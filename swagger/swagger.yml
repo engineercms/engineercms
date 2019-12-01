@@ -1772,21 +1772,6 @@ paths:
           description: Invalid page supplied
         "404":
           description: articl not found
-  /fileinput/uploadwxeditorimg:
-    post:
-      tags:
-      - fileinput
-      description: post article img by catalogid
-      operationId: FileinputController.post wx artile img by catalogId
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/.SUCCESS'
-        "400":
-          description: Invalid page supplied
-        "404":
-          description: articl not found
   /onlyoffice/conversion:
     post:
       tags:
@@ -2166,6 +2151,75 @@ paths:
           description: Invalid page supplied
         "404":
           description: article not found
+  /wx/addwxuser:
+    post:
+      tags:
+      - wx
+      description: post user
+      operationId: UserController.post wx user
+      parameters:
+      - in: query
+        name: uname
+        description: The username of user
+        required: true
+        type: string
+      - in: query
+        name: nickname
+        description: The nickname of user
+        required: true
+        type: string
+      - in: query
+        name: password
+        description: The Password of user
+        required: true
+        type: string
+      - in: query
+        name: email
+        description: The email of user
+        type: string
+      - in: query
+        name: department
+        description: The department of user
+        type: string
+      - in: query
+        name: secoffice
+        description: The secoffice of user
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.AddUser'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
+  /wx/addwxuserpays:
+    post:
+      tags:
+      - wx
+      description: post userpay by articleid
+      operationId: PayController.post wx userpay by articleid
+      parameters:
+      - in: query
+        name: articleid
+        description: The id of article
+        required: true
+        type: string
+      - in: query
+        name: amount
+        description: The amout of pays
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.AddUserPays'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pas not found
   /wx/deletewxarticle:
     post:
       tags:
@@ -2380,6 +2434,149 @@ paths:
           description: Invalid page supplied
         "404":
           description: articl not found
+  /wx/getwxpay:
+    get:
+      tags:
+      - wx
+      description: get pay by page
+      operationId: PayController.get wx pay list
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getwxpdf/{id}:
+    get:
+      tags:
+      - wx
+      description: get wx pdf by id
+      operationId: MainController.dowload wx pdf
+      parameters:
+      - in: path
+        name: id
+        description: The id of pdf
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetAttachbyId'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pdf not found
+  /wx/getwxpdflist:
+    get:
+      tags:
+      - wx
+      description: get pdf by page
+      operationId: MainController.get wx pdf list
+      parameters:
+      - in: query
+        name: keyword
+        description: The keyword of pdf
+        type: string
+      - in: query
+        name: projectid
+        description: The projectid of pdf
+        type: string
+      - in: query
+        name: searchpage
+        description: The page for pdf list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pdf not found
+  /wx/getwxusergetappreciations:
+    get:
+      tags:
+      - wx
+      description: get userappreciation by page
+      operationId: PayController.get wx userappreciations list
+      parameters:
+      - in: query
+        name: page
+        description: The page for myappreciation list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getwxusermoney:
+    get:
+      tags:
+      - wx
+      description: get user money
+      operationId: PayController.get wx user money
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetUserMoney'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getwxuserpayappreciations:
+    get:
+      tags:
+      - wx
+      description: get userappreciation by page
+      operationId: PayController.get wx userappreciations list
+      parameters:
+      - in: query
+        name: page
+        description: The page for myappreciation list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getwxuserpays:
+    get:
+      tags:
+      - wx
+      description: get userpay by page
+      operationId: PayController.get wx userpays list
+      parameters:
+      - in: query
+        name: page
+        description: The page for mymoney list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /wx/islogin:
     get:
       tags:
@@ -2431,7 +2628,6 @@ paths:
       - in: query
         name: keyword
         description: The keyword of drawings
-        required: true
         type: string
       - in: query
         name: projectid
@@ -2539,6 +2735,57 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/.AddArticle'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /wx/updatewxuser:
+    post:
+      tags:
+      - wx
+      description: post user password by uid
+      operationId: UserController.post wx userpassword by uid
+      parameters:
+      - in: query
+        name: uid
+        description: The id of user
+        required: true
+        type: string
+      - in: query
+        name: oldpass
+        description: The oldPassword of user
+        required: true
+        type: string
+      - in: query
+        name: newpass
+        description: The newpassword of user
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: The id of wx
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.AddArticle'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /wx/uploadappreciationphoto:
+    post:
+      tags:
+      - wx
+      description: post user avatar
+      operationId: FroalaController.post wx user avatar
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.SUCCESS'
         "400":
           description: Invalid page supplied
         "404":
@@ -2739,6 +2986,10 @@ definitions:
     type: object
   .AddTopicReply:
     type: object
+  .AddUser:
+    type: object
+  .AddUserPays:
+    type: object
   .Adddiary:
     type: object
   .DeleteTopicReply:
@@ -2753,6 +3004,8 @@ definitions:
     type: object
   .GetProductsPage:
     type: object
+  .GetUserMoney:
+    type: object
   .SUCCESS:
     type: object
   .SaveUser:
@@ -2760,9 +3013,6 @@ definitions:
   .success:
     type: object
 tags:
-- name: wx
-  description: |
-    CMSWXDIARY API
 - name: adminlog
   description: |
     CMSADMIN API

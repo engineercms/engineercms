@@ -18,6 +18,8 @@ import (
 
 var engine *xorm.Engine
 
+// var gdb *gorm.DB
+
 type AdminCategory struct {
 	Id       int64     `form:"-"`
 	ParentId int64     `orm:"null"`
@@ -126,6 +128,7 @@ func init() {
 		if err != nil {
 			log.Println(err)
 		}
+
 		break
 	default:
 		beego.Critical("Database driver is not allowed:", db_type)
@@ -168,6 +171,14 @@ func createdb() {
 	default:
 		beego.Critical("Database driver is not allowed:", db_type)
 	}
+
+	// gdb, err := gorm.Open(db_type, dns)
+	// gdb.LogMode(true)
+	// if err != nil {
+	// 	panic("failed to connect database")
+	// }
+	// defer gdb.Close()
+
 	db, err := sql.Open(db_type, dns)
 	if err != nil {
 		panic(err.Error())

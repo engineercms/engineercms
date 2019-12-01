@@ -160,10 +160,16 @@
         </a>
         <ul class="dropdown-menu">
           <li {{if .IsStandard}}class="active"{{end}}>
-            <a href="/standard" target="_blank">查询</a>
+            <a href="/standard" target="_blank">查阅</a>
           </li>
           <li {{if .IsLegislation}}class="active"{{end}}>
-            <a href="/legislation" target="_blank">对标</a>
+            <a href="/legislation" target="_blank">输入框对标</a>
+          </li>
+          <li {{if .IsLegislation}}class="active"{{end}}>
+            <a href="/legislation/fileinput" target="_blank">excel对标</a>
+          </li>
+          <li {{if .IsLegislation}}class="active"{{end}}>
+            <a href="/legislation/wordfileinput" target="_blank">word对标</a>
           </li>
         </ul>
       </li>

@@ -121,26 +121,25 @@ func SearchProjProductPage(pid, limit, offset int64, key string) (prod []*Produc
 	for _, v := range sonproj {
 		cond1 = cond1.Or("ProjectId", v.Id)
 	}
+	if key != "" {
+		cond1 = cond1.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
+		//循环
+		// cond2 := cond.Or("ProjectId", pid1).Or("ProjectId", pid2)……
+		// ids := []int{1, 2, 3}
+		// p.Raw("SELECT name FROM user WHERE id IN (?, ?, ?)", ids)
 
-	cond2 := cond.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
+		// 假定表名test,列id是数值类型。
+		// 用同一个字段的多个值作为条件来查询可以使用in或者or
+		// select * from test where id in (1,2,3)
 
-	//循环
-	// cond2 := cond.Or("ProjectId", pid1).Or("ProjectId", pid2)……
-	// ids := []int{1, 2, 3}
-	// p.Raw("SELECT name FROM user WHERE id IN (?, ?, ?)", ids)
-
-	// 假定表名test,列id是数值类型。
-	// 用同一个字段的多个值作为条件来查询可以使用in或者or
-	// select * from test where id in (1,2,3)
-
-	// SELECT * FROM `employee`' AND ' : ' WHERE '
-	// SELECT id, user_name FROM user WHERE id = ?
-	// elect * from tbl_employee where id=#{id} and last_name like #{lastName} and email=#{email}
-	cond3 := cond.AndCond(cond1).AndCond(cond2)
+		// SELECT * FROM `employee`' AND ' : ' WHERE '
+		// SELECT id, user_name FROM user WHERE id = ?
+		// elect * from tbl_employee where id=#{id} and last_name like #{lastName} and email=#{email}
+	}
 	//(...or...or...)and()
 	o := orm.NewOrm()
 	qs := o.QueryTable("Product")
-	qs = qs.SetCond(cond3)
+	qs = qs.SetCond(cond1)
 	//循环这个id下所有项目？
 	_, err = qs.Limit(limit, offset).Distinct().OrderBy("-created").All(&prod) //qs.Filter("Drawn", user.Nickname).All(&aa)
 	if err != nil {

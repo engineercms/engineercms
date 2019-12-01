@@ -309,15 +309,12 @@ func (c *LoginController) WxLogin() {
 	if id == "1" {
 		APPID = "wx7f77b90a1a891d93"
 		SECRET = "f58ca4f28cbb52ccd805d66118060449"
-	} else if id == "2" {
-		APPID = beego.AppConfig.String("wxAPPID2")
-		SECRET = beego.AppConfig.String("wxSECRET2")
-	} else if id == "3" {
-		APPID = beego.AppConfig.String("wxAPPID3")
-		SECRET = beego.AppConfig.String("wxSECRET3")
-	} else if id == "4" {
-		APPID = beego.AppConfig.String("wxAPPID4")
-		SECRET = beego.AppConfig.String("wxSECRET4")
+	} else {
+		appstring := "wxAPPID" + id
+		APPID = beego.AppConfig.String(appstring)
+		secretstring := "wxSECRET" + id
+		SECRET = beego.AppConfig.String(secretstring)
+		// beego.Info(APPID)
 	}
 	//这里用security.go里的方法
 	requestUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + JSCODE + "&grant_type=authorization_code"
@@ -366,16 +363,21 @@ func (c *LoginController) WxLogin() {
 			if err != nil {
 				beego.Error(err)
 			}
+			wxsite := beego.AppConfig.String("wxreqeustsite")
 			var photo string
 			if len(useravatar) != 0 {
-				wxsite := beego.AppConfig.String("wxreqeustsite")
 				photo = wxsite + useravatar[0].UserAvatar.AvatarUrl
-				// beego.Info(photo)
 			}
-			// roles, err := models.GetRolenameByUserId(user.Id)
-			// if err != nil {
-			// 	beego.Error(err)
-			// }
+			//根据userid取出appreciation赞赏码
+			userappreciation, err := models.GetUserAppreciationUrl(user.Id)
+			if err != nil {
+				beego.Error(err)
+			}
+			var appreciationphoto string
+			if len(userappreciation) != 0 {
+				appreciationphoto = wxsite + userappreciation[0].UserAppreciation.AppreciationUrl
+			}
+
 			var isAdmin bool
 			// // beego.Info(roles)
 			// for _, v := range roles {
@@ -403,7 +405,7 @@ func (c *LoginController) WxLogin() {
 			//用户小程序login的时候，即这里，将openid存入session
 			//下次用户请求携带hotqinsessionid即可取到session-openid了。
 			sessionId := c.Ctx.Input.Cookie("hotqinsessionid") //这一步什么意思
-			c.Data["json"] = map[string]interface{}{"errNo": 1, "msg": "success", "userId": uid, "isAdmin": isAdmin, "sessionId": sessionId, "photo": photo}
+			c.Data["json"] = map[string]interface{}{"errNo": 1, "msg": "success", "userId": uid, "isAdmin": isAdmin, "sessionId": sessionId, "photo": photo, "appreciationphoto": appreciationphoto}
 			c.ServeJSON()
 		}
 		// beego.Info(useridstring)

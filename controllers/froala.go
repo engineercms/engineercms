@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/pborman/uuid"
-	// "image/png"
+	"image"
 	"io"
 	"log"
 	"net/http"
@@ -15,7 +15,12 @@ import (
 	// "hydrocms/models"
 	"encoding/base64"
 	"github.com/3xxx/engineercms/models"
+	"github.com/nfnt/resize"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
 	"io/ioutil"
+	// "path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -487,25 +492,87 @@ func (c *FroalaController) UploadWxEditorImg() {
 	}
 	fileSuffix := path.Ext(h.Filename)
 	// random_name
-	newname := strconv.FormatInt(time.Now().UnixNano(), 10) + fileSuffix // + "_" + filename
+	nanoname := strconv.FormatInt(time.Now().UnixNano(), 10)
+	newname := nanoname + fileSuffix // + "_" + filename
+	small_newname := nanoname + "_small" + fileSuffix
 	year, month, _ := time.Now().Date()
 	err = os.MkdirAll(DiskDirectory+"/"+strconv.Itoa(year)+month.String()+"/", 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
 	if err != nil {
 		beego.Error(err)
 	}
-	var path string
+	var imagepath, new_imagepath string
 	var filesize int64
 	if h != nil {
 		//保存附件
-		path = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + newname
+		imagepath = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + newname
+		new_imagepath = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + small_newname
 		Url = "/" + Url + "/" + strconv.Itoa(year) + month.String() + "/"
-		err = c.SaveToFile("file", path) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+		err = c.SaveToFile("file", imagepath) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
 		if err != nil {
 			beego.Error(err)
 		}
-		filesize, _ = FileSize(path)
+		filesize, _ = FileSize(imagepath)
 		filesize = filesize / 1000.0
-		c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "link": Url + newname, "title": "111", "original": "demo.jpg"}
+
+		//*****压缩图片***
+		file, err := os.Open(imagepath)
+		if err != nil {
+			// log.Fatal(err)
+			beego.Error(err)
+		}
+		defer file.Close()
+		var img image.Image
+		var typeImage int
+		// ext := filepath.Ext(imagepath)
+		if strings.EqualFold(fileSuffix, ".jpg") || strings.EqualFold(fileSuffix, ".jpeg") {
+			img, err = jpeg.Decode(file)
+			if err != nil {
+				// log.Fatal(err)
+				beego.Error(err)
+			}
+			typeImage = 0
+		} else if strings.EqualFold(fileSuffix, ".png") {
+			// decode png into image.Image
+			img, err = png.Decode(file)
+			if err != nil {
+				// log.Fatal(err)
+				beego.Error(err)
+			}
+			typeImage = 1
+		} else if strings.EqualFold(fileSuffix, ".gif") {
+			img, err = gif.Decode(file)
+			if err != nil {
+				// log.Fatal(err)
+				beego.Error(err)
+			}
+			typeImage = 2
+		}
+
+		// file.Close()
+
+		// resize to width 1000 using Lanczos resampling
+		// and preserve aspect ratio
+		m := resize.Resize(1000, 0, img, resize.Lanczos3)
+		// m := resize.Thumbnail(1000, 0, img, resize.Lanczos3)
+
+		out, err := os.Create(new_imagepath)
+		defer out.Close()
+		if err != nil {
+			beego.Error(err)
+		}
+		if typeImage == 0 {
+			err = jpeg.Encode(out, m, &jpeg.Options{Quality: 80})
+			if err != nil {
+				beego.Error(err)
+			}
+		} else {
+			err = png.Encode(out, m)
+			if err != nil {
+				beego.Error(err)
+			}
+		}
+
+		c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "link": Url + small_newname, "title": "111", "original": "demo.jpg"}
 		c.ServeJSON()
 	} else {
 		c.Data["json"] = map[string]interface{}{"state": "ERROR", "link": "", "title": "", "original": ""}
@@ -612,6 +679,64 @@ func (c *FroalaController) UploadWxAvatar() {
 			filesize, _ = FileSize(path)
 			filesize = filesize / 1000.0
 			_, err = models.AddUserAvator(user.Id, Url+newname)
+			if err != nil {
+				beego.Error(err)
+			}
+			wxsite := beego.AppConfig.String("wxreqeustsite")
+			// c.Data["json"] = map[string]interface{}{"errNo": 1, "msg": "success", "photo": wxsite + Url + newname, "title": newname, "original": newname}
+			// c.ServeJSON()
+			c.Ctx.WriteString(wxsite + Url + newname)
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"errNo": 0, "state": "ERROR", "photo": "", "title": "", "original": ""}
+		c.ServeJSON()
+	}
+}
+
+// @Title post wx user avatar
+// @Description post user avatar
+// @Success 200 {object} SUCCESS
+// @Failure 400 Invalid page supplied
+// @Failure 404 articl not found
+// @router /uploadappreciationphoto [post]
+//小程序wx添加用户赞赏码上传
+func (c *FroalaController) UploadAppreciationPhoto() {
+	var user models.User
+	var err error
+	openID := c.GetSession("openID")
+	if openID != nil {
+		user, err = models.GetUserByOpenID(openID.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	//获取上传的文件
+	_, h, err := c.GetFile("file")
+	if err != nil {
+		beego.Error(err)
+	}
+	fileSuffix := path.Ext(h.Filename)
+	// random_name
+	newname := strconv.FormatInt(time.Now().UnixNano(), 10) + fileSuffix // + "_" + filename
+	err = os.MkdirAll("./static/appreciation/", 0777)                    //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
+	if err != nil {
+		beego.Error(err)
+	}
+	var path string
+	var filesize int64
+	if h != nil {
+		//保存附件
+		path = "./static/appreciation/" + newname
+		Url := "/static/appreciation/"
+		err = c.SaveToFile("file", path) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"state": "ERROR", "photo": "", "title": "", "original": ""}
+			c.ServeJSON()
+		} else {
+			filesize, _ = FileSize(path)
+			filesize = filesize / 1000.0
+			_, err = models.AddUserAppreciation(user.Id, Url+newname)
 			if err != nil {
 				beego.Error(err)
 			}

@@ -710,6 +710,7 @@ func (c *MainController) Pdf() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 pdf not found
 // @router /wxpdf/:id [get]
+// 有权限判断
 func (c *MainController) WxPdf() {
 	// var openID string
 	// openid := c.GetSession("openID")
@@ -773,6 +774,44 @@ func (c *MainController) WxPdf() {
 	}
 }
 
+// @Title dowload wx pdf
+// @Description get wx pdf by id
+// @Param id path string  true "The id of pdf"
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /getwxpdf/:id [get]
+// 查阅防腐资料，不用权限判断
+func (c *MainController) GetWxPdf() {
+	id := c.Ctx.Input.Param(":id")
+	//pid转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	//根据附件id取得附件的prodid，路径
+	attachment, err := models.GetAttachbyId(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	product, err := models.GetProd(attachment.ProductId)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	//由proj id取得url
+	fileurl, _, err := GetUrlPath(product.ProjectId)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = "未查到openID"
+		c.ServeJSON()
+	} else {
+		c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
+	}
+}
+
 // @Title dowload wx standardpdf
 // @Description get wx standardpdf by id
 // @Param id path string  true "The id of standardpdf"
@@ -780,6 +819,7 @@ func (c *MainController) WxPdf() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 pdf not found
 // @router /wxstandardpdf/:id [get]
+// 小程序查询规范
 func (c *MainController) WxStandardPdf() {
 	// id := c.Input().Get("id")
 	id := c.Ctx.Input.Param(":id")
@@ -788,7 +828,6 @@ func (c *MainController) WxStandardPdf() {
 	if err != nil {
 		beego.Error(err)
 	}
-
 	//根据id取得规范的路径
 	standard, err := models.GetStandard(idNum)
 	if err != nil {
@@ -798,6 +837,97 @@ func (c *MainController) WxStandardPdf() {
 	fileurl := strings.Replace(standard.Route, "/attachment/", "attachment/", -1)
 	// http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, standard.Route)
 	c.Ctx.Output.Download(fileurl)
+}
+
+// @Title get wx pdf list
+// @Description get pdf by page
+// @Param keyword query string  false "The keyword of pdf"
+// @Param projectid query string  false "The projectid of pdf"
+// @Param searchpage query string  true "The page for pdf list"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /getwxpdflist [get]
+// 小程序取得某个项目目录下的所有pdf，分页
+// 结合搜索来用
+func (c *MainController) GetWxPdfList() {
+	// wxsite := beego.AppConfig.String("wxreqeustsite")
+	limit := "6"
+	limit1, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("searchpage")
+	page1, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	var offset int64
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	key := c.Input().Get("keyword")
+	var products []*models.Product
+
+	pid := c.Input().Get("projectid")
+	// beego.Info(pid)
+	var pidNum int64
+	if pid != "" && key == "" {
+		pidNum, err = strconv.ParseInt(pid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		products, err = models.SearchProjProductPage(pidNum, limit1, offset, "")
+		if err != nil {
+			beego.Error(err.Error)
+		}
+	} else if pid != "" && key != "" {
+		pidNum, err = strconv.ParseInt(pid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		products, err = models.SearchProjProductPage(pidNum, limit1, offset, key)
+		if err != nil {
+			beego.Error(err.Error)
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "关键字或项目为空"}
+		c.ServeJSON()
+		return
+	}
+	Pdfslice := make([]PdfLink, 0)
+	for _, w := range products {
+		Attachments, err := models.GetAttachments(w.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		//对成果进行循环
+		//赋予url
+		for _, v := range Attachments {
+			if path.Ext(v.FileName) == ".pdf" || path.Ext(v.FileName) == ".PDF" {
+				pdfarr := make([]PdfLink, 1)
+				pdfarr[0].Id = v.Id
+				pdfarr[0].Title = v.FileName
+				if pidNum == 25002 { //图
+					pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%233F51B5%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
+					pdfarr[0].ActIndex = "drawing"
+				} else { //纪
+					pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%23009688%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E7%BA%AA%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
+					pdfarr[0].ActIndex = "other"
+				}
+				pdfarr[0].Created = v.Created
+				// timeformatdate, _ := time.Parse(datetime, thisdate)
+				// const lll = "2006-01-02 15:04"
+				pdfarr[0].Updated = v.Updated //.Format(lll)
+				Pdfslice = append(Pdfslice, pdfarr...)
+			}
+		}
+	}
+	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "searchers": Pdfslice}
+	c.ServeJSON()
 }
 
 //升级数据库

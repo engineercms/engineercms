@@ -27,11 +27,11 @@ type User struct {
 	Remark        string `orm:"null;size(200)" form:"Remark" valid:"MaxSize(200)"`
 	Ip            string //ip地址
 	Port          string
-	Status        int       `orm:"default(2)" form:"Status" valid:"Range(1,2)"`
+	Status        int       `orm:"default(1)";form:"Status";valid:"Range(1,2)"`
 	Lastlogintime time.Time `orm:"type(datetime);auto_now_add" form:"-"`
 	Createtime    time.Time `orm:"type(datetime);auto_now_add" `
 	Updated       time.Time `orm:"type(datetime);auto_now_add" `
-	Role          string    `json:"role"`
+	Role          string    `json:"role";orm:"default('4')"`
 	// Roles         []*Role   `orm:"rel(m2m)"`
 }
 
@@ -50,12 +50,20 @@ type UserAvatar struct {
 	Createtime time.Time `orm:"type(datetime);auto_now_add" `
 }
 
+//用户和AppreciationUrl对应表,一个用户对应多个AppreciationUrl
+type UserAppreciation struct {
+	Id              int64
+	Uid             int64
+	AppreciationUrl string
+	Createtime      time.Time `orm:"type(datetime);auto_now_add" `
+}
+
 // Id            int64
 // Username      string    `orm:"unique;size(32)" form:"Username"  valid:"Required;MaxSize(20);MinSize(6)"`
 // Password      string    `orm:"size(32)" form:"Password" valid:"Required;MaxSize(20);MinSize(6)"`
 
 func init() {
-	orm.RegisterModel(new(User), new(UserOpenID), new(UserAvatar))
+	orm.RegisterModel(new(User), new(UserOpenID), new(UserAvatar), new(UserAppreciation))
 }
 
 //这个是使用的，下面那个adduser不知干啥的
@@ -112,7 +120,7 @@ func AddUserOpenID(userid int64, openid string) (id int64, err error) {
 	return id, err //这里需要改改，否则，即使已经存在，则err为空。
 }
 
-//后台手工操作添加微信小程序openid和用户名
+//添加用户头像
 func AddUserAvator(userid int64, avatarurl string) (id int64, err error) {
 	o := orm.NewOrm()
 	var useravatar UserAvatar
@@ -120,6 +128,20 @@ func AddUserAvator(userid int64, avatarurl string) (id int64, err error) {
 	useravatar.Uid = userid
 	useravatar.AvatarUrl = avatarurl
 	id, err = o.Insert(&useravatar)
+	if err != nil {
+		return id, err
+	}
+	return id, err //这里需要改改，否则，即使已经存在，则err为空。
+}
+
+//添加用户赞赏码
+func AddUserAppreciation(userid int64, appreciationurl string) (id int64, err error) {
+	o := orm.NewOrm()
+	var userappreciation UserAppreciation
+	// 没有找到记录
+	userappreciation.Uid = userid
+	userappreciation.AppreciationUrl = appreciationurl
+	id, err = o.Insert(&userappreciation)
 	if err != nil {
 		return id, err
 	}
@@ -147,9 +169,21 @@ type UserAvatarUrl struct {
 	UserAvatar `xorm:"extends"`
 }
 
+//取出用户头像
 func GetUserAvatorUrl(uid int64) ([]*UserAvatarUrl, error) {
 	useravatarurl := make([]*UserAvatarUrl, 0)
 	return useravatarurl, engine.Table("user").Join("INNER", "user_avatar", "user.id = user_avatar.uid").Where("user.id=?", uid).Desc("user_avatar.createtime").Find(&useravatarurl)
+}
+
+type UserAppreciationUrl struct {
+	User             `xorm:"extends"`
+	UserAppreciation `xorm:"extends"`
+}
+
+//取出用户赞赏码
+func GetUserAppreciationUrl(uid int64) ([]*UserAppreciationUrl, error) {
+	userappreciationurl := make([]*UserAppreciationUrl, 0)
+	return userappreciationurl, engine.Table("user").Join("INNER", "user_appreciation", "user.id = user_appreciation.uid").Where("user.id=?", uid).Desc("user_appreciation.createtime").Find(&userappreciationurl)
 }
 
 func ValidateUser(user User) error {

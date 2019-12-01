@@ -294,24 +294,26 @@ func (c *ArticleController) GetArticle() {
 }
 
 type WxArticle struct {
-	Id          int64     `json:"id",form:"-"`
-	Title       string    `json:"title"`
-	Subtext     string    `json:"subtext",orm:"sie(20)"`
-	Author      string    `json:"author"`
-	IsArticleMe bool      `json:"isArticleMe"`
-	ImgUrl      string    `json:"imgUrl"`
-	ImgUrls     []Img     `json:"imgUrls"`
-	Content     string    `json:"html",orm:"sie(5000)"`
-	LeassonType int       `json:"leassonType"`
-	ProductId   int64     `orm:"null"`
-	Views       int64     `orm:"default(0)"`
-	Created     time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated     string    `json:"time",orm:"auto_now_add;type(datetime)"`
-	Word        string    `json:"word",orm:"sie(5000)"`
-	LikeNum     int       `json:"likeNum"`
-	Liked       bool      `json:"liked"`
-	Comment     []Comment `json:"comment"`
-	CommentNum  int       `json:"commentNum"`
+	Id      int64  `json:"id",form:"-"`
+	Title   string `json:"title"`
+	Subtext string `json:"subtext",orm:"sie(20)"`
+	Author  string `json:"author"`
+	// UserId      in64      `json:"userid"`
+	AppreciationUrl string    `json:"appreciationurl"` //作者赞赏码
+	IsArticleMe     bool      `json:"isArticleMe"`
+	ImgUrl          string    `json:"imgUrl"`
+	ImgUrls         []Img     `json:"imgUrls"`
+	Content         string    `json:"html",orm:"sie(5000)"`
+	LeassonType     int       `json:"leassonType"`
+	ProductId       int64     `orm:"null"`
+	Views           int64     `orm:"default(0)"`
+	Created         time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated         string    `json:"time",orm:"auto_now_add;type(datetime)"`
+	Word            string    `json:"word",orm:"sie(5000)"`
+	LikeNum         int       `json:"likeNum"`
+	Liked           bool      `json:"liked"`
+	Comment         []Comment `json:"comment"`
+	CommentNum      int       `json:"commentNum"`
 }
 
 type Comment struct {
@@ -345,7 +347,6 @@ type prodWxTableserver struct {
 // @router /getwxarticles [get]
 //小程序取得所有文章列表，分页_珠三角设代用
 func (c *ArticleController) GetWxArticles() {
-
 	// id := c.Ctx.Input.Param(":id")
 	id := beego.AppConfig.String("wxcatalogid") //"26159" //25002珠三角设代日记id26159
 	wxsite := beego.AppConfig.String("wxreqeustsite")
@@ -812,15 +813,27 @@ func (c *ArticleController) GetWxArticle() {
 		commentslice = append(commentslice, comment...)
 	}
 
-	if prod.Principal == user.Nickname {
+	if prod.Uid == user.Id { //20191122修改
 		isArticleMe = true
 	}
-	beego.Info(isArticleMe)
+	//根据prod.Uid，查询作者的赞赏码
+	userappreciationurl, err := models.GetUserAppreciationUrl(prod.Uid)
+	if err != nil {
+		beego.Error(err)
+	}
+	var userappreciationphoto string
+	if len(userappreciationurl) != 0 {
+		wxsite := beego.AppConfig.String("wxreqeustsite")
+		userappreciationphoto = wxsite + userappreciationurl[0].UserAppreciation.AppreciationUrl
+	}
+	// beego.Info(isArticleMe)
 	wxArticle := &WxArticle{
-		Id:          Article.Id,
-		Title:       prod.Title,
-		Subtext:     Article.Subtext,
-		Author:      prod.Principal,
+		Id:              Article.Id,
+		Title:           prod.Title,
+		Subtext:         Article.Subtext,
+		Author:          prod.Principal,
+		AppreciationUrl: userappreciationphoto,
+		// UserId:      prod.Uid,
 		IsArticleMe: isArticleMe,
 		ImgUrl:      photo,
 		ImgUrls:     slice2,

@@ -146,17 +146,17 @@ func (c *SearchController) SearchProduct() { //search用的是get方法
 
 // @Title get wx drawings list
 // @Description get drawings by page
-// @Param keyword query string  true "The keyword of drawings"
-// @Param projectid query string  false "The projectid of drawings"
-// @Param searchpage query string  true "The page for drawings list"
+// @Param keyword query string false "The keyword of drawings"
+// @Param projectid query string false "The projectid of drawings"
+// @Param searchpage query string true "The page for drawings list"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 drawings not found
 // @router /searchwxdrawings [get]
-//小程序取得所有图纸列表，分页_plus
+// 小程序取得所有图纸列表，分页_plus
 func (c *SearchController) SearchWxDrawings() {
 	// wxsite := beego.AppConfig.String("wxreqeustsite")
-	limit := "5"
+	limit := "8"
 	limit1, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
 		beego.Error(err)
@@ -174,7 +174,6 @@ func (c *SearchController) SearchWxDrawings() {
 	}
 
 	pid := c.Input().Get("projectid")
-	// beego.Info(pid)
 	var pidNum int64
 	if pid != "" {
 		pidNum, err = strconv.ParseInt(pid, 10, 64)
@@ -182,7 +181,6 @@ func (c *SearchController) SearchWxDrawings() {
 			beego.Error(err)
 		}
 	}
-	// beego.Info(pidNum)
 
 	key := c.Input().Get("keyword")
 	var products []*models.Product
@@ -197,46 +195,49 @@ func (c *SearchController) SearchWxDrawings() {
 			if err != nil {
 				beego.Error(err.Error)
 			}
-			// beego.Info(pidNum)
 		}
-		Pdfslice := make([]PdfLink, 0)
-		for _, w := range products {
-			//取到每个成果的附件（模态框打开）；pdf、文章——新窗口打开
-			//循环成果
-			//每个成果取到所有附件
-			//一个附件则直接打开/下载；2个以上则打开模态框
-			Attachments, err := models.GetAttachments(w.Id)
-			if err != nil {
-				beego.Error(err)
-			}
-			//对成果进行循环
-			//赋予url
-			for _, v := range Attachments {
-				if path.Ext(v.FileName) == ".pdf" || path.Ext(v.FileName) == ".PDF" {
-					pdfarr := make([]PdfLink, 1)
-					pdfarr[0].Id = v.Id
-					pdfarr[0].Title = v.FileName
-					if pidNum == 25002 { //图
-						pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%233F51B5%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
-						pdfarr[0].ActIndex = "drawing"
-					} else { //纪
-						pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%23009688%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E7%BA%AA%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
-						pdfarr[0].ActIndex = "other"
-					}
-					pdfarr[0].Created = v.Created
-					// timeformatdate, _ := time.Parse(datetime, thisdate)
-					// const lll = "2006-01-02 15:04"
-					pdfarr[0].Updated = v.Updated //.Format(lll)
-					Pdfslice = append(Pdfslice, pdfarr...)
-				}
-			}
-		}
-		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "searchers": Pdfslice}
-		c.ServeJSON()
 	} else {
-		c.Data["json"] = map[string]interface{}{"info": "关键字为空"}
-		c.ServeJSON()
+		products, err = models.SearchProjProductPage(pidNum, limit1, offset, key)
+		if err != nil {
+			beego.Error(err.Error)
+		}
+		// c.Data["json"] = map[string]interface{}{"info": "关键字为空"}
+		// c.ServeJSON()
 	}
+	Pdfslice := make([]PdfLink, 0)
+	for _, w := range products {
+		//取到每个成果的附件（模态框打开）；pdf、文章——新窗口打开
+		//循环成果
+		//每个成果取到所有附件
+		//一个附件则直接打开/下载；2个以上则打开模态框
+		Attachments, err := models.GetAttachments(w.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		//对成果进行循环
+		//赋予url
+		for _, v := range Attachments {
+			if path.Ext(v.FileName) == ".pdf" || path.Ext(v.FileName) == ".PDF" {
+				pdfarr := make([]PdfLink, 1)
+				pdfarr[0].Id = v.Id
+				pdfarr[0].Title = v.FileName
+				// if pidNum == 25002 { //图
+				pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%233F51B5%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
+				pdfarr[0].ActIndex = "drawing"
+				// } else { //纪
+				// pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%23009688%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E7%BA%AA%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
+				// pdfarr[0].ActIndex = "other"
+				// }
+				pdfarr[0].Created = v.Created
+				// timeformatdate, _ := time.Parse(datetime, thisdate)
+				// const lll = "2006-01-02 15:04"
+				pdfarr[0].Updated = v.Updated //.Format(lll)
+				Pdfslice = append(Pdfslice, pdfarr...)
+			}
+		}
+	}
+	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "searchers": Pdfslice}
+	c.ServeJSON()
 	// var user models.User
 	// //取出用户openid
 	// JSCODE := c.Input().Get("code")

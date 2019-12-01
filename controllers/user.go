@@ -226,6 +226,78 @@ func (c *UserController) AddUser() {
 	}
 }
 
+// @Title post wx user
+// @Description post user
+// @Param uname query string true "The username of user"
+// @Param nickname query string true "The nickname of user"
+// @Param password query string true "The Password of user"
+// @Param email query string false "The email of user"
+// @Param department query string false "The department of user"
+// @Param secoffice query string false "The secoffice of user"
+// @Success 200 {object} models.AddUser
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /addwxuser [post]
+//小程序添加用户
+func (c *UserController) AddWxUser() {
+	var user m.User
+	var err error
+	openID := c.GetSession("openID")
+	if openID != nil {
+		user2, err := m.GetUserByOpenID(openID.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+		//判断是否具备admin角色
+		role, err := m.GetRoleByRolename("admin")
+		if err != nil {
+			beego.Error(err)
+		}
+		uid := strconv.FormatInt(user2.Id, 10)
+		roleid := strconv.FormatInt(role.Id, 10)
+		isAdmin := e.HasRoleForUser(uid, "role_"+roleid)
+		if !isAdmin {
+			c.Data["json"] = map[string]interface{}{"info": "非管理员", "id": 0}
+			c.ServeJSON()
+			return
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+		// user.Id = 9
+	}
+	user.Username = c.Input().Get("uname")
+	user.Nickname = c.Input().Get("nickname")
+	// beego.Info(user.Username)
+	Pwd1 := c.Input().Get("password")
+	md5Ctx := md5.New()
+	md5Ctx.Write([]byte(Pwd1))
+	cipherStr := md5Ctx.Sum(nil)
+	user.Password = hex.EncodeToString(cipherStr)
+	// user.Email = c.Input().Get("email")
+	// user.Department = c.Input().Get("department")
+	// user.Secoffice = c.Input().Get("secoffice")
+	// user.Ip = c.Input().Get("ip")
+	// user.Port = c.Input().Get("port")
+	// statusint, err := strconv.Atoi(c.Input().Get("status"))
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	user.Status = 1
+	user.Role = "4"
+	id, err := m.SaveUser(user)
+	if err == nil && id > 0 {
+		// c.Rsp(true, "Success")
+		// return
+		c.Data["json"] = map[string]interface{}{"info": "succsess", "id": id}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "添加失败", "id": 0}
+		c.ServeJSON()
+	}
+}
+
 // func (c *UserController) UpdateUser() {
 // 	u := m.User{}
 // 	if err := c.ParseForm(&u); err != nil {
