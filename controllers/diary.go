@@ -11,15 +11,74 @@ import (
 	// "net"
 	// "net/http"
 	// "net/url"
-	// "path"
+	"path"
 	"strconv"
 	"strings"
-	// "time"
+	"time"
+	// "io/ioutil"
+	"github.com/PuerkitoBio/goquery"
+	"io"
+	"log"
+
+	"github.com/unidoc/unioffice/common"
+	"github.com/unidoc/unioffice/document"
+	"github.com/unidoc/unioffice/measurement"
+	// "github.com/unidoc/unioffice/schema/soo/wml"
 )
 
 // CMSWXDIARY API
 type DiaryController struct {
 	beego.Controller
+}
+
+//日志列表页
+func (c *DiaryController) Get() {
+	c.TplName = "wxdiaries.tpl"
+}
+
+//日志页面
+func (c *DiaryController) GetWxDiary2() {
+	c.TplName = "wxdiary.tpl"
+	var err error
+	id := c.Ctx.Input.Param(":id")
+	// beego.Info(id)
+	wxsite := beego.AppConfig.String("wxreqeustsite")
+
+	//id转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(idNum)
+	Diary, err := models.GetDiary(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	content := strings.Replace(Diary.Content, "/attachment/", wxsite+"/attachment/", -1)
+	type Duration int64
+	const (
+		Nanosecond  Duration = 1
+		Microsecond          = 1000 * Nanosecond
+		Millisecond          = 1000 * Microsecond
+		Second               = 1000 * Millisecond
+		Minute               = 60 * Second
+		Hour                 = 60 * Minute
+	)
+	// hours := 8
+	// const lll = "2006-01-02 15:04"
+	// diarytime := Diary.Updated.Add(time.Duration(hours) * time.Hour).Format(lll)
+	wxDiary := &models.Diary{
+		Id:        Diary.Id,
+		Title:     Diary.Title,
+		Diarydate: Diary.Diarydate,
+		Content:   content, //Diary.Content,
+		// LeassonType: 1,
+		Views:   Diary.Views,
+		Created: Diary.Created,
+		// Updated:     diarytime,
+	}
+	c.Data["Diary"] = wxDiary
 }
 
 // @Title post wx diary by catalogId
@@ -34,7 +93,7 @@ type DiaryController struct {
 // @Failure 400 Invalid page supplied
 // @Failure 404 Diary not found
 // @router /addwxdiary [post]
-//向设代日记id下添加微信小程序文章_珠三角设代plus用_这个是文字图片分开方式，用下面这个
+//向设代日记id下添加微信小程序文章_珠三角设代plus用_
 func (c *DiaryController) AddWxDiary() {
 	var user models.User
 	var err error
@@ -45,7 +104,7 @@ func (c *DiaryController) AddWxDiary() {
 		if err != nil {
 			beego.Error(err)
 		} else {
-			beego.Info(user)
+			// beego.Info(user)
 			pid := beego.AppConfig.String("wxdiaryprojectid") //"26159"
 			title := c.Input().Get("title")
 			diarydate := c.Input().Get("diarydate")
@@ -119,12 +178,12 @@ func (c *DiaryController) AddWxDiary() {
 // @Title get wx diaries list
 // @Description get diaries by page
 // @Param page query string  true "The page for diaries list"
-// @Param skey query string  true "The skey for user"
+// @Param skey query string  false "The skey for diary"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
 // @router /getwxdiaries [get]
-//小程序取得所有文章列表，分页_珠三角设代用
+//小程序取得日志列表，分页_珠三角设代用
 func (c *DiaryController) GetWxdiaries() {
 	// id := c.Ctx.Input.Param(":id")
 	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
@@ -161,9 +220,66 @@ func (c *DiaryController) GetWxdiaries() {
 	if err != nil {
 		beego.Error(err)
 	}
-	beego.Info(diaries)
+	// beego.Info(diaries)
 
 	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "diaries": diaries}
+	c.ServeJSON()
+}
+
+// @Title get wx diaries list
+// @Description get diaries by page
+// @Param page query string  true "The page for diaries list"
+// @Param skey query string  false "The skey for diary"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articls not found
+// @router /getwxdiaries2 [get]
+//网页页面取得日志列表，返回page rows total
+func (c *DiaryController) GetWxdiaries2() {
+	// id := c.Ctx.Input.Param(":id")
+	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+	// wxsite := beego.AppConfig.String("wxreqeustsite")
+	// limit := "10"
+	limit := c.Input().Get("limit")
+
+	limit1, err := strconv.Atoi(limit)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("page")
+	// page1, err := strconv.ParseInt(page, 10, 64)
+	page1, err := strconv.Atoi(page)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	var idNum int64
+	//id转成64为
+	idNum, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	// var offset int64
+	var offset int
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	// diaries, err := models.GetWxDiaries(idNum, limit1, offset)
+	diaries, err := models.GetWxDiaries2(idNum, limit1, offset)
+	if err != nil {
+		beego.Error(err)
+	}
+	count, err := models.GetWxDiaryCount(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	// beego.Info(diaries)
+
+	c.Data["json"] = map[string]interface{}{"page": page, "rows": diaries, "total": count}
 	c.ServeJSON()
 }
 
@@ -320,4 +436,178 @@ func (c *DiaryController) DeleteWxDiary() {
 			}
 		}
 	}
+}
+
+type DiaryContent struct {
+	Txt  string
+	Html string
+}
+
+func (c *DiaryController) HtmlToDoc() {
+	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+
+	// limit := "10"
+	limit := c.Input().Get("limit")
+	limit1, err := strconv.Atoi(limit)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("page")
+
+	page1, err := strconv.Atoi(page)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	var idNum int64
+	//id转成64为
+	idNum, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	var offset int
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	// diaries, err := models.GetWxDiaries(idNum, limit1, offset)
+	diaries, err := models.GetWxDiaries2(idNum, limit1, offset)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	doc := document.New()
+
+	for _, v := range diaries {
+		did := v.Diary.Id
+		// wxsite := beego.AppConfig.String("wxreqeustsite")
+
+		Diary, err := models.GetDiary(did)
+		if err != nil {
+			beego.Error(err)
+		}
+		para := doc.AddParagraph()
+		run := para.AddRun()
+		para.SetStyle("Title")
+		run.AddText(Diary.Title)
+
+		para = doc.AddParagraph()
+		para.SetStyle("Heading1")
+		run = para.AddRun()
+		run.AddText(Diary.Diarydate)
+
+		//将一篇日志分段，通过<p标签
+		slice1 := make([]DiaryContent, 0)
+
+		var r io.Reader = strings.NewReader(string(Diary.Content))
+		goquerydoc, err := goquery.NewDocumentFromReader(r)
+		if err != nil {
+			beego.Error(err)
+		}
+
+		goquerydoc.Find("p").Each(func(i int, s *goquery.Selection) {
+			sel, _ := s.Html()
+			bb := make([]DiaryContent, 1)
+			bb[0].Html = sel
+			txt := s.Text()
+			bb[0].Txt = txt
+			slice1 = append(slice1, bb...)
+		})
+
+		for _, w := range slice1 {
+			//在每段里查找img标签
+			// beego.Info(w)
+			var r2 io.Reader = strings.NewReader(w.Html)
+			goquerydoc2, err := goquery.NewDocumentFromReader(r2)
+			if err != nil {
+				beego.Error(err)
+			}
+			slice2 := make([]Img, 0)
+			goquerydoc2.Find("img").Each(func(i int, s2 *goquery.Selection) {
+				sel2, _ := s2.Attr("src")
+				// beego.Info(sel2)
+				aa := make([]Img, 1)
+				sel3 := strings.Replace(sel2, "/attachment/", "attachment/", -1)
+				aa[0].Src = sel3
+				aa[0].Name = path.Base(sel2)
+				slice2 = append(slice2, aa...)
+			})
+
+			para = doc.AddParagraph()
+			para.Properties().SetFirstLineIndent(0.354331 * measurement.Inch)
+			run = para.AddRun()
+			run.AddText(w.Txt)
+
+			if len(slice2) > 0 {
+				for _, x := range slice2 {
+					img1, err := common.ImageFromFile(x.Src)
+					if err != nil {
+						log.Fatalf("unable to create image: %s", err)
+					}
+					img1ref, err := doc.AddImage(img1)
+					if err != nil {
+						log.Fatalf("unable to add image to document: %s", err)
+					}
+					para = doc.AddParagraph()
+					run = para.AddRun()
+
+					inl, err := run.AddDrawingInline(img1ref)
+					if err != nil {
+						log.Fatalf("unable to add inline image: %s", err)
+					}
+					inl.SetSize(5.5*measurement.Inch, 5.5*measurement.Inch)
+				}
+			}
+		}
+
+		// wxDiary := &models.Diary{
+		// 	Id:        Diary.Id,
+		// 	Title:     Diary.Title,
+		// 	Diarydate: Diary.Diarydate,
+		// 	Content:   content,
+		// 	Views:     Diary.Views,
+		// 	Created:   Diary.Created,
+		// }
+
+		// img2data, err := ioutil.ReadFile("gophercolor.png")
+		// if err != nil {
+		// 	log.Fatalf("unable to read file: %s", err)
+		// }
+		// img2, err := common.ImageFromBytes(img2data)
+		// if err != nil {
+		// 	log.Fatalf("unable to create image: %s", err)
+		// }
+		// img2ref, err := doc.AddImage(img2)
+		// if err != nil {
+		// 	log.Fatalf("unable to add image to document: %s", err)
+		// }
+
+		// para := doc.AddParagraph()
+
+		// anchored, err := para.AddRun().AddDrawingAnchored(img1ref)
+		// if err != nil {
+		// 	log.Fatalf("unable to add anchored image: %s", err)
+		// }
+		// anchored.SetName("Gopher")
+		// anchored.SetSize(2*measurement.Inch, 2*measurement.Inch)
+		// anchored.SetOrigin(wml.WdST_RelFromHPage, wml.WdST_RelFromVTopMargin)
+		// anchored.SetHAlignment(wml.WdST_AlignHCenter)
+		// anchored.SetYOffset(3 * measurement.Inch)
+		// anchored.SetTextWrapSquare(wml.WdST_WrapTextBothSides)
+
+	}
+	newname := strconv.FormatInt(time.Now().UnixNano(), 10) + ".docx"
+	doc.SaveToFile("static/" + newname)
+	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "filename": newname}
+	c.ServeJSON()
+}
+
+func createParaRun(doc *document.Document, s string) document.Run {
+	para := doc.AddParagraph()
+	run := para.AddRun()
+	run.AddText(s)
+	return run
 }

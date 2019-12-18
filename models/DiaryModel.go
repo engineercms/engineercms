@@ -81,6 +81,17 @@ func GetWxDiaries(pid, limit, offset int64) (diaries []*Diary, err error) {
 	return diaries, err
 }
 
+//获取日志总数
+func GetWxDiaryCount(pid int64) (count int64, err error) {
+	o := orm.NewOrm()
+	qs := o.QueryTable("Diary")
+	count, err = qs.Filter("Projectid", pid).Limit(-1).Count()
+	if err != nil {
+		return 0, err
+	}
+	return count, err
+}
+
 type DiaryUser struct {
 	Diary `xorm:"extends"`
 	User  `xorm:"extends"`
