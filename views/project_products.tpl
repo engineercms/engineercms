@@ -79,7 +79,7 @@
 <body>
 
 <div class="col-lg-12">
-  <h3>成果列表</h3>
+  <!-- <h3>成果列表</h3> -->
 <div id="toolbar1" class="btn-group">
         <!-- 多文件批量上传  {{if not .RoleAdd}}style="display:none"{{end}}-->
         <button {{if ne "true" .RoleAdd}} style="display:none" {{end}} type="button" data-name="addButton" id="addButton" class="btn btn-default" title="批量上传模式"> <i class="fa fa-plus">添加</i>

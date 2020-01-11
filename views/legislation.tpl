@@ -10,12 +10,12 @@
    <script type="text/javascript" src="/static/youdao/fanyi.js" data-main="/fanyi" ></script>
    <script type="text/javascript" src="/static/youdao/ntes.js"></script>
 </head>
+<div class="container-fill">{{template "navbar" .}}</div>
+
 <body class="open result-default">
-  <div class="navbar navba-default navbar-fixed-top">
-    <div class="container-fill">{{template "navbar" .}}</div>
-  </div>
-  <h1 > <i class="glyphicon glyphicon-chevron-right"></i> <i class="glyphicon glyphicon-minus"></i>
-  </h1>
+
+  <!-- <h1 > <i class="glyphicon glyphicon-chevron-right"></i> <i class="glyphicon glyphicon-minus"></i></h1> -->
+  
   <div id="w" class="cf">
     <div id="transBackground">
         <div id="main" class="cf show-translate">

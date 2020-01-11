@@ -604,6 +604,105 @@ func (c *AttachController) AddAttachment() {
 	//    url     : "图片地址"        // 上传成功时才返回
 }
 
+// @Title post wx attachment by projectid
+// @Description post attachment by projectid
+// @Param pid query string true "The projectid of attachment"
+// @Success 200 {object} models.AddArticle
+// @Failure 400 Invalid page supplied
+// @Failure 404 project not found
+// @router /addwxattachment [post]
+//向某个侧栏id下添加成果——用于第一种批量添加一对一模式
+func (c *AttachController) AddWxAttachment() {
+	var user models.User
+	var err error
+	openID := c.GetSession("openID")
+	if openID != nil {
+		user, err = models.GetUserByOpenID(openID.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	var parentidpath, parentidpath1 string
+	var filepath, DiskDirectory, Url string
+
+	//解析表单
+	filename := c.Input().Get("filename")
+	pid := c.Input().Get("pid")
+	//pid转成64为
+	pidNum, err := strconv.ParseInt(pid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据pid查出项目id
+	proj, err := models.GetProj(pidNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	parentidpath = strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+	parentidpath1 = strings.Replace(parentidpath, "#", "", -1)
+	patharray := strings.Split(parentidpath1, "-")
+	topprojectid, err := strconv.ParseInt(patharray[0], 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	//根据proj的parentIdpath——这个已经有了专门函数，下列可以简化！
+	//由proj id取得url
+	Url, DiskDirectory, err = GetUrlPath(pidNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	//获取上传的文件
+	_, h, err := c.GetFile("file")
+	if err != nil {
+		beego.Error(err)
+	}
+	if h != nil {
+		//保存附件
+		// f.Close() // 关闭上传的文件，不然的话会出现临时文件不能清除的情况
+		//将附件的编号和名称写入数据库
+		_, filename1, filename2, _, _, _, _ := Record(filename)
+		// filename1, filename2 := SubStrings(attachment)
+		//当2个文件都取不到filename1的时候，数据库里的tnumber的唯一性检查出错。
+		if filename1 == "" {
+			filename1 = filename2 //如果编号为空，则用文件名代替，否则多个编号为空导致存入数据库唯一性检查错误
+		}
+		//20190728改名，替换文件名中的#和斜杠
+		//文件命中怎么可能出现斜杠？？？
+		filename2 = strings.Replace(filename2, "#", "号", -1)
+		filename2 = strings.Replace(filename2, "/", "-", -1)
+		FileSuffix := path.Ext(h.Filename)
+		attachmentname := filename1 + filename2 + FileSuffix
+		//存入成果数据库
+		//如果编号重复，则不写入，只返回Id值。
+		//根据id添加成果code, title, label, principal, content string, projectid int64
+		prodId, err := models.AddProduct(filename1, filename2, "", "", user.Id, pidNum, topprojectid)
+		if err != nil {
+			beego.Error(err)
+		}
+		//除了product，其余都是原始文件名，挺好的吧。
+		filepath = DiskDirectory + "/" + filename
+
+		//如果附件名称相同，则覆盖上传，但数据库不追加
+		_, err = models.AddAttachment(filename, 0, 0, prodId)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"info": "ERR"}
+			c.ServeJSON()
+		} else {
+			//存入文件夹
+			err = c.SaveToFile("file", filepath) //给文件加水印WaterMark(filepath)
+			if err != nil {
+				beego.Error(err)
+			}
+			c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "title": attachmentname, "original": attachmentname, "url": Url + "/" + attachmentname}
+			c.ServeJSON()
+		}
+	}
+}
+
 //向服务器保存dwg文件
 func (c *AttachController) SaveDwgfile() {
 	id := c.Input().Get("id")
@@ -1332,7 +1431,7 @@ func (c *AttachController) Attachment() {
 			} else {
 				projurl, err = models.GetProjbyParentidTitle(projurl.Id, array[i])
 				if err != nil {
-					beego.Error(err)
+					// beego.Error(err)
 				}
 			}
 			projurls = projurls + "/" + strconv.FormatInt(projurl.Id, 10)

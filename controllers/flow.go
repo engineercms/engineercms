@@ -168,6 +168,8 @@ func (c *FlowController) FlowTypeList() {
 // 管理员定义流程类型doctype、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowTypeUpdate() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	dtid := c.Input().Get("dtid")
@@ -196,6 +198,8 @@ func (c *FlowController) FlowTypeUpdate() {
 // 管理员定义流程类型doctype、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowTypeDelete() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	//定义流程类型
@@ -217,6 +221,8 @@ func (c *FlowController) FlowTypeDelete() {
 // 管理员定义流程类型doctype、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowState() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	//定义流程状态
@@ -256,6 +262,8 @@ func (c *FlowController) FlowState() {
 // 管理员定义流程类型docstate、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowStateUpdate() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	dtid := c.Input().Get("dtid")
@@ -283,6 +291,8 @@ func (c *FlowController) FlowStateUpdate() {
 // 管理员定义流程类型docstate、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowStateDelete() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	//定义流程类型
@@ -365,6 +375,8 @@ func (c *FlowController) FlowStateList() {
 // 管理员定义流程类型doctype、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowAction() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	reconfirm := c.Input().Get("reconfirm")
@@ -397,6 +409,8 @@ func (c *FlowController) FlowAction() {
 // 管理员定义流程类型docstate、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowActionUpdate() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	dtid := c.Input().Get("dtid")
@@ -496,6 +510,8 @@ func (c *FlowController) FlowActionList() {
 // 管理员定义流程类型doctype、流程状态state、流程节点node、
 // 流程流向transition，输入doctype、docstate1、docaction、docstate2
 func (c *FlowController) FlowTransition() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	// dtid := c.Input().Get("dtid")
 	dtid := c.GetString("dtid")
@@ -548,6 +564,8 @@ func (c *FlowController) FlowTransition() {
 // 管理员定义流程类型docstate、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowTransitionUpdate() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	dtid := c.Input().Get("dtid")
@@ -576,6 +594,8 @@ func (c *FlowController) FlowTransitionUpdate() {
 // 管理员定义流程类型docstate、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowTransitionDelete() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	dtid := c.Input().Get("dtid")
 	//pid转成64为
@@ -664,6 +684,8 @@ func (c *FlowController) FlowTransitionList() {
 // @Title post wf Workflow...
 // @Description post Workflow..
 // @Param name query string  true "The name of Workflow"
+// @Param dtid query string  true "The doctypeid of Workflow"
+// @Param dsid query string  true "The docstate of Workflow"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
@@ -671,6 +693,8 @@ func (c *FlowController) FlowTransitionList() {
 // 管理员定义流程Workflow
 // 输入doctype和初始action
 func (c *FlowController) FlowWorkflow() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name") //图纸设计-三级校审流程
 	dtid := c.Input().Get("dtid")
@@ -774,6 +798,8 @@ func (c *FlowController) FlowWorkflowList() {
 // 管理员定义流程AccessContext
 // 流程命名空间
 func (c *FlowController) FlowAccessContext() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	//定义用户、组、角色、权限集合
@@ -799,6 +825,8 @@ func (c *FlowController) FlowAccessContext() {
 // 管理员定义流程类型docstate、流程状态state、流程节点node、
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowAccessContextUpdate() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	dtid := c.Input().Get("dtid")
@@ -879,6 +907,10 @@ func (c *FlowController) FlowAccessContextList() {
 // @Title post wf Node...
 // @Description post Node..
 // @Param name query string  true "The name of Node"
+// @Param dtid query string  true "The doctypeid of Node"
+// @Param dsid query string  true "The docstateid of Node"
+// @Param acid query string  true "The accesssid of Node"
+// @Param nodetype query string  true "The nodetype of Node"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
@@ -888,6 +920,9 @@ func (c *FlowController) FlowAccessContextList() {
 // A `Node` each has to be defined for each document state of the workflow,
 // except the final state. Please look at `_Workflows.AddNode`.
 func (c *FlowController) FlowNode() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+	// c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	dtid := c.Input().Get("dtid")
@@ -933,6 +968,9 @@ func (c *FlowController) FlowNode() {
 	}
 	//根据doctypeid获得workflow
 	workflow, err := flow.Workflows.GetByDocType(flow.DocTypeID(dtID))
+	if err != nil {
+		beego.Error(err)
+	}
 	//定义流程类型workflow下的具体每个节点node，用户对文件执行某个动作（event里的action）后，会沿着这些节点走
 	// AddNode maps the given document state to the specified node.  This
 	// map is consulted by the workflow when performing a state transition
@@ -973,6 +1011,8 @@ func (c *FlowController) FlowNode() {
 // @router /flownodelist [get]
 // 管理员定义流程Node
 func (c *FlowController) FlowNodeList() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	// prefix := c.Input().Get("prefix")
 	// var offset, limit1, page1 int64
 	// var err error
@@ -1010,7 +1050,7 @@ func (c *FlowController) FlowNodeList() {
 	// } else {
 	// 	offset = (page1 - 1) * limit
 	// }
-	// nodes, err := flow.Nodes.NodeList(offset, limit)
+	// nodes, err := flow.Nodes.NodeList(offset, limit)//这个含有ac_id,为何不能用这个？
 	nodes, err := flow.Nodes.List(flow.WorkflowID(workflowID))
 	c.Data["json"] = nodes
 	c.ServeJSON()
@@ -1029,17 +1069,22 @@ func (c *FlowController) FlowNodeList() {
 // 管理员定义流程user
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowUser() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	first_name := c.Input().Get("firstname")
 	last_name := c.Input().Get("lastname")
 	email := c.Input().Get("email")
 	active := c.Input().Get("active")
 	var err error
-	var res sql.Result
+	var uid flow.UserID
+	// var res sql.Result
 	if active == "true" {
-		res, err = tx.Exec("INSERT INTO users_master(first_name, last_name, email, active) VALUES(?, ?, ?, ?)", first_name, last_name, email, 1)
+		uid, err = flow.Users.New(tx, first_name, last_name, email, 1)
+		// res, err = tx.Exec("INSERT INTO users_master(first_name, last_name, email, active) VALUES(?, ?, ?, ?)", first_name, last_name, email, 1)
 	} else {
-		res, err = tx.Exec("INSERT INTO users_master(first_name, last_name, email, active) VALUES(?, ?, ?, ?)", first_name, last_name, email, 0)
+		uid, err = flow.Users.New(tx, first_name, last_name, email, 0)
+		// res, err = tx.Exec("INSERT INTO users_master(first_name, last_name, email, active) VALUES(?, ?, ?, ?)", first_name, last_name, email, 0)
 	}
 	//定义用户-组-角色-权限关系
 	// res, err := tx.Exec(`INSERT INTO users_master(first_name, last_name, email, active)
@@ -1050,7 +1095,7 @@ func (c *FlowController) FlowUser() {
 		c.Data["json"] = map[string]interface{}{"err": err, "data": "写入失败!"}
 		c.ServeJSON()
 	} else {
-		uid, _ := res.LastInsertId()
+		// uid, _ := res.LastInsertId()
 		uID1 := flow.UserID(uid)
 		_, err = flow.Groups.NewSingleton(tx, uID1)
 		// tx.Commit()
@@ -1157,9 +1202,12 @@ func (c *FlowController) FlowUserList() {
 // 管理员定义流程Group
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowGroup() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	grouptype := c.Input().Get("grouptype")
+	beego.Info(grouptype)
 	//注意：单人组自动建立！！！
 	_, err := flow.Groups.New(tx, name, grouptype) //).(flow.GroupID)
 	if err != nil {
@@ -1242,6 +1290,8 @@ func (c *FlowController) FlowGroupList() {
 // 管理员定义流程GroupUser
 // 将users加入group
 func (c *FlowController) FlowUserGroup() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	// uid := c.Input().Get("uid")
 	// beego.Info(uid)
@@ -1348,6 +1398,8 @@ func (c *FlowController) FlowGroupUsersList() {
 // 管理员定义流程Role
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowRole() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	name := c.Input().Get("name")
 	_, err := flow.Roles.New(tx, name)
@@ -1378,6 +1430,8 @@ type rolelist struct {
 // @router /flowrolelist [get]
 // 查询所有role
 func (c *FlowController) FlowRoleList() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var offset, limit1, page1 int64
 	var err error
 	limit := c.Input().Get("limit")
@@ -1428,6 +1482,8 @@ func (c *FlowController) FlowRoleList() {
 // 管理员定义流程Permission
 // 流程动作action、流程流向transition、流程事件event
 func (c *FlowController) FlowPermission() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	roleid := c.Input().Get("roleid")
 	//pid转成64为
@@ -1484,6 +1540,7 @@ type Actions struct {
 // @router /flowrolepermissionlist [get]
 // 查询role和对应对应的permission
 func (c *FlowController) FlowRolePermissionList() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 	var offset, limit1, page1 int64
 	var err error
 	limit := c.Input().Get("limit")
@@ -1550,6 +1607,8 @@ func (c *FlowController) FlowRolePermissionList() {
 // 管理员定义流程GroupRole
 // 来自accesscontext
 func (c *FlowController) FlowGroupRole() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	acid := c.Input().Get("acid")
 	//pid转成64为
@@ -1602,6 +1661,8 @@ type grouprolelist struct {
 // @router /flowgrouprolelist [get]
 // 查询group的角色role-来自accesscontext
 func (c *FlowController) FlowGroupRoleList() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var offset, limit1, page1 int64
 	var err error
 	limit := c.Input().Get("limit")
@@ -1665,6 +1726,8 @@ func (c *FlowController) FlowGroupRoleList() {
 // @router /flowdoc [post]
 // 添加一个带流程的文档
 func (c *FlowController) FlowDoc() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 
 	//查询预先定义的doctype流程类型
@@ -1961,6 +2024,8 @@ type Doclist struct {
 // @router /flowdoclist [get]
 // 文件列表页，水平显示每个文件的状态
 func (c *FlowController) FlowDocList() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	//查询预先定义的doctype流程类型
 	dtid := c.Input().Get("dtid")
 	dtID, err := strconv.ParseInt(dtid, 10, 64)
@@ -2168,6 +2233,8 @@ func (c *FlowController) FlowDocList() {
 // @router /flowdocevent [post]
 // 添加events：
 func (c *FlowController) FlowEvent() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
 	var tx *sql.Tx
 	dtid := c.Input().Get("dtid")
 	dtID, err := strconv.ParseInt(dtid, 10, 64)
@@ -2485,6 +2552,7 @@ func (c *FlowController) FlowNext() {
 	if err != nil {
 		beego.Error(err)
 	}
+	//下面这个messageid没有
 	messageid := c.Input().Get("messageid")
 	messageID, err := strconv.ParseInt(messageid, 10, 64)
 	if err != nil {
@@ -2576,6 +2644,138 @@ func (c *FlowController) FlowNext() {
 		c.Data["json"] = map[string]interface{}{"err": nil, "data": "写入成功!"}
 		c.ServeJSON()
 	}
+}
+
+// @Title post wf next
+// @Description post workflow next
+// @Param dtid query string  true "The id of doctype"
+// @Param daid query string  true "The id of action"
+// @Param docid query string  true "The id of document"
+// @Param gid query string  true "The id of group"
+// @Param text query string  false "The text of apply"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 data not found
+// @router /wxflownext [post]
+// FlowDocAction列出了文档和动作，用户点击action，则这里进行修改docstate
+func (c *FlowController) WxFlowNext() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+	var tx *sql.Tx //用这个nil，后面就不用commit了吧，都在flow里commit了。
+	var tx1 *sql.Tx
+	// var openID string
+	var user models.User
+	var err error
+	openid := c.GetSession("openID")
+	if openid != nil {
+		// openID = openid.(string)
+		user, err = models.GetUserByOpenID(openid.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+		var uID int64
+		// username, _, _, _, _ := checkprodRole(c.Ctx)
+
+		flowuser, err := flow.Users.GetByName(user.Username)
+		if err != nil {
+			beego.Error(err)
+		} else {
+			uID = int64(flowuser.ID)
+		}
+
+		dtid := c.Input().Get("dtid")
+		dtID, err := strconv.ParseInt(dtid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		daid := c.Input().Get("daid")
+		daID, err := strconv.ParseInt(daid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		docid := c.Input().Get("docid")
+		docID, err := strconv.ParseInt(docid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		messageid := c.Input().Get("messageid")
+		messageID, err := strconv.ParseInt(messageid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+
+		//根据docid取得document
+		document, err := flow.Documents.Get(tx, flow.DocTypeID(dtID), flow.DocumentID(docID))
+		if err != nil {
+			beego.Error(err)
+		}
+		//根据document取得workflow
+		myWorkflow, err := flow.Workflows.GetByDocType(document.DocType.ID)
+		if err != nil {
+			beego.Error(err)
+		}
+
+		//当前用户所在的用户组
+		singletongroup, err := flow.Users.SingletonGroupOf(flow.UserID(uID))
+		if err != nil {
+			beego.Error(err)
+		}
+		//接受用户组
+		gid := make([]string, 0, 2)
+		// c.Ctx.Input.Bind(&gid, "gid")
+		gid[0] = c.Input().Get("gid")
+		var groupIds []flow.GroupID
+		for _, v := range gid {
+			gID, err := strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
+			groupIds = append(groupIds, flow.GroupID(gID))
+		}
+		text := c.Input().Get("text")
+		if text == "" {
+			text = "no comments"
+		}
+		//建立event
+		docEventInput := flow.DocEventsNewInput{
+			DocTypeID:   flow.DocTypeID(dtID),
+			DocumentID:  flow.DocumentID(docID),
+			DocStateID:  document.State.ID,      //document state must be this state，文档的现状状态
+			DocActionID: flow.DocActionID(daID), //Action performed by `Group`; required,由用户组执行的操作
+			GroupID:     singletongroup.ID,      //Group (user) who performed the action that raised this event; required，执行引发此事件的操作的组(用户)
+			Text:        text,                   //Any comments or notes; required，
+		}
+		deID, err := flow.DocEvents.New(tx, &docEventInput)
+		if err != nil {
+			beego.Error(err)
+		}
+
+		myDocEvent, err := flow.DocEvents.Get(flow.DocEventID(deID))
+		if err != nil {
+			beego.Error(err)
+		} else {
+			beego.Info(myDocEvent)
+		}
+		//这里要将邮箱对应的信息改为已读unread改为false
+		newDocStateId, err := myWorkflow.ApplyEvent(tx1, myDocEvent, groupIds)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"err": err, "data": "写入失败!"}
+			c.ServeJSON()
+		} else {
+			//修改邮件为已读，即——已处理
+			err = flow.Mailboxes.SetStatusByUser(tx, flowuser.ID, flow.MessageID(messageID), false)
+			if err != nil {
+				beego.Error(err)
+			}
+			fmt.Println("newDocStateId=", newDocStateId, err)
+			c.Data["json"] = map[string]interface{}{"err": nil, "data": "写入成功!"}
+			c.ServeJSON()
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"err": err, "data": "用户未登录!"}
+		c.ServeJSON()
+	}
+
 }
 
 //后端分页的数据结构

@@ -19,7 +19,7 @@
 </head>
 
 <body>
-  <div class="bs-example">
+  <!-- <div class="bs-example"> -->
     <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
       <!-- <ol class="carousel-indicators">
         {{range $index, $elem :=.Photo}}
@@ -44,7 +44,7 @@
         <span class="glyphicon glyphicon-chevron-right"></span>
       </a>
     </div>
-  </div> 
+  <!-- </div>  -->
 
 <div class="text-center">
   <h1><i class="fa fa-terminal" style="font-size:80px"></i>

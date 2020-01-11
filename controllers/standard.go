@@ -37,7 +37,7 @@ type Standardmore struct {
 //显示所有规范
 func (c *StandardController) GetStandard() {
 	c.Data["IsStandard"] = true //这里修改到ListAllPosts()
-	c.TplName = "standard.tpl"
+	// c.TplName = "standard.tpl"
 	// c.Data["IsLogin"] = checkAccount(c.Ctx)
 	// uname, _, _ := checkRoleread(c.Ctx) //login里的
 	// c.Data["Uname"] = uname
@@ -103,8 +103,15 @@ func (c *StandardController) Index() { //
 	c.TplName = "standard.tpl"
 	// c.Data["IsLogin"] = checkAccount(c.Ctx)
 	// uname, _, _ := checkRoleread(c.Ctx) //login里的
+	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
 	// rolename, _ = strconv.Atoi(role)
 	// c.Data["Uname"] = uname
+	c.Data["Username"] = username
+	c.Data["Ip"] = c.Ctx.Input.IP()
+	c.Data["role"] = role
+	c.Data["IsAdmin"] = isadmin
+	c.Data["IsLogin"] = islogin
+	c.Data["Uid"] = uid
 	standards, err := models.GetAllStandards() //这里传入空字符串
 	if err != nil {
 		beego.Error(err.Error)

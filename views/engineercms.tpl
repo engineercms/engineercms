@@ -33,13 +33,11 @@
          })();
         </script>
 </head>
-<body>
-
-  <div class="navbar-wrapper">
   <div class="container-fill">
         {{template "navbar" .}}
   </div>
-</div>
+<body>
+
 <div id="myCarousel" class="carousel slide" data-ride="carousel">
   <ol class="carousel-indicators">
     <li data-target="#myCarousel" data-slide-to="0" class="active"></li>

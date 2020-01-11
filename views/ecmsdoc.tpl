@@ -10,13 +10,9 @@
 <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="/static/js/docs.min.js"></script>
 </head>
+<div class="container-fill">{{template "navbar" .}}</div>
 
-<!-- <div class="navbar-wrapper"> -->
-  <div class="container-fill">
-        {{template "navbar" .}}
-  </div>
-<!-- </div> -->
-<body>
+<body class="open result-default">
 <div class="container">
 
   <div class="col-md-3" role="complementary">

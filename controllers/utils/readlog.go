@@ -27,7 +27,10 @@ import (
 // }
 
 func TestLog(t *testing.T) { //测试函数，参数必须是t *Testing.T
-	f, _ := os.Open("D:/file.log") //日志文件路径
+	f, err := os.Open("D:/file.log") //日志文件路径
+	if err != nil {
+		log.Fatalf("Open file error,%s\n", err.Error())
+	}
 	defer f.Close()
 	var resultSlice []int                                          //存储最后的结果切片，因为是要找出每一个时间值，所以用切片来存储
 	var exp = regexp.MustCompile(`[\d]+_[\d]+(executeTime:)[\d]+`) //正则表达式，是为了从日志文件里获23_3executeTime:1234这种数据结果。
@@ -195,6 +198,9 @@ func tail(cmd *Command, arg []string) bool {
 		log.Printf("打开文件失败:%s\n", err.Error())
 		return true
 	}
+
+	defer File.Close() //20191108添加close
+
 	var w io.Writer
 	if args.output != "" {
 		w, err = os.Create(args.output)

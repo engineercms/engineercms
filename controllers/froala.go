@@ -587,7 +587,7 @@ func (c *FroalaController) UploadWxEditorImg() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /uploadwximgs/:id [post]
-//微信wx添加文章里的图片上传——这个没有用上，但这个id更通用
+//微信wx添加文章里的图片上传——这个鲁班宝，但这个id更通用
 func (c *FroalaController) UploadWxImgs() {
 	//解析表单
 	pid := c.Ctx.Input.Param(":id")
@@ -609,25 +609,87 @@ func (c *FroalaController) UploadWxImgs() {
 	}
 	fileSuffix := path.Ext(h.Filename)
 	// random_name
-	newname := strconv.FormatInt(time.Now().UnixNano(), 10) + fileSuffix // + "_" + filename
+	nanoname := strconv.FormatInt(time.Now().UnixNano(), 10)
+	newname := nanoname + fileSuffix // + "_" + filename
+	small_newname := nanoname + "_small" + fileSuffix
 	year, month, _ := time.Now().Date()
 	err = os.MkdirAll(DiskDirectory+"/"+strconv.Itoa(year)+month.String()+"/", 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
 	if err != nil {
 		beego.Error(err)
 	}
-	var path string
+	var imagepath, new_imagepath string
 	var filesize int64
 	if h != nil {
 		//保存附件
-		path = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + newname
+		imagepath = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + newname
+		new_imagepath = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + small_newname
 		Url = "/" + Url + "/" + strconv.Itoa(year) + month.String() + "/"
-		err = c.SaveToFile("file", path) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+		err = c.SaveToFile("file", imagepath) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
 		if err != nil {
 			beego.Error(err)
 		}
-		filesize, _ = FileSize(path)
+		filesize, _ = FileSize(imagepath)
 		filesize = filesize / 1000.0
-		c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "link": Url + newname, "title": "111", "original": "demo.jpg"}
+
+		//*****压缩图片***
+		file, err := os.Open(imagepath)
+		if err != nil {
+			// log.Fatal(err)
+			beego.Error(err)
+		}
+		defer file.Close()
+		var img image.Image
+		var typeImage int
+		// ext := filepath.Ext(imagepath)
+		if strings.EqualFold(fileSuffix, ".jpg") || strings.EqualFold(fileSuffix, ".jpeg") {
+			img, err = jpeg.Decode(file)
+			if err != nil {
+				// log.Fatal(err)
+				beego.Error(err)
+			}
+			typeImage = 0
+		} else if strings.EqualFold(fileSuffix, ".png") {
+			// decode png into image.Image
+			img, err = png.Decode(file)
+			if err != nil {
+				// log.Fatal(err)
+				beego.Error(err)
+			}
+			typeImage = 1
+		} else if strings.EqualFold(fileSuffix, ".gif") {
+			img, err = gif.Decode(file)
+			if err != nil {
+				// log.Fatal(err)
+				beego.Error(err)
+			}
+			typeImage = 2
+		}
+
+		// file.Close()
+
+		// resize to width 1000 using Lanczos resampling
+		// and preserve aspect ratio
+		m := resize.Resize(1000, 0, img, resize.Lanczos3)
+		// m := resize.Thumbnail(1000, 0, img, resize.Lanczos3)
+
+		out, err := os.Create(new_imagepath)
+		defer out.Close()
+		if err != nil {
+			beego.Error(err)
+		}
+		if typeImage == 0 {
+			err = jpeg.Encode(out, m, &jpeg.Options{Quality: 80})
+			if err != nil {
+				beego.Error(err)
+			}
+		} else {
+			err = png.Encode(out, m)
+			if err != nil {
+				beego.Error(err)
+			}
+		}
+
+		c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "link": Url + small_newname, "title": "111", "original": "demo.jpg"}
 		c.ServeJSON()
 	} else {
 		c.Data["json"] = map[string]interface{}{"state": "ERROR", "link": "", "title": "", "original": ""}

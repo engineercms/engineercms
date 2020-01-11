@@ -182,6 +182,8 @@ func (c *RegistController) WxRegist() {
 			// 		isAdmin = true
 			// 	}
 			// }
+			//bug:下面这句是取得角色admin，如果用户未设置角色admin，则出错20191224。
+			//因此，必须有系统默认设置admin角色才行。
 			role, err := models.GetRoleByRolename("admin")
 			if err != nil {
 				beego.Error(err)

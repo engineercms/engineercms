@@ -68,7 +68,7 @@
                 $(".breadcrumb #nav").remove();
                 for (i=0;i<data.length;i++){
                     // $(".breadcrumb").append('<li><a href="javascript:void(0)"><i class="fa fa-home">项目编号：' + {{.Category.Code}}+ '</a></li>');onclick="SomeJavaScriptCode"
-                    $(".breadcrumb").append('<li id="nav"><a href="javascript:gototree('+data[i].Id+')">' + data[i].Title + '</a></li>');
+                    $(".breadcrumb").append('<li id="nav"><a href="javascript:gototree(' + data[i].Id + ')">' + data[i].Title + '</a></li>');
                 }
               // });
             }
@@ -160,8 +160,8 @@
 
 <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
 <!-- 面包屑导航 -->
-  <div class="breadcrumbs">
-    <ol class="breadcrumb" split="&gt;">
+  <!-- <div class="breadcrumbs"> -->
+    <ol class="breadcrumb" style="margin-bottom: 2px;" split="&gt;">
       <li>
         <a href="javascript:gototree({{.Category.Id}})"> <i class="fa fa-home" aria-hidden="true"></i>
           项目编号：{{.Category.Code}}
@@ -175,14 +175,14 @@
       </li>
       {{end}}-->
     </ol>
-  </div>
+  <!-- </div> -->
     <!-- <div class="form-group"> -->
         <!-- <label class="control-label" id="regis" for="LoginForm-UserName"></label> 显示部门名称  -->
     <!-- </div> -->
         <!-- <iframe src="/secofficeshow" name='main' id="iframepage" frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" onLoad="iFrameHeight()"></iframe> -->
         <!-- <iframe src="/secofficeshow" name='main' id="iframepage" frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" onload="changeFrameHeight()"></iframe> -->
         <!-- 默认显示所有成果？还是项目简介？当为项目id时，判断是一级，显示里面的成果 -->
-       <iframe src="/project/{{.Id}}/{{.Id}}" name='iframepage' id="iframepage" frameborder="0"  width="100%" scrolling="no" marginheight="0" marginwidth="0"  onload="this.height=800"></iframe>
+       <iframe src="/project/{{.Id}}/{{.Id}}" name='iframepage' id="iframepage" frameborder="0"  width="100%" scrolling="no" marginheight="0" marginwidth="0"  onload="this.height=800"></iframe> 
 </div>  
 
 

@@ -117,7 +117,7 @@ func (c *ProdController) GetProjProd() {
 	// _, role := checkprodRole(c.Ctx)
 	// c.Data["role"] = role
 	//记录开始时间
-	start := time.Now()
+	// start := time.Now()
 
 	//这里取到用户的权限
 	//添加权限POST
@@ -218,8 +218,8 @@ func (c *ProdController) GetProjProd() {
 	if err != nil {
 		beego.Error(err)
 	}
-	elapsed := time.Since(start)
-	beego.Info(elapsed)
+	// elapsed := time.Since(start)
+	// beego.Info(elapsed)
 
 	//取出流程flow类型
 	//要么等点击按钮的时候，用ajax获取

@@ -74,13 +74,11 @@
     }*/
   </style>
 </head>
-
-<div class="container-fill">{{template "/navbar" .}}</div>
+<div class="container-fill">{{template "/T.navbar.tpl" .}}</div>
 
 <body>
-
 <div class="col-lg-12">
-  <h3>文档列表</h3>
+  <h3>考勤列表</h3>
 <div id="toolbar" class="btn-group">
   <span style="position: relative;z-index: 9999;">
     <input type='text' placeholder='选择月份' class='datepicker btn btn-default' id='Date' value=''/>
@@ -141,6 +139,9 @@
           // console.log(d)
           $("#activity").append('<option class="option" value="' + data.processing[i].F_ID + '">' + data.processing[i].F_Caption + '</option>');
         });
+        var page=$("li.page-number.active").text()
+        // alert(page)
+        var limit=$("span.page-size:first").text()
 
         $("#table").bootstrapTable({
           ajax: function (request) {
@@ -148,6 +149,8 @@
               type: "GET",
               url: "/v1/checkin/monthcheck?activityId="+data.processing[0].F_ID+"&year="+b+"&month="+d,
               contentType: "application/json;charset=utf-8",
+              
+              data: {page:1,limit:30},
               dataType: "json",
               json: 'callback',
               success: function (json) {
@@ -453,7 +456,7 @@
             });
           });
         }
-        console.log(myColumns);
+        // console.log(myColumns);
         return myColumns;
       }
     });

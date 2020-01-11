@@ -136,6 +136,7 @@ func init() {
 					&controllers.StandardController{},
 					&controllers.DiaryController{},
 					&controllers.PayController{},
+					&controllers.FinanceController{},
 				),
 			),
 			beego.NSNamespace("/adminlog",
@@ -169,13 +170,11 @@ func init() {
 					&controllers.OnlyController{},
 				),
 			),
-			// *******消耗内存，暂时注释20191218
-			// beego.NSNamespace("/fileinput",
-			// 	beego.NSInclude(
-			// 		&controllers.FileinputController{},
-			// 	),
-			// ),
-			// *******消耗内存，暂时注释20191218
+			beego.NSNamespace("/fileinput",
+				beego.NSInclude(
+					&controllers.FileinputController{},
+				),
+			),
 			// beego.NSNamespace("/cms",
 			// 	beego.NSInclude(
 			// 		&controllers.CMSController{},
@@ -193,8 +192,7 @@ func init() {
 	// beego.Router("/.well-known/pki-validation/AC9A20F9BD09F18D247337AABC67BC06.txt", &controllers.AdminController{}, "*:Testdown")
 	beego.Router("/.well-known/pki-validation/*", &controllers.AdminController{}, "*:Testdown")
 
-	//这个暂时注释掉20191218
-	// beego.Router("/doctree", &controllers.OnlyController{}, "*:GetTree")
+	beego.Router("/doctree", &controllers.OnlyController{}, "*:GetTree")
 	//升级数据库
 	beego.Router("/updatedatabase", &controllers.MainController{}, "*:UpdateDatabase")
 	//删除数据表和字段测试
@@ -647,8 +645,13 @@ func init() {
 	beego.Router("/diary", &controllers.DiaryController{}, "get:Get") //get
 	//具体一个日志页面
 	beego.Router("/getwxdiary2/:id", &controllers.DiaryController{}, "get:GetWxDiary2")
-	//转换为pdf，这个暂时注释掉20191218
+	//转换为word
 	// beego.Router("/htmltodoc", &controllers.DiaryController{}, "get:HtmlToDoc")
+
+	//设代财务登记列表页面
+	beego.Router("/finance", &controllers.FinanceController{}, "get:Get") //get
+	//具体一个财务登记页面
+	beego.Router("/getwxfinance2/:id", &controllers.FinanceController{}, "get:GetWxFinance2")
 
 	//微信小程序
 	//小程序发表文章提交

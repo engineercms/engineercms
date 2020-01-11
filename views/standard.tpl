@@ -12,15 +12,11 @@
   <link rel="stylesheet" type="text/css" href="/static/css/webuploader.css">
   <script type="text/javascript" src="/static/js/webuploader.min.js"></script>
   <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
- 
 </head>
 
+<div class="container-fill">{{template "navbar" .}}</div>
+
 <body>
-<div class="navbar navba-default navbar-fixed-top">
-  <div class="container-fill">{{template "navbar" .}}</div>
-</div>
-
-
 <div class="text-center">
   <h1 > <i class="glyphicon glyphicon-chevron-right"></i> <i class="glyphicon glyphicon-minus"></i>
   </h1>

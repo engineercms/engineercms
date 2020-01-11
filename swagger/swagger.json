@@ -969,6 +969,34 @@
                         "description": "The name of Node",
                         "required": true,
                         "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "dtid",
+                        "description": "The doctypeid of Node",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "dsid",
+                        "description": "The docstateid of Node",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "acid",
+                        "description": "The accesssid of Node",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "nodetype",
+                        "description": "The nodetype of Node",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -1769,6 +1797,20 @@
                         "in": "query",
                         "name": "name",
                         "description": "The name of Workflow",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "dtid",
+                        "description": "The doctypeid of Workflow",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "dsid",
+                        "description": "The docstate of Workflow",
                         "required": true,
                         "type": "string"
                     }
@@ -2649,29 +2691,6 @@
                     },
                     "404": {
                         "description": "articls not found"
-                    }
-                }
-            }
-        },
-        "/fileinput/bootstrapfileinput": {
-            "post": {
-                "tags": [
-                    "fileinput"
-                ],
-                "description": "post file by BootstrapFileInput",
-                "operationId": "FileinputController.post bootstrapfileinput",
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/.SUCCESS"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid page supplied"
-                    },
-                    "404": {
-                        "description": "articl not found"
                     }
                 }
             }
@@ -3614,8 +3633,45 @@
                     {
                         "in": "query",
                         "name": "skey",
-                        "description": "The skey for user",
+                        "description": "The skey for diary",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.GetProductsPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "articls not found"
+                    }
+                }
+            }
+        },
+        "/wx/getwxdiaries2": {
+            "get": {
+                "tags": [
+                    "wx"
+                ],
+                "description": "get diaries by page",
+                "operationId": "DiaryController.get wx diaries list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "description": "The page for diaries list",
                         "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "skey",
+                        "description": "The skey for diary",
                         "type": "string"
                     }
                 ],
@@ -4564,10 +4620,6 @@
         {
             "name": "todo",
             "description": "CMSTODO API\n"
-        },
-        {
-            "name": "fileinput",
-            "description": "CMSWX froala API\n"
         }
     ]
 }

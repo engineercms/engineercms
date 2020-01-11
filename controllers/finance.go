@@ -27,18 +27,18 @@ import (
 )
 
 // CMSWXDIARY API
-type DiaryController struct {
+type FinanceController struct {
 	beego.Controller
 }
 
 //日志列表页
-func (c *DiaryController) Get() {
-	c.TplName = "wxdiaries.tpl"
+func (c *FinanceController) Get() {
+	c.TplName = "wxfinance.tpl"
 }
 
-//日志页面
-func (c *DiaryController) GetWxDiary2() {
-	c.TplName = "wxdiary.tpl"
+//财务登记页面——作废
+func (c *FinanceController) GetWxFinance2() {
+	c.TplName = "wxfinance.tpl"
 	var err error
 	id := c.Ctx.Input.Param(":id")
 	// beego.Info(id)
@@ -50,12 +50,12 @@ func (c *DiaryController) GetWxDiary2() {
 		beego.Error(err)
 	}
 	// beego.Info(idNum)
-	Diary, err := models.GetDiary(idNum)
+	Finance, err := models.GetFinance(idNum)
 	if err != nil {
 		beego.Error(err)
 	}
 
-	content := strings.Replace(Diary.Content, "/attachment/", wxsite+"/attachment/", -1)
+	content := strings.Replace(Finance.Content, "/attachment/", wxsite+"/attachment/", -1)
 	type Duration int64
 	const (
 		Nanosecond  Duration = 1
@@ -67,49 +67,54 @@ func (c *DiaryController) GetWxDiary2() {
 	)
 	// hours := 8
 	// const lll = "2006-01-02 15:04"
-	// diarytime := Diary.Updated.Add(time.Duration(hours) * time.Hour).Format(lll)
-	wxDiary := &models.Diary{
-		Id:        Diary.Id,
-		Title:     Diary.Title,
-		Diarydate: Diary.Diarydate,
-		Content:   content, //Diary.Content,
+	// financetime := Finance.Updated.Add(time.Duration(hours) * time.Hour).Format(lll)
+	wxFinance := &models.Finance{
+		Id:          Finance.Id,
+		Amount:      Finance.Amount,
+		Financedate: Finance.Financedate,
+		Content:     content, //Finance.Content,
 		// LeassonType: 1,
-		Views:   Diary.Views,
-		Created: Diary.Created,
-		// Updated:     diarytime,
+		Views:   Finance.Views,
+		Created: Finance.Created,
+		// Updated:     financetime,
 	}
-	c.Data["Diary"] = wxDiary
+	c.Data["Finance"] = wxFinance
 }
 
-// @Title post wx diary by catalogId
-// @Description post diary by projectid
-// @Param title query string  true "The title of diary"
-// @Param diarydate query string  true "The diarydate of diary"
-// @Param diaryactivity query string  true "The diaryactivity of diary"
-// @Param diaryweather query string  true "The diaryweather of diary"
-// @Param content query string  true "The content of diary"
-// @Param skey query string  true "The skey of user"
-// @Success 200 {object} models.AddDiary
+// @Title post wx finance by catalogId
+// @Description post finance by projectid
+// @Param amount query string true "The amount of finance"
+// @Param financedate query string true "The financedate of finance"
+// @Param financeactivity query string true "The financeactivity of finance"
+// @Param content query string true "The content of finance"
+// @Param skey query string false "The skey of user"
+// @Success 200 {object} models.AddFinance
 // @Failure 400 Invalid page supplied
-// @Failure 404 Diary not found
-// @router /addwxdiary [post]
+// @Failure 404 Finance not found
+// @router /addwxfinance/:id [post]
 //向设代日记id下添加微信小程序文章_珠三角设代plus用_
-func (c *DiaryController) AddWxDiary() {
+func (c *FinanceController) AddWxFinance() {
 	var user models.User
 	var err error
 	openID := c.GetSession("openID")
-	beego.Info(openID)
+	// beego.Info(openID)
 	if openID != nil {
 		user, err = models.GetUserByOpenID(openID.(string))
 		if err != nil {
 			beego.Error(err)
 		} else {
-			// beego.Info(user)
-			pid := beego.AppConfig.String("wxdiaryprojectid") //"26159"
-			title := c.Input().Get("title")
-			diarydate := c.Input().Get("diarydate")
-
-			array := strings.Split(diarydate, "-")
+			pid := c.Ctx.Input.Param(":id")
+			amount := c.Input().Get("amount")
+			amountint, err := strconv.Atoi(amount)
+			if err != nil {
+				beego.Error(err)
+			}
+			radio := c.Input().Get("radio")
+			if radio == "1" {
+				amountint = 0 - amountint
+			}
+			financedate := c.Input().Get("financedate")
+			array := strings.Split(financedate, "-")
 			//当月天数
 			const base_format = "2006-01-02"
 			year := array[0]
@@ -121,25 +126,15 @@ func (c *DiaryController) AddWxDiary() {
 			if len(day) == 1 {
 				day = "0" + day
 			}
-			// diarydate2, err := time.Parse(base_format, year+"-"+month+"-"+day)
-			// if err != nil {
-			// 	beego.Error(err)
-			// }
-			diarydate2 := year + "-" + month + "-" + day
-			// beego.Info(diarydate2)
-			diaryactivity := c.Input().Get("diaryactivity")
-			diaryweather := c.Input().Get("diaryweather")
-
+			financedate2 := year + "-" + month + "-" + day
+			financeactivity := c.Input().Get("financeactivity")
 			content := c.Input().Get("content")
-			content = "<p style='font-size: 16px;'>分部：" + diaryactivity + "；</p><p style='font-size: 16px;'>天气：" + diaryweather + "；</p><p style='font-size: 16px;'>记录：" + user.Nickname + "；</p>" + content //<span style="font-size: 18px;">这个字体到底是多大才好看</span>
-
-			//id转成64为
+			content = "<p style='font-size: 16px;'>分部：" + financeactivity + "；</p><p style='font-size: 16px;'>记录：" + user.Nickname + "；</p>" + content //<span style="font-size: 18px;">这个字体到底是多大才好看</span>
 			pidNum, err := strconv.ParseInt(pid, 10, 64)
 			if err != nil {
 				beego.Error(err)
 			}
-			//添加日志
-			aid, err := models.AddDiary(title, content, diarydate2, pidNum, user.Id)
+			aid, err := models.AddFinance(amountint, content, financedate2, pidNum, user.Id)
 			if err != nil {
 				beego.Error(err)
 				c.Data["json"] = map[string]interface{}{"status": 0, "info": "ERR", "id": aid}
@@ -150,54 +145,35 @@ func (c *DiaryController) AddWxDiary() {
 			}
 		}
 	} else {
-		return
+		c.Data["json"] = map[string]interface{}{"status": 0, "info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		// return
 	}
-	// //根据pid查出项目id
-	// proj, err := models.GetProj(pidNum)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
-	// parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
-	// patharray := strings.Split(parentidpath1, "-")
-	// topprojectid, err := strconv.ParseInt(patharray[0], 10, 64)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// code := time.Now().Format("2006-01-02 15:04")
-	// code = strings.Replace(code, "-", "", -1)
-	// code = strings.Replace(code, " ", "", -1)
-	// code = strings.Replace(code, ":", "", -1)
-	// //根据项目id添加成果code, title, label, principal, content string, projectid int64
-	// Id, err := models.AddProduct(code, title, "wx", user.Nickname, user.Id, pidNum, topprojectid)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
 }
 
-// @Title get wx diaries list
-// @Description get diaries by page
-// @Param page query string  true "The page for diaries list"
-// @Param limit query string  true "The limit of page for diaries list"
-// @Param skey query string  false "The skey for diary"
+// @Title get wx finance list
+// @Description get finance by page
+// @Param page query string  true "The page for finance list"
+// @Param limit query string  true "The limit of page for finance list"
+// @Param skey query string  false "The skey for finance"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
-// @router /getwxdiaries [get]
-//小程序取得日志列表，分页_珠三角设代用
-func (c *DiaryController) GetWxdiaries() {
-	// id := c.Ctx.Input.Param(":id")
-	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+// @router /getwxfinancelist/:id [get]
+//小程序取得日志列表，分页,通用
+func (c *FinanceController) GetWxFinanceList() {
+	id := c.Ctx.Input.Param(":id")
+	// id := beego.AppConfig.String("wxfinanceprojectid") //"26159" //25002珠三角设代日记id26159
 	// wxsite := beego.AppConfig.String("wxreqeustsite")
 	limit := c.Input().Get("limit")
 	if limit == "" {
 		limit = "12"
 	}
-	// limit1, err := strconv.ParseInt(limit, 10, 64)
 	limit1, err := strconv.Atoi(limit)
 	if err != nil {
 		beego.Error(err)
 	}
+
 	page := c.Input().Get("page")
 	// page1, err := strconv.ParseInt(page, 10, 64)
 	page1, err := strconv.Atoi(page)
@@ -219,30 +195,31 @@ func (c *DiaryController) GetWxdiaries() {
 		offset = (page1 - 1) * limit1
 	}
 
-	// diaries, err := models.GetWxDiaries(idNum, limit1, offset)
-	diaries, err := models.GetWxDiaries2(idNum, limit1, offset)
+	// finance, err := models.GetWxFinance(idNum, limit1, offset)
+	finance, err := models.GetWxFinance2(idNum, limit1, offset)
 	if err != nil {
 		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR"}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "finance": finance}
+		c.ServeJSON()
 	}
-	// beego.Info(diaries)
-
-	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "diaries": diaries}
-	c.ServeJSON()
 }
 
-// @Title get wx diaries list
-// @Description get diaries by page
-// @Param page query string  true "The page for diaries list"
-// @Param limit query string  true "The limit of page for diaries list"
-// @Param skey query string  false "The skey for diary"
+// @Title get wx finance list
+// @Description get finance by page
+// @Param page query string  true "The page for finance list"
+// @Param limit query string  true "The limit of page for finance list"
+// @Param skey query string  false "The skey for finance"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
-// @router /getwxdiaries2 [get]
+// @router /getwxfinance2/:id [get]
 //网页页面取得日志列表，返回page rows total
-func (c *DiaryController) GetWxdiaries2() {
-	// id := c.Ctx.Input.Param(":id")
-	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+func (c *FinanceController) GetWxfinance2() {
+	id := c.Ctx.Input.Param(":id")
+	// id := beego.AppConfig.String("wxfinanceprojectid") //"26159" //25002珠三角设代日记id26159
 	// wxsite := beego.AppConfig.String("wxreqeustsite")
 	// limit := "10"
 	limit := c.Input().Get("limit")
@@ -272,32 +249,32 @@ func (c *DiaryController) GetWxdiaries2() {
 		offset = (page1 - 1) * limit1
 	}
 
-	// diaries, err := models.GetWxDiaries(idNum, limit1, offset)
-	diaries, err := models.GetWxDiaries2(idNum, limit1, offset)
+	// finance, err := models.GetWxFinance(idNum, limit1, offset)
+	finance, err := models.GetWxFinance2(idNum, limit1, offset)
 	if err != nil {
 		beego.Error(err)
 	}
-	count, err := models.GetWxDiaryCount(idNum)
+	count, err := models.GetWxFinanceCount(idNum)
 	if err != nil {
 		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"page": 1, "rows": finance, "total": 0}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"page": page, "rows": finance, "total": count}
+		c.ServeJSON()
 	}
-
-	// beego.Info(diaries)
-
-	c.Data["json"] = map[string]interface{}{"page": page, "rows": diaries, "total": count}
-	c.ServeJSON()
 }
 
-// @Title get wx diary by diaryId
-// @Description get diary by diaryid
-// @Param id path string  true "The id of diary"
+// @Title get wx finance by financeId
+// @Description get finance by financeid
+// @Param id path string  true "The id of finance"
 // @Param skey path string  true "The skey of user"
-// @Success 200 {object} models.GetDiary
+// @Success 200 {object} models.GetFinance
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
-// @router /getwxdiary/:id [get]
+// @router /getwxfinance/:id [get]
 //根据id查看一篇微信文章
-func (c *DiaryController) GetWxDiary() {
+func (c *FinanceController) GetWxFinance() {
 	var err error
 	id := c.Ctx.Input.Param(":id")
 	// beego.Info(id)
@@ -309,12 +286,12 @@ func (c *DiaryController) GetWxDiary() {
 		beego.Error(err)
 	}
 	// beego.Info(idNum)
-	Diary, err := models.GetDiary(idNum)
+	Finance, err := models.GetFinance(idNum)
 	if err != nil {
 		beego.Error(err)
 	}
 
-	content := strings.Replace(Diary.Content, "/attachment/", wxsite+"/attachment/", -1)
+	content := strings.Replace(Finance.Content, "/attachment/", wxsite+"/attachment/", -1)
 	type Duration int64
 	const (
 		Nanosecond  Duration = 1
@@ -326,32 +303,32 @@ func (c *DiaryController) GetWxDiary() {
 	)
 	// hours := 8
 	// const lll = "2006-01-02 15:04"
-	// diarytime := Diary.Updated.Add(time.Duration(hours) * time.Hour).Format(lll)
-	wxDiary := &models.Diary{
-		Id:        Diary.Id,
-		Title:     Diary.Title,
-		Diarydate: Diary.Diarydate,
-		Content:   content, //Diary.Content,
+	// financetime := Finance.Updated.Add(time.Duration(hours) * time.Hour).Format(lll)
+	wxFinance := &models.Finance{
+		Id:          Finance.Id,
+		Amount:      Finance.Amount,
+		Financedate: Finance.Financedate,
+		Content:     content, //Finance.Content,
 		// LeassonType: 1,
-		Views:   Diary.Views,
-		Created: Diary.Created,
-		// Updated:     diarytime,
+		Views:   Finance.Views,
+		Created: Finance.Created,
+		// Updated:     financetime,
 	}
-	c.Data["json"] = wxDiary
+	c.Data["json"] = wxFinance
 	c.ServeJSON()
 }
 
-// @Title post wx diary by diaryid
-// @Description post diary by diaryid
-// @Param id query string true "The id of diary"
-// @Param title query string true "The title of diary"
-// @Param content query string true "The content of diary"
-// @Success 200 {object} models.AddDiary
+// @Title post wx finance by financeid
+// @Description post finance by financeid
+// @Param id query string true "The id of finance"
+// @Param title query string true "The title of finance"
+// @Param content query string true "The content of finance"
+// @Success 200 {object} models.AddFinance
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
-// @router /updatewxdiary [post]
+// @router /updatewxfinance [post]
 //编辑设代日记id下微信小程序文章_珠三角设代plus用_editor方式
-func (c *DiaryController) UpdateWxDiary() {
+func (c *FinanceController) UpdateWxFinance() {
 	// pid := beego.AppConfig.String("wxcatalogid") //"26159"
 	//hotqinsessionid携带过来后，用下面的方法获取用户登录存储在服务端的session
 	openid := c.GetSession("openID")
@@ -360,7 +337,11 @@ func (c *DiaryController) UpdateWxDiary() {
 	}
 
 	id := c.Input().Get("id")
-	title := c.Input().Get("title")
+	amount := c.Input().Get("amount")
+	amountint, err := strconv.Atoi(amount)
+	if err != nil {
+		beego.Error(err)
+	}
 	content := c.Input().Get("content")
 	//将content中的http://ip/去掉
 	wxsite := beego.AppConfig.String("wxreqeustsite")
@@ -372,12 +353,12 @@ func (c *DiaryController) UpdateWxDiary() {
 	}
 
 	//取得文章
-	_, err = models.GetDiary(idNum)
+	_, err = models.GetFinance(idNum)
 	if err != nil {
 		beego.Error(err)
 	} else {
 		//更新文章
-		err = models.UpdateDiary(idNum, title, content)
+		err = models.UpdateFinance(idNum, amountint, content)
 		if err != nil {
 			beego.Error(err)
 			c.Data["json"] = map[string]interface{}{"info": "ERR", "id": id}
@@ -389,15 +370,15 @@ func (c *DiaryController) UpdateWxDiary() {
 	}
 }
 
-// @Title post wx diary by diaryId
-// @Description post diary by catalogid
-// @Param id query string  true "The id of diary"
-// @Success 200 {object} models.Adddiary
+// @Title post wx finance by financeId
+// @Description post finance by catalogid
+// @Param id query string  true "The id of finance"
+// @Success 200 {object} models.Addfinance
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
-// @router /deletewxdiary [post]
+// @router /deletewxfinance [post]
 //根据id删除_没删除文章中的图片
-func (c *DiaryController) DeleteWxDiary() {
+func (c *FinanceController) DeleteWxFinance() {
 	var openID string
 	openid := c.GetSession("openID")
 	beego.Info(openid.(string))
@@ -426,7 +407,7 @@ func (c *DiaryController) DeleteWxDiary() {
 				if err != nil {
 					beego.Error(err)
 				}
-				err = models.DeleteDiary(idNum)
+				err = models.DeleteFinance(idNum)
 				if err != nil {
 					beego.Error(err)
 					c.Data["json"] = "delete wrong"
@@ -443,13 +424,13 @@ func (c *DiaryController) DeleteWxDiary() {
 	}
 }
 
-type DiaryContent struct {
+type FinanceContent struct {
 	Txt  string
 	Html string
 }
 
-func (c *DiaryController) HtmlToDoc() {
-	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+func (c *FinanceController) HtmlToDoc() {
+	id := beego.AppConfig.String("wxfinanceprojectid") //"26159" //25002珠三角设代日记id26159
 
 	// limit := "10"
 	limit := c.Input().Get("limit")
@@ -478,36 +459,36 @@ func (c *DiaryController) HtmlToDoc() {
 		offset = (page1 - 1) * limit1
 	}
 
-	// diaries, err := models.GetWxDiaries(idNum, limit1, offset)
-	diaries, err := models.GetWxDiaries2(idNum, limit1, offset)
+	// finance, err := models.GetWxFinance(idNum, limit1, offset)
+	finance, err := models.GetWxFinance2(idNum, limit1, offset)
 	if err != nil {
 		beego.Error(err)
 	}
 
 	doc := document.New()
 
-	for _, v := range diaries {
-		did := v.Diary.Id
+	for _, v := range finance {
+		did := v.Finance.Id
 		// wxsite := beego.AppConfig.String("wxreqeustsite")
 
-		Diary, err := models.GetDiary(did)
+		Finance, err := models.GetFinance(did)
 		if err != nil {
 			beego.Error(err)
 		}
 		para := doc.AddParagraph()
 		run := para.AddRun()
 		para.SetStyle("Title")
-		run.AddText(Diary.Title)
+		run.AddText(strconv.Itoa(Finance.Amount))
 
 		para = doc.AddParagraph()
 		para.SetStyle("Heading1")
 		run = para.AddRun()
-		run.AddText(Diary.Diarydate)
+		run.AddText(Finance.Financedate)
 
 		//将一篇日志分段，通过<p标签
-		slice1 := make([]DiaryContent, 0)
+		slice1 := make([]FinanceContent, 0)
 
-		var r io.Reader = strings.NewReader(string(Diary.Content))
+		var r io.Reader = strings.NewReader(string(Finance.Content))
 		goquerydoc, err := goquery.NewDocumentFromReader(r)
 		if err != nil {
 			beego.Error(err)
@@ -515,7 +496,7 @@ func (c *DiaryController) HtmlToDoc() {
 
 		goquerydoc.Find("p").Each(func(i int, s *goquery.Selection) {
 			sel, _ := s.Html()
-			bb := make([]DiaryContent, 1)
+			bb := make([]FinanceContent, 1)
 			bb[0].Html = sel
 			txt := s.Text()
 			bb[0].Txt = txt
@@ -568,13 +549,13 @@ func (c *DiaryController) HtmlToDoc() {
 			}
 		}
 
-		// wxDiary := &models.Diary{
-		// 	Id:        Diary.Id,
-		// 	Title:     Diary.Title,
-		// 	Diarydate: Diary.Diarydate,
+		// wxFinance := &models.Finance{
+		// 	Id:        Finance.Id,
+		// 	Title:     Finance.Title,
+		// 	Financedate: Finance.Financedate,
 		// 	Content:   content,
-		// 	Views:     Diary.Views,
-		// 	Created:   Diary.Created,
+		// 	Views:     Finance.Views,
+		// 	Created:   Finance.Created,
 		// }
 
 		// img2data, err := ioutil.ReadFile("gophercolor.png")
@@ -608,11 +589,4 @@ func (c *DiaryController) HtmlToDoc() {
 	doc.SaveToFile("static/" + newname)
 	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "filename": newname}
 	c.ServeJSON()
-}
-
-func createParaRun(doc *document.Document, s string) document.Run {
-	para := doc.AddParagraph()
-	run := para.AddRun()
-	run.AddText(s)
-	return run
 }

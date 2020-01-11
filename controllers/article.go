@@ -10,6 +10,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"io"
 	// "net/http"
+	"database/sql"
+	"github.com/js-ojus/flow"
 	"path"
 	"regexp"
 	"strconv"
@@ -314,6 +316,8 @@ type WxArticle struct {
 	Liked           bool      `json:"liked"`
 	Comment         []Comment `json:"comment"`
 	CommentNum      int       `json:"commentNum"`
+	DocState        flow.DocState
+	ProdDoc         models.ProductDocument
 }
 
 type Comment struct {
@@ -340,6 +344,7 @@ type prodWxTableserver struct {
 // @Title get wx artiles list
 // @Description get articles by page
 // @Param page query string  true "The page for articles list"
+// @Param limit query string  true "The limit of page for articles list"
 // @Param skey query string  true "The skey for user"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
@@ -350,7 +355,11 @@ func (c *ArticleController) GetWxArticles() {
 	// id := c.Ctx.Input.Param(":id")
 	id := beego.AppConfig.String("wxcatalogid") //"26159" //25002珠三角设代日记id26159
 	wxsite := beego.AppConfig.String("wxreqeustsite")
-	limit := "5"
+	// limit := "5"
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit = "6"
+	}
 	limit1, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
 		beego.Error(err)
@@ -471,16 +480,21 @@ func (c *ArticleController) GetWxArticles() {
 // @Description get articles by page
 // @Param id path string  true "The id of project"
 // @Param page query string  true "The page for articles list"
+// @Param limit query string  true "The limit of page for articles list"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
 // @router /getwxarticless/:id [get]
-//小程序取得我的文章列表，分页_plus
+//小程序取得我的文章列表，分页_plus_通用_函文章状态
 func (c *ArticleController) GetWxArticless() {
 	id := c.Ctx.Input.Param(":id")
 	// id := beego.AppConfig.String("wxcatalogid") //"26159" //25002珠三角设代日记id26159
 	wxsite := beego.AppConfig.String("wxreqeustsite")
-	limit := "5"
+	// limit := "5"
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit = "6"
+	}
 	limit1, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
 		beego.Error(err)
@@ -503,58 +517,11 @@ func (c *ArticleController) GetWxArticless() {
 	} else {
 		offset = (page1 - 1) * limit1
 	}
-	// articleslice := make([]*WxArticle, 0)
-	// getwxarticles(idNum, limit1, offset, articleslice, wxsite)
-	// var user models.User
-	// //取出用户openid
-	// JSCODE := c.Input().Get("code")
-	// if JSCODE != "" {
-	// 	// beego.Info(JSCODE)
-	// 	APPID := beego.AppConfig.String("wxAPPID2")
-	// 	SECRET := beego.AppConfig.String("wxSECRET2")
-	// 	app_version := c.Input().Get("app_version")
-	// 	if app_version == "3" {
-	// 		APPID = beego.AppConfig.String("wxAPPID3")
-	// 		SECRET = beego.AppConfig.String("wxSECRET3")
-	// 	}
-	// 	// APPID := "wx7f77b90a1a891d93"
-	// 	// SECRET := "f58ca4f28cbb52ccd805d66118060449"
-	// 	requestUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + JSCODE + "&grant_type=authorization_code"
-	// 	resp, err := http.Get(requestUrl)
-	// 	if err != nil {
-	// 		beego.Error(err)
-	// 		return
-	// 	}
-	// 	defer resp.Body.Close()
-	// 	if resp.StatusCode != 200 {
-	// 		beego.Error(err)
-	// 		// return
-	// 	}
-	// 	var data map[string]interface{}
-	// 	err = json.NewDecoder(resp.Body).Decode(&data)
-	// 	if err != nil {
-	// 		beego.Error(err)
-	// 		// return
-	// 	}
-	// 	// beego.Info(data)
-	// 	var openID string
-	// 	// var sessionKey string
-	// 	if _, ok := data["session_key"]; !ok {
-	// 		errcode := data["errcode"]
-	// 		errmsg := data["errmsg"].(string)
-	// 		// return
-	// 		c.Data["json"] = map[string]interface{}{"errNo": errcode, "msg": errmsg, "data": "session_key 不存在"}
-	// 		// c.ServeJSON()
-	// 	} else {
-	// 		// var unionId string
-	// 		openID = data["openid"].(string)
+
 	var userid int64
 	openID := c.GetSession("openID")
 	if openID == nil {
-		// return false
 		userid = 0
-		//     this.SetSession("asta", int(1))
-		//     this.Data["num"] = 0
 	} else {
 		user, err := models.GetUserByOpenID(openID.(string))
 		if err != nil {
@@ -562,27 +529,39 @@ func (c *ArticleController) GetWxArticless() {
 		}
 		userid = user.Id
 	}
-	// 	}
-	// }
-	//
-	// if user.Nickname != "" {
-	// 	userid = user.Id
-	// } else {
-	// 	userid = 0
-	// }
+
 	//根据项目id取得所有成果
 	//bug_如果5个成果里都没有文章，则显示文章失败；如果多个文章，会超过5个
 	products, err := models.GetProductsPage(idNum, limit1, offset, userid, "")
 	if err != nil {
 		beego.Error(err)
 	}
+	var tx *sql.Tx
+	var document *flow.Document
 	Articleslice := make([]WxArticle, 0)
+	articlearr := make([]WxArticle, 1)
 	for _, w := range products {
 		//取得文章
 		Articles, err := models.GetWxArticles(w.Id)
 		if err != nil {
 			beego.Error(err)
 		}
+
+		//这里去查flow表格里文档状态
+		proddoc, err := models.GetProductDocument(w.Id)
+		if err != nil {
+			beego.Error(err)
+		} else {
+			document, err = flow.Documents.Get(tx, flow.DocTypeID(proddoc.DocTypeId), flow.DocumentID(proddoc.DocumentId))
+			if err != nil {
+				beego.Error(err)
+			}
+			articlearr[0].DocState = document.State
+			articlearr[0].ProdDoc = proddoc
+			// linkarr[0].DocState = document.State
+			// linkarr[0].ProdDoc = proddoc
+		}
+
 		for _, x := range Articles {
 			//取到文章里的图片地址
 			slice2 := make([]Img, 0)
@@ -611,7 +590,6 @@ func (c *ArticleController) GetWxArticless() {
 				beego.Error(err)
 			}
 
-			articlearr := make([]WxArticle, 1)
 			articlearr[0].Id = x.Id
 			articlearr[0].Title = w.Title
 			articlearr[0].Subtext = x.Subtext
@@ -626,8 +604,10 @@ func (c *ArticleController) GetWxArticless() {
 			}
 			articlearr[0].LeassonType = 1
 			articlearr[0].ProductId = x.ProductId
+
 			Articleslice = append(Articleslice, articlearr...)
 		}
+
 	}
 	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "articles": Articleslice}
 	c.ServeJSON()
@@ -707,6 +687,7 @@ func (c *ArticleController) GetWxArticle() {
 	var user models.User
 	var err error
 	var isArticleMe bool
+	var wxArticle *WxArticle
 	openid := c.GetSession("openID")
 	if openid != nil {
 		openID = openid.(string)
@@ -733,7 +714,25 @@ func (c *ArticleController) GetWxArticle() {
 	if err != nil {
 		beego.Error(err)
 	}
+	var tx *sql.Tx
+	var document *flow.Document
 
+	//这里去查flow表格里文档状态
+	proddoc, err := models.GetProductDocument(Article.ProductId)
+	if err != nil {
+		beego.Error(err)
+	} else {
+		document, err = flow.Documents.Get(tx, flow.DocTypeID(proddoc.DocTypeId), flow.DocumentID(proddoc.DocumentId))
+		if err != nil {
+			beego.Error(err)
+		}
+		wxArticle = &WxArticle{
+			DocState: document.State,
+			ProdDoc:  proddoc,
+		}
+		// linkarr[0].DocState = document.State
+		// linkarr[0].ProdDoc = proddoc
+	}
 	//取到文章里的图片地址
 	slice2 := make([]Img, 0)
 	var slice3 string
@@ -827,7 +826,7 @@ func (c *ArticleController) GetWxArticle() {
 		userappreciationphoto = wxsite + userappreciationurl[0].UserAppreciation.AppreciationUrl
 	}
 	// beego.Info(isArticleMe)
-	wxArticle := &WxArticle{
+	wxArticle = &WxArticle{
 		Id:              Article.Id,
 		Title:           prod.Title,
 		Subtext:         Article.Subtext,
@@ -943,6 +942,7 @@ func (c *ArticleController) GetWxArticle() {
 // @Title get wx artiles list
 // @Description get articles by page
 // @Param page query string  true "The page for articles list"
+// @Param limit query string  true "The limit of page for articles list"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
@@ -952,7 +952,11 @@ func (c *ArticleController) GetListArticles() {
 	// id := c.Ctx.Input.Param(":id")
 	id := beego.AppConfig.String("wxcatalogid") //"26159" //25002珠三角设代日记id26159
 	// wxsite := beego.AppConfig.String("wxreqeustsite")
-	limit := "6"
+	// limit := "6"
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit = "6"
+	}
 	limit1, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
 		beego.Error(err)
@@ -1164,7 +1168,8 @@ func (c *ArticleController) AddArticle() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /addwxarticle [post]
-//向设代日记id下添加微信小程序文章_珠三角设代plus用_这个是文字图片分开方式，用下面这个
+//作废！向设代日记id下添加微信小程序文章_珠三角设代plus用_
+//这个是文字图片分开方式，用下面这个
 func (c *ArticleController) AddWxArticle() {
 	// var userrole string
 	// var user models.User
@@ -1218,6 +1223,7 @@ func (c *ArticleController) AddWxArticle() {
 	// 	// var unionId string
 	// 	openID = data["openid"].(string)
 	pid := beego.AppConfig.String("wxcatalogid") //"26159"
+	// pid := c.Ctx.Input.Param(":id")
 	title := c.Input().Get("title")
 	content := c.Input().Get("content")
 	content = "<p style='font-size: 18px;'>" + content + "</p>" //<span style="font-size: 18px;">这个字体到底是多大才好看</span>
@@ -1401,75 +1407,26 @@ func (c *ArticleController) UpdateWxEditorArticle() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /addwxarticles/:id [post]
-//向设代日记id下添加微信小程序文章——青少儿书画用
+//向设代日记id下添加微信小程序文章——通用：包括青少儿书画用
 func (c *ArticleController) AddWxArticles() {
-	// JSCODE := c.Input().Get("code")
-	// // beego.Info(JSCODE)
-	// APPID := beego.AppConfig.String("wxAPPID2")
-	// SECRET := beego.AppConfig.String("wxSECRET2")
-	// app_version := c.Input().Get("app_version")
-	// if app_version == "3" {
-	// 	APPID = beego.AppConfig.String("wxAPPID3")
-	// 	SECRET = beego.AppConfig.String("wxSECRET3")
-	// }
-	// // APPID := "wx05b480781ac8f4c8"                //这里一定要修改啊
-	// // SECRET := "0ddfd84afc74f3bc5b5db373a4090dc5" //这里一定要修改啊
-	// requestUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + JSCODE + "&grant_type=authorization_code"
-	// resp, err := http.Get(requestUrl)
-	// if err != nil {
-	// 	beego.Error(err)
-	// 	return
-	// }
-	// defer resp.Body.Close()
-	// if resp.StatusCode != 200 {
-	// 	beego.Error(err)
-	// 	// return
-	// }
-	// var data map[string]interface{}
-	// err = json.NewDecoder(resp.Body).Decode(&data)
-	// if err != nil {
-	// 	beego.Error(err)
-	// 	// return
-	// }
-	// // beego.Info(data)
-	// var openID string
 	var user models.User
 	var err error
-	// // var sessionKey string
-	// if _, ok := data["session_key"]; !ok {
-	// 	errcode := data["errcode"]
-	// 	errmsg := data["errmsg"].(string)
-	// 	// return
-	// 	c.Data["json"] = map[string]interface{}{"errNo": errcode, "msg": errmsg, "data": "session_key 不存在"}
-	// 	c.ServeJSON()
-	// } else {
-	// var unionId string
-
-	var openID string
-	openid := c.GetSession("openID")
-	if openid == nil {
-
-	} else {
-		openID = openid.(string)
-		user, err = models.GetUserByOpenID(openID)
+	openID := c.GetSession("openID")
+	if openID != nil {
+		user, err = models.GetUserByOpenID(openID.(string))
 		if err != nil {
 			beego.Error(err)
 		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return //本地调试的时候，由于小程序无法登陆服务器，所以这里要注释掉。
 	}
 
 	pid := c.Ctx.Input.Param(":id")
+
 	title := c.Input().Get("title")
 	content := c.Input().Get("content")
-	if user.Nickname != "" {
-		content = "<p style='font-size: 18px;'>" + content + "</p>"
-	} else {
-		content = "<p style='font-size: 18px;'>" + openID + "~" + content + "</p>" //<span style="font-size: 18px;">这个字体到底是多大才好看</span>
-	}
-	imagesurl := c.Input().Get("images")
-	array := strings.Split(imagesurl, ",")
-	for _, v := range array {
-		content = content + "<p><img src='" + v + "'></p>"
-	}
 	//id转成64为
 	pidNum, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
@@ -1507,7 +1464,6 @@ func (c *ArticleController) AddWxArticles() {
 		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "id": aid}
 		c.ServeJSON()
 	}
-
 }
 
 //向成果id下添加文章——这个没用，上面那个已经包含了

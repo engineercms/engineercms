@@ -31,7 +31,7 @@
   <div class="col-lg-12">
     <br>
     <hr/>
-  </div>
+  
   <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
     <h4>Copyright © 2016-2019 EngineerCMS</h4>
     <p>
@@ -65,6 +65,7 @@
         <a href="https://github.com/3xxx/merit">MeritMS-价值成果管理系统</a>
       </p>
     </div>
+  </div>
   </div>
 </div> 
 
