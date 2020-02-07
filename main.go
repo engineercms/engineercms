@@ -24,8 +24,13 @@ func main() {
 	// beego.AddFuncMap("dict", dict)
 	beego.AddFuncMap("loadtimes", loadtimes)
 	beego.AddFuncMap("subsuffix", subsuffix)
-	//开启orm调试模式
-	// orm.Debug = true
+	//默认关闭orm调试模式
+	ormDebug := beego.AppConfig.String("ormDebug")
+	if ormDebug == "true" {
+		orm.Debug = true
+	} else {
+		orm.Debug = false
+	}
 	//创建附件目录ModePerm FileMode = 0777 // 覆盖所有Unix权限位（用于通过&获取类型位）
 	os.Mkdir("attachment", os.ModePerm)
 	//创建轮播图片存放目录

@@ -236,6 +236,17 @@ func GetProductDocument(id int64) (proddoc ProductDocument, err error) {
 	return proddoc, err
 }
 
+//根据flowdocumentid和doctypeid查询productid
+func GetDocumentProduct(docid int64) (proddoc ProductDocument, err error) {
+	o := orm.NewOrm()
+	qs := o.QueryTable("ProductDocument")
+	err = qs.Filter("DocumentId", docid).One(&proddoc)
+	if err != nil {
+		return proddoc, err
+	}
+	return proddoc, err
+}
+
 //取得侧栏id下成果总数
 func GetProductsCount(id int64, searchText string) (count int64, err error) {
 	o := orm.NewOrm()

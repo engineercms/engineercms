@@ -284,31 +284,6 @@ func (c *ProdController) GetProducts() {
 		offset = (page1 - 1) * limit1
 	}
 
-	// var offset, limit1, page1 int
-	// limit := c.Input().Get("limit")
-	// if limit == "" {
-	// 	limit1 = 10
-	// } else {
-	// 	limit1, err = strconv.Atoi(limit)
-	// 	if err != nil {
-	// 		beego.Error(err)
-	// 	}
-	// }
-	// page := c.Input().Get("pageNo")
-	// if page == "" {
-	// 	page1 = 1
-	// } else {
-	// 	page1, err = strconv.Atoi(page)
-	// 	if err != nil {
-	// 		beego.Error(err)
-	// 	}
-	// }
-	// if page1 <= 1 {
-	// 	offset = 0
-	// } else {
-	// 	offset = (page1 - 1) * limit1
-	// }
-
 	//根据项目id取得所有成果
 	//2019-09-21这里要修改成联合查询，得到成果下的附件和文章，以及成果的flowdocument
 	//***           ******
@@ -848,12 +823,17 @@ func (c *ProdController) AddProduct() {
 	if err != nil {
 		beego.Error(err)
 	}
-	parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
-	parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
-	patharray := strings.Split(parentidpath1, "-")
-	topprojectid, err := strconv.ParseInt(patharray[0], 10, 64)
-	if err != nil {
-		beego.Error(err)
+	var topprojectid int64
+	if proj.ParentIdPath != "" {
+		parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = proj.Id
 	}
 	//根据id添加成果code, title, label, principal, content string, projectid int64
 	_, err = models.AddProduct(code, title, label, principal, uid, pidNum, topprojectid)

@@ -4,11 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/3xxx/engineercms/models"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/astaxie/beego"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/js-ojus/flow"
+	"io"
 	"log"
+	"path"
 	"strconv"
+	"strings"
 )
 
 // VueFlow API
@@ -1719,12 +1723,12 @@ func (c *FlowController) FlowGroupRoleList() {
 // @Param acid query string  true "The accesscontext of document"
 // @Param gid query string  true "The groupid of Group"
 // @Param name query string  true "The name of document"
-// @Param data query string  true "The data of document"
+// @Param data query string  false "The data of document"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
 // @router /flowdoc [post]
-// 添加一个带流程的文档
+// 网页端添加一个带流程的文档
 func (c *FlowController) FlowDoc() {
 	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 
@@ -1783,7 +1787,7 @@ func (c *FlowController) FlowDoc() {
 	documentid, err := flow.Documents.New(tx, &docNewInput)
 	if err != nil {
 		beego.Error(err)
-		c.Data["json"] = map[string]interface{}{"err": err, "data": "写入失败!"}
+		c.Data["json"] = map[string]interface{}{"info": "ERR", "err": err, "data": "写入失败!"}
 		c.ServeJSON()
 	} else {
 		//可以传另外一个参数productid过来，然后在这里写入productdocument表格
@@ -1793,7 +1797,78 @@ func (c *FlowController) FlowDoc() {
 			beego.Error(err)
 		}
 
-		c.Data["json"] = map[string]interface{}{"err": "ok", "data": "写入成功!"}
+		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "err": "ok", "data": "写入成功!"}
+		c.ServeJSON()
+	}
+}
+
+// @Title post wf document
+// @Description post document
+// @Param dtid query string  true "The doctypeid of document"
+// @Param acid query string  true "The accesscontext of document"
+// @Param gid query string  true "The groupid of Group"
+// @Param name query string  true "The name of document"
+// @Param id query string  true "The id of document"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 data not found
+// @router /wxflowdoc [post]
+// 小程序上添加一个带流程的文档——这个作废，在article里添加一个文章直接作为初始流程
+func (c *FlowController) WxFlowDoc() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+
+	var tx *sql.Tx
+
+	//查询预先定义的doctype流程类型
+	dtid := c.Input().Get("dtid")
+	dtID, err := strconv.ParseInt(dtid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	acid := c.Input().Get("acid")
+	acID, err := strconv.ParseInt(acid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	gid := c.Input().Get("gid")
+	gID, err := strconv.ParseInt(gid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	name := c.Input().Get("docname")
+	//与flowdoc接口的区别就是由文章id取得prodid
+	data := c.Input().Get("docdata")
+	//docid是文章id，要取得成果productid,可以是数组
+	articleid, err := strconv.ParseInt(data, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	article, err := models.GetArticle(articleid)
+	if err != nil {
+		beego.Error(err)
+	}
+	docNewInput := flow.DocumentsNewInput{
+		DocTypeID:       flow.DocTypeID(dtID),       //属于图纸设计类型的流程
+		AccessContextID: flow.AccessContextID(acID), //所有用户权限符合这个contex的要求
+		GroupID:         flow.GroupID(gID),          //groupId,初始状态下的用户组，必须是个人用户组（一个用户也可以成为一个独特的组，因为用户无法赋予角色，所以必须将用户放到组里）
+		Title:           name,                       //这个文件的名称
+		Data:            data,                       //文件的描述
+	}
+	// flow.Documents.New(tx, &docNewInput)
+	documentid, err := flow.Documents.New(tx, &docNewInput)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERR", "err": err, "data": "写入失败!"}
+		c.ServeJSON()
+	} else {
+		//可以传另外一个参数productid过来，然后在这里写入productdocument表格
+		//DocTypeID
+		_, err = models.AddProductDocument(dtID, int64(documentid), article.ProductId)
+		if err != nil {
+			beego.Error(err)
+		}
+
+		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "err": "ok", "data": "写入成功!"}
 		c.ServeJSON()
 	}
 }
@@ -2636,6 +2711,7 @@ func (c *FlowController) FlowNext() {
 		c.ServeJSON()
 	} else {
 		//修改邮件为已读，即——已处理
+		//根据messageid查出所有mailbox，都修改成已读。
 		err = flow.Mailboxes.SetStatusByUser(tx, flowuser.ID, flow.MessageID(messageID), false)
 		if err != nil {
 			beego.Error(err)
@@ -2650,14 +2726,15 @@ func (c *FlowController) FlowNext() {
 // @Description post workflow next
 // @Param dtid query string  true "The id of doctype"
 // @Param daid query string  true "The id of action"
-// @Param docid query string  true "The id of document"
+// @Param articleid query string  true "The id of article"
 // @Param gid query string  true "The id of group"
+// @Param messageid query string  true "The messageid of doc"
 // @Param text query string  false "The text of apply"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
 // @router /wxflownext [post]
-// FlowDocAction列出了文档和动作，用户点击action，则这里进行修改docstate
+// 小程序端next
 func (c *FlowController) WxFlowNext() {
 	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 	var tx *sql.Tx //用这个nil，后面就不用commit了吧，都在flow里commit了。
@@ -2665,117 +2742,135 @@ func (c *FlowController) WxFlowNext() {
 	// var openID string
 	var user models.User
 	var err error
+	var uID int64
 	openid := c.GetSession("openID")
 	if openid != nil {
-		// openID = openid.(string)
 		user, err = models.GetUserByOpenID(openid.(string))
 		if err != nil {
 			beego.Error(err)
-		}
-		var uID int64
-		// username, _, _, _, _ := checkprodRole(c.Ctx)
-
-		flowuser, err := flow.Users.GetByName(user.Username)
-		if err != nil {
-			beego.Error(err)
 		} else {
-			uID = int64(flowuser.ID)
-		}
-
-		dtid := c.Input().Get("dtid")
-		dtID, err := strconv.ParseInt(dtid, 10, 64)
-		if err != nil {
-			beego.Error(err)
-		}
-		daid := c.Input().Get("daid")
-		daID, err := strconv.ParseInt(daid, 10, 64)
-		if err != nil {
-			beego.Error(err)
-		}
-		docid := c.Input().Get("docid")
-		docID, err := strconv.ParseInt(docid, 10, 64)
-		if err != nil {
-			beego.Error(err)
-		}
-		messageid := c.Input().Get("messageid")
-		messageID, err := strconv.ParseInt(messageid, 10, 64)
-		if err != nil {
-			beego.Error(err)
-		}
-
-		//根据docid取得document
-		document, err := flow.Documents.Get(tx, flow.DocTypeID(dtID), flow.DocumentID(docID))
-		if err != nil {
-			beego.Error(err)
-		}
-		//根据document取得workflow
-		myWorkflow, err := flow.Workflows.GetByDocType(document.DocType.ID)
-		if err != nil {
-			beego.Error(err)
-		}
-
-		//当前用户所在的用户组
-		singletongroup, err := flow.Users.SingletonGroupOf(flow.UserID(uID))
-		if err != nil {
-			beego.Error(err)
-		}
-		//接受用户组
-		gid := make([]string, 0, 2)
-		// c.Ctx.Input.Bind(&gid, "gid")
-		gid[0] = c.Input().Get("gid")
-		var groupIds []flow.GroupID
-		for _, v := range gid {
-			gID, err := strconv.ParseInt(v, 10, 64)
+			flowuser, err := flow.Users.GetByName(user.Username) //user.Username
 			if err != nil {
 				beego.Error(err)
+				uID = 5
+			} else {
+				uID = int64(flowuser.ID)
 			}
-			groupIds = append(groupIds, flow.GroupID(gID))
-		}
-		text := c.Input().Get("text")
-		if text == "" {
-			text = "no comments"
-		}
-		//建立event
-		docEventInput := flow.DocEventsNewInput{
-			DocTypeID:   flow.DocTypeID(dtID),
-			DocumentID:  flow.DocumentID(docID),
-			DocStateID:  document.State.ID,      //document state must be this state，文档的现状状态
-			DocActionID: flow.DocActionID(daID), //Action performed by `Group`; required,由用户组执行的操作
-			GroupID:     singletongroup.ID,      //Group (user) who performed the action that raised this event; required，执行引发此事件的操作的组(用户)
-			Text:        text,                   //Any comments or notes; required，
-		}
-		deID, err := flow.DocEvents.New(tx, &docEventInput)
-		if err != nil {
-			beego.Error(err)
-		}
-
-		myDocEvent, err := flow.DocEvents.Get(flow.DocEventID(deID))
-		if err != nil {
-			beego.Error(err)
-		} else {
-			beego.Info(myDocEvent)
-		}
-		//这里要将邮箱对应的信息改为已读unread改为false
-		newDocStateId, err := myWorkflow.ApplyEvent(tx1, myDocEvent, groupIds)
-		if err != nil {
-			beego.Error(err)
-			c.Data["json"] = map[string]interface{}{"err": err, "data": "写入失败!"}
-			c.ServeJSON()
-		} else {
-			//修改邮件为已读，即——已处理
-			err = flow.Mailboxes.SetStatusByUser(tx, flowuser.ID, flow.MessageID(messageID), false)
-			if err != nil {
-				beego.Error(err)
-			}
-			fmt.Println("newDocStateId=", newDocStateId, err)
-			c.Data["json"] = map[string]interface{}{"err": nil, "data": "写入成功!"}
-			c.ServeJSON()
 		}
 	} else {
-		c.Data["json"] = map[string]interface{}{"err": err, "data": "用户未登录!"}
-		c.ServeJSON()
+		uID = 5
+		// c.Data["json"] = map[string]interface{}{"info": "ERR", "err": err, "data": "用户未登录!"}
+		// c.ServeJSON()
+	}
+	dtid := c.Input().Get("dtid")
+	dtID, err := strconv.ParseInt(dtid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	daid := c.Input().Get("daid")
+	daID, err := strconv.ParseInt(daid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	articleid := c.Input().Get("articleid")
+	articleID, err := strconv.ParseInt(articleid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	article, err := models.GetArticle(articleID)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据article.productid查询documentid
+	proddocument, err := models.GetProductDocument(article.ProductId)
+	if err != nil {
+		beego.Error(err)
+	}
+	messageid := c.Input().Get("messageid")
+	messageID, err := strconv.ParseInt(messageid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据mailboxexid查询mailbox，获得messageid
+	// notification,err:=flow.Mailboxes.GetMessage(flow.mmailboxesID)
+	//根据docid取得document
+	// beego.Info(article.ProductId)
+	document, err := flow.Documents.Get(tx, flow.DocTypeID(dtID), flow.DocumentID(proddocument.DocumentId))
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据document取得workflow
+	myWorkflow, err := flow.Workflows.GetByDocType(document.DocType.ID)
+	if err != nil {
+		beego.Error(err)
 	}
 
+	//当前用户所在的用户组
+	singletongroup, err := flow.Users.SingletonGroupOf(flow.UserID(uID))
+	if err != nil {
+		beego.Error(err)
+	}
+	//接受用户组
+	// gid := make([]string, 0, 2)
+	// c.Ctx.Input.Bind(&gid, "gid")
+	gid := make([]string, 1, 2)
+	gid[0] = c.Input().Get("gid")
+	var groupIds []flow.GroupID
+	for _, v := range gid {
+		gID, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		groupIds = append(groupIds, flow.GroupID(gID))
+	}
+	text := c.Input().Get("text")
+	if text == "" {
+		text = "no comments"
+	}
+	//建立event
+	docEventInput := flow.DocEventsNewInput{
+		DocTypeID:   flow.DocTypeID(dtID),
+		DocumentID:  flow.DocumentID(proddocument.DocumentId),
+		DocStateID:  document.State.ID,      //document state must be this state，文档的现状状态
+		DocActionID: flow.DocActionID(daID), //Action performed by `Group`; required,由用户组执行的操作
+		GroupID:     singletongroup.ID,      //Group (user) who performed the action that raised this event; required，执行引发此事件的操作的组(用户)
+		Text:        text,                   //Any comments or notes; required，
+	}
+	deID, err := flow.DocEvents.New(tx, &docEventInput)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	myDocEvent, err := flow.DocEvents.Get(flow.DocEventID(deID))
+	if err != nil {
+		beego.Error(err)
+	} else {
+		beego.Info(myDocEvent)
+	}
+	//这里要将邮箱对应的信息改为已读unread改为false
+	newDocStateId, err := myWorkflow.ApplyEvent(tx1, myDocEvent, groupIds)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERR", "err": err, "data": "写入失败!"}
+		c.ServeJSON()
+	} else {
+		//修改邮件为已读，即——已处理
+		//应该将这个messageid都处理掉。！！！~~~~%%%&&******
+		//根据messageid查出所有mailbox，都修改成已读(已处理)。
+		notification, err := flow.Mailboxes.GetMessageList(flow.MessageID(messageID), 0, 0, false)
+		if err != nil {
+			beego.Error(err)
+		}
+		for _, v := range notification {
+			err = flow.Mailboxes.SetStatusByUser(tx, flow.UserID(uID), flow.MessageID(v.Message.ID), false)
+			if err != nil {
+				beego.Error(err)
+			}
+		}
+		fmt.Println("newDocStateId=", newDocStateId, err)
+		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "err": nil, "data": "写入成功!"}
+		c.ServeJSON()
+	}
 }
 
 //后端分页的数据结构
@@ -2869,7 +2964,7 @@ func (c *FlowController) FlowUserMailbox() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
 // @router /flowusermailbox2 [get]
-// 1.列表显示用户个人邮件
+// 1.网页端列表显示用户个人邮件
 func (c *FlowController) FlowUserMailbox2() {
 	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 
@@ -2900,7 +2995,7 @@ func (c *FlowController) FlowUserMailbox2() {
 		offset = (page1 - 1) * limit1
 	}
 
-	var uID int64
+	// var uID int64
 	var unreadbool bool
 	unread := c.Input().Get("unread")
 	if unread == "true" {
@@ -2913,19 +3008,25 @@ func (c *FlowController) FlowUserMailbox2() {
 	// beego.Info(uid)
 	if err != nil {
 		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"err": err, "data": "用户未登陆!"}
+		c.ServeJSON()
 	} else {
 		flowuser, err := flow.Users.GetByName(username)
 		if err != nil {
 			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"err": err, "data": "flow中该用户不存在!"}
+			c.ServeJSON()
 		} else {
-			uID = int64(flowuser.ID)
-			notification, err := flow.Mailboxes.ListByUser(flow.UserID(uID), offset, limit1, unreadbool)
+			// uID = int64(flowuser.ID)
+			notification, err := flow.Mailboxes.ListByUser(flowuser.ID, offset, limit1, unreadbool)
+			// notification, err := flow.Mailboxes.ListByUser(flow.UserID(uID), offset, limit1, unreadbool)
 			if err != nil {
 				beego.Error(err)
 				c.Data["json"] = map[string]interface{}{"err": err, "data": "查询失败!"}
 				c.ServeJSON()
 			}
-			arr, err := flow.Mailboxes.ListByUser(flow.UserID(uID), 0, 0, unreadbool)
+			arr, err := flow.Mailboxes.ListByUser(flowuser.ID, 0, 0, unreadbool)
+			// arr, err := flow.Mailboxes.ListByUser(flow.UserID(uID), 0, 0, unreadbool)
 			if err != nil {
 				beego.Error(err)
 			}
@@ -2934,6 +3035,190 @@ func (c *FlowController) FlowUserMailbox2() {
 			c.ServeJSON()
 		}
 	}
+}
+
+// @Title get user mailbox
+// @Description get usermailbox
+// @Param page query string true "The page of mailbox"
+// @Param limit query string false "The limit page of mailbox"
+// @Param unread query string false "The unread of mailbox"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 data not found
+// @router /wxflowusermailbox2 [get]
+// 小程序列表显示用户个人邮件——待处理
+// 用户点击邮件，进入文章详细，携带messageid——wxflownext里对邮件进行已读处理
+func (c *FlowController) WxFlowUserMailbox2() {
+	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
+	wxsite := beego.AppConfig.String("wxreqeustsite")
+	var offset, limit1, page1 int64
+	var err error
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit1 = 0
+	} else {
+		limit1, err = strconv.ParseInt(limit, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	page := c.Input().Get("page")
+	if page == "" {
+		limit1 = 0
+		page1 = 1
+	} else {
+		page1, err = strconv.ParseInt(page, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	// var uID int64
+	var unreadbool bool
+	unread := c.Input().Get("unread")
+	if unread == "true" {
+		unreadbool = true
+	} else {
+		unreadbool = false
+	}
+	// username, _, _, _, _ := checkprodRole(c.Ctx)
+	var user models.User
+	var uID int64
+	openid := c.GetSession("openID")
+	if openid != nil {
+		user, err = models.GetUserByOpenID(openid.(string))
+		if err != nil {
+			beego.Error(err)
+		} else {
+			flowuser, err := flow.Users.GetByName(user.Username) //user.Username
+			if err != nil {
+				beego.Error(err)
+				uID = 6
+			} else {
+				uID = int64(flowuser.ID)
+			}
+		}
+	} else {
+		uID = 6
+		// c.Data["json"] = map[string]interface{}{"info": "ERR", "err": err, "data": "用户未登录!"}
+		// c.ServeJSON()
+	}
+	// if err != nil {
+	// 	beego.Error(err)
+	// 	c.Data["json"] = map[string]interface{}{"err": err, "data": "用户未登陆!"}
+	// 	c.ServeJSON()
+	// } else {
+	// 	flowuser, err := flow.Users.GetByName(username)
+	// 	if err != nil {
+	// 		beego.Error(err)
+	// 		c.Data["json"] = map[string]interface{}{"err": err, "data": "flow中该用户不存在!"}
+	// 		c.ServeJSON()
+	// 	} else {
+	// uID = int64(flowuser.ID)
+	Articleslice := make([]WxArticle, 0)
+	articlearr := make([]WxArticle, 1)
+	var tx *sql.Tx
+	//这里由用户id，flow里根据uid查询groupid（single）
+	notification, err := flow.Mailboxes.ListByUser(flow.UserID(uID), offset, limit1, unreadbool)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERR", "err": err, "data": "查询失败!"}
+		c.ServeJSON()
+	}
+	for _, v := range notification {
+		// beego.Info(v.ID)
+		productdoc, err := models.GetDocumentProduct(int64(v.Message.DocID))
+		if err != nil {
+			beego.Error(err)
+		} else {
+			// for _, w := range products {
+			product, err := models.GetProd(productdoc.ProductId)
+			if err != nil {
+				beego.Error(err)
+			}
+			//取得文章
+			Articles, err := models.GetWxArticles(productdoc.ProductId)
+			if err != nil {
+				beego.Error(err)
+			}
+
+			//这里去查flow表格里文档状态
+			// proddoc, err := models.GetProductDocument(v.Message.DocID)
+			// if err != nil {
+			// 	beego.Error(err)
+			// } else {
+			document, err := flow.Documents.Get(tx, v.Message.DocType.ID, v.Message.DocID)
+			if err != nil {
+				beego.Error(err)
+			}
+			// linkarr[0].DocState = document.State
+			// linkarr[0].ProdDoc = proddoc
+			// }
+			articlearr[0].DocState = document.State
+			articlearr[0].DocNotification.Message.ID = v.Message.ID
+			articlearr[0].ProdDoc = productdoc
+
+			for _, x := range Articles {
+				//取到文章里的图片地址
+				slice2 := make([]Img, 0)
+				var r io.Reader = strings.NewReader(string(x.Content))
+				doc, err := goquery.NewDocumentFromReader(r)
+				if err != nil {
+					beego.Error(err)
+				}
+				doc.Find("img").Each(func(i int, s *goquery.Selection) {
+					sel, _ := s.Attr("src")
+					aa := make([]Img, 1)
+					aa[0].Src = sel
+					aa[0].Name = path.Base(sel)
+					slice2 = append(slice2, aa...)
+				})
+
+				//取得文章所有点赞
+				likes, err := models.GetAllTopicLikes(x.Id)
+				if err != nil {
+					beego.Error(err)
+				}
+
+				//取得文章所有评论
+				comments, err := models.GetAllTopicReplies(x.Id)
+				if err != nil {
+					beego.Error(err)
+				}
+
+				articlearr[0].Id = x.Id
+				articlearr[0].Title = product.Title
+				articlearr[0].Subtext = x.Subtext
+				articlearr[0].Author = product.Principal
+				articlearr[0].Views = x.Views
+				articlearr[0].LikeNum = len(likes)
+				articlearr[0].CommentNum = len(comments)
+				if len(slice2) > 0 {
+					articlearr[0].ImgUrl = wxsite + slice2[0].Src
+				} else {
+					articlearr[0].ImgUrl = wxsite + "/static/img/go.jpg"
+				}
+				articlearr[0].LeassonType = 1
+				articlearr[0].ProductId = x.ProductId
+
+				Articleslice = append(Articleslice, articlearr...)
+			}
+		}
+	}
+	// arr, err := flow.Mailboxes.ListByUser(flow.UserID(uID), 0, 0, unreadbool)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// list := mailboxlist{notification, page1, len(arr)}
+	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "err": nil, "articles": Articleslice} //list
+	c.ServeJSON()
+	// 	}
+	// }
 }
 
 // @Title get group mailbox
@@ -2946,7 +3231,7 @@ func (c *FlowController) FlowUserMailbox2() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
 // @router /flowgroupmailbox [get]
-// 1.列表显示用户邮件
+// 1.列表显示用户组邮件
 func (c *FlowController) FlowGroupMailbox() {
 	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 
@@ -3017,7 +3302,7 @@ func (c *FlowController) FlowGroupMailbox() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
 // @router /liucheng [get]
-// 2.点击一个具体文档——显示详情——显示actions
+// 2.点击一个具体文档——显示详情——显示flowchart
 func (c *FlowController) LiuCheng() {
 	c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 	var code, code1, code2, code3, code4, code5, code6, code7, code8, code9, code10, code11, code12, code13, code14, code15, code16, code17, code18, code19, code20 string

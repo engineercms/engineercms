@@ -1052,7 +1052,7 @@
 
   </el-container>
 </el-container>
-  <el-footer style="text-align: center;">Copyright © 2016-2019 EngineerCMS</el-footer>
+  <el-footer style="text-align: center;">Copyright © 2016-2020 EngineerCMS</el-footer>
     <!-- <el-carousel indicator-position="outside" :height="bannerHeight + 'px'">
      <el-carousel-item v-for="(item,index) in BannerImg">
        <img src="../../assets/images/banner1.jpg" v-if="index == 0" class="bannerImg" />

@@ -421,7 +421,6 @@ func (c *AttachController) AddAttachment() {
 	if err != nil {
 		beego.Error(err)
 	}
-
 	//根据proj的parentIdpath——这个已经有了专门函数，下列可以简化！
 	//由proj id取得url
 	// Url, DiskDirectory, err = GetUrlPath(proj.Id)
@@ -638,13 +637,17 @@ func (c *AttachController) AddWxAttachment() {
 	if err != nil {
 		beego.Error(err)
 	}
-
-	parentidpath = strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
-	parentidpath1 = strings.Replace(parentidpath, "#", "", -1)
-	patharray := strings.Split(parentidpath1, "-")
-	topprojectid, err := strconv.ParseInt(patharray[0], 10, 64)
-	if err != nil {
-		beego.Error(err)
+	var topprojectid int64
+	if proj.ParentIdPath != "" {
+		parentidpath = strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 = strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = proj.Id
 	}
 
 	//根据proj的parentIdpath——这个已经有了专门函数，下列可以简化！
@@ -777,12 +780,17 @@ func (c *AttachController) NewDwg() {
 	if err != nil {
 		beego.Error(err)
 	}
-	parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
-	parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
-	patharray := strings.Split(parentidpath1, "-")
-	topprojectid, err := strconv.ParseInt(patharray[0], 10, 64)
-	if err != nil {
-		beego.Error(err)
+	var topprojectid int64
+	if proj.ParentIdPath != "" {
+		parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = proj.Id
 	}
 	//根据项目id添加成果code, title, label, principal, content string, projectid int64
 	Id, err := models.AddProduct(code, title, label, principal, uid, pidNum, topprojectid)
@@ -897,12 +905,17 @@ func (c *AttachController) AddAttachment2() {
 	if err != nil {
 		beego.Error(err)
 	}
-	parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
-	parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
-	patharray := strings.Split(parentidpath1, "-")
-	topprojectid, err := strconv.ParseInt(patharray[0], 10, 64)
-	if err != nil {
-		beego.Error(err)
+	var topprojectid int64
+	if proj.ParentIdPath != "" {
+		parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = proj.Id
 	}
 	prodcode := c.Input().Get("prodcode") //和上面那个区别仅仅在此处而已
 	prodname := c.Input().Get("prodname")

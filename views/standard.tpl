@@ -154,7 +154,7 @@
   </div>
 
   <div class="col-lg-6">
-    <h4>Copyright © 2016~2019 EngineerCMS</h4>
+    <h4>Copyright © 2016~2020 EngineerCMS</h4>
     <p>
       网站由 <i class="user icon"></i>
       <a target="_blank" href="https://github.com/3xxx">@3xxx</a>
