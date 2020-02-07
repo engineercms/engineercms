@@ -118,7 +118,7 @@
 
 Linux系统下请替换掉执行文件engineercms(linux)
 
-不清楚的，可以加我QQ504284或者微信hotqin999聊，也可参考quickerstart.txt。
+不清楚的，可以加我QQ504284或者微信hotqin999聊，也可参考[quickstart](https://github.com/3xxx/engineercms/blob/master/quickstart%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.txt)。
 
 [wiki](https://github.com/3xxx/EngineerCMS/wiki)。包括linux系统下的编译。linux系统下的部署参见网盘中的文档。
 
@@ -126,7 +126,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 
 ## Quick Start
 
-* 参见quickstart快速开始。包括后台导入Excel用户，设置用户角色和权限。
+* 参见[quickstart](https://github.com/3xxx/engineercms/blob/master/quickstart%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.txt)快速开始。包括后台导入Excel用户，设置用户角色和权限。
 
 * linux系统上的部署参见网盘中的文档。
 
