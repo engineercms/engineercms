@@ -4,6 +4,7 @@ import (
 	// "crypto/md5"
 	// "encoding/hex"
 	"encoding/json"
+	"github.com/3xxx/engineercms/controllers/utils"
 	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
 	// "github.com/astaxie/beego/httplib"
@@ -14,10 +15,17 @@ import (
 	// "path"
 	"strconv"
 	// "strings"
-	// "fmt"
+	"fmt"
 	// "reflect"
 	"sort"
 	"time"
+	// "github.com/xlstudio/wxbizdatacrypt"
+	"crypto/sha1"
+	// "encoding/xml"
+	// "fmt"
+	"io"
+	// "io/ioutil"
+	// "log"
 )
 
 // CMSCHECKIN API
@@ -1004,3 +1012,265 @@ func (c *CheckController) MonthCheck() {
 		// c.ServeJSON()
 	}
 }
+
+// @Title get Signature
+// @Description get Signature
+// @Param signature query string true "The signature of wx"
+// @Param timestamp query string true "The timestamp of wx"
+// @Param nonce query string true "The nonce for wx"
+// @Param echostr query string true "The echostr for wx"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articls not found
+// @router /checksignature [get]
+// 检验signature v1/checkin/checksignature
+func (c *CheckController) CheckSignature() {
+	// r.ParseForm()
+	token := "3xxx"
+	// EncodingAESKey := "MeiIgTIBnoGVjRMZkgrXlx3t7olpSKeieK331rdMSqf"
+	// var signature string = strings.Join(r.Form["signature"], "")
+	// var timestamp string = strings.Join(r.Form["timestamp"], "")
+	// var nonce string = strings.Join(r.Form["nonce"], "")
+	// var echostr string = strings.Join(r.Form["echostr"], "")
+	signature := c.Input().Get("signature")
+	timestamp := c.Input().Get("timestamp")
+	// beego.Info(timestamp)
+	nonce := c.Input().Get("nonce")
+	// beego.Info(nonce)
+	echostr := c.Input().Get("echostr")
+	// beego.Info(echostr)
+
+	tmps := []string{token, timestamp, nonce}
+	sort.Strings(tmps)
+	tmpStr := tmps[0] + tmps[1] + tmps[2]
+	tmp := str2sha1(tmpStr)
+	if tmp == signature {
+		// beego.Info(tmp)
+		// beego.Info(signature)
+		// fmt.Fprintf(w, echostr)
+		c.Ctx.WriteString(echostr)
+		// c.Data["json"] = echostr
+		// c.ServeJSON()
+	} else {
+		// beego.Info(tmp)
+		// beego.Info(signature)
+		c.Data["json"] = map[string]interface{}{"tmp": tmp, "signature": signature}
+		c.ServeJSON()
+	}
+}
+
+// @Title post subscribemessage
+// @Description post subscribemessage
+// @Param tmplIds query string true "The tmplIds of wx"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articls not found
+// @router /subscribemessage [post]
+// 检验signature v1/checkin/subscribemessage
+//存储用户订阅subscribemessage
+func (c *CheckController) SubscribeMessage() {
+	openID := c.GetSession("openID")
+	if openID == nil {
+		beego.Info("openid为空")
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "openid为空"}
+		c.ServeJSON()
+	} else {
+		tmplIds := c.Input().Get("tmplIds")
+		//存储openid对应订阅消息模板id
+		id, err := models.AddWxSubscribeMessage(openID.(string), tmplIds)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": 0}
+			c.ServeJSON()
+		} else {
+			c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "data": id}
+			c.ServeJSON()
+		}
+	}
+}
+
+// @Title post Message
+// @Description post Message
+// @Param app_version query string true "The app_version of wx"
+// @Param template_id query string true "The template_id of Message"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articls not found
+// @router /sendmessage [post]
+// 检验signature v1/checkin/sendmessage
+// 点击发送订阅消息
+func (c *CheckController) SendMessage() {
+	// POST https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=ACCESS_TOKEN
+	app_version := c.Input().Get("app_version")
+	accessToken, err := utils.GetAccessToken(app_version)
+
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+		c.ServeJSON()
+	}
+	// template_id := c.Input().Get("template_id")
+	template_id := "c8Dped7TztDiMJ2bzHMu4G3nikn-mSOHmQEh_7aTlLo"
+	// openid := "opl4B5YvCVXaatKF6VGUSbohMlWQ" //"opl4B5auOWiSxXo5-RB3NTitcHxk"
+	//查出所有openid
+	openids, err := models.GetOpenIDs()
+	for _, i := range openids {
+		errcode, errmsg, err := utils.SendMessage(accessToken, i.OpenID, template_id)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+			c.ServeJSON()
+		} else if errcode == 40003 {
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "touser字段openid为空或者不正确", "errmsg": errmsg}
+			c.ServeJSON()
+		} else if errcode == 40037 {
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "订阅模板id为空不正确", "errmsg": errmsg}
+			c.ServeJSON()
+		} else if errcode == 43101 {
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "用户拒绝接受消息，如果用户之前曾经订阅过，则表示用户取消了订阅关系", "errmsg": errmsg}
+			c.ServeJSON()
+		} else if errcode == 47003 {
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "模板参数不准确，可能为空或者不满足规则，errmsg会提示具体是哪个字段出错", "errmsg": errmsg}
+			c.ServeJSON()
+		} else if errcode == 41030 {
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "page路径不正确，需要保证在现网版本小程序中存在，与app.json保持一致", "errmsg": errmsg}
+			c.ServeJSON()
+		} else {
+			c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "data": "成功！"}
+			c.ServeJSON()
+		}
+	}
+	// 40003	touser字段openid为空或者不正确
+	// 40037	订阅模板id为空不正确
+	// 43101	用户拒绝接受消息，如果用户之前曾经订阅过，则表示用户取消了订阅关系
+	// 47003	模板参数不准确，可能为空或者不满足规则，errmsg会提示具体是哪个字段出错
+	// 41030	page路径不正确，需要保证在现网版本小程序中存在，与app.json保持一致
+	// 打卡类型
+	// {{phrase1.DATA}}
+	// 打卡时间
+	// {{date2.DATA}}
+	// 打卡地点
+	// {{thing3.DATA}}
+}
+
+func SendMessage() {
+	app_version := "4"
+	accessToken, err := utils.GetAccessToken(app_version)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(accessToken)
+	// template_id := c.Input().Get("template_id")
+	template_id := "c8Dped7TztDiMJ2bzHMu4G3nikn-mSOHmQEh_7aTlLo"
+	// openid := "opl4B5YvCVXaatKF6VGUSbohMlWQ" //"opl4B5auOWiSxXo5-RB3NTitcHxk"
+	//查出所有openid
+	openids, err := models.GetOpenIDs()
+	if err != nil {
+		beego.Error(err)
+	} else {
+		for _, i := range openids {
+			errcode, errmsg, err := utils.SendMessage(accessToken, i.OpenID, template_id)
+			// beego.Info(errcode)
+			// beego.Info(errmsg)
+			if err != nil {
+				beego.Error(err)
+			} else if errcode == 40003 {
+				beego.Error("touser字段openid为空或者不正确" + errmsg)
+			} else if errcode == 40037 {
+				beego.Error("订阅模板id为空不正确" + errmsg)
+			} else if errcode == 43101 {
+				beego.Error("用户拒绝接受消息，如果用户之前曾经订阅过，则表示用户取消了订阅关系" + errmsg)
+			} else if errcode == 47003 {
+				beego.Error("模板参数不准确，可能为空或者不满足规则，errmsg会提示具体是哪个字段出错" + errmsg)
+			} else if errcode == 41030 {
+				beego.Error("page路径不正确，需要保证在现网版本小程序中存在，与app" + errmsg)
+			} else {
+				beego.Error("发送成功" + errmsg)
+				// beego.Info(errmsg)
+			}
+		}
+	}
+}
+
+// {
+// 	"touser":"opl4B5YvCVXaatKF6VGUSbohMlWQ",
+// "template_id":"c8Dped7TztDiMJ2bzHMu4G3nikn-mSOHmQEh_7aTlLo",
+// "page":"index",
+// "data":{
+// 	"phrase1":{"value":"设代打卡"},
+// 	"date2":{"value":"8:30"},
+// 	"thing3":{"value":"顺德、南沙、东莞、深圳"}
+// 	}
+// }
+// {
+//   "touser": "OPENID",
+//   "template_id": "TEMPLATE_ID",
+//   "page": "index",
+//   "miniprogram_state":"developer",
+//   "lang":"zh_CN",
+//   "data": {
+//       "number01": {
+//           "value": "339208499"
+//       },
+//       "date01": {
+//           "value": "2015年01月05日"
+//       },
+//       "site01": {
+//           "value": "TIT创意园"
+//       } ,
+//       "site02": {
+//           "value": "广州市新港中路397号"
+//       }
+//   }
+// }
+
+// type Request struct {
+// 	ToUserName   string
+// 	FromUserName string
+// 	CreateTime   time.Duration
+// 	MsgType      string
+// 	Content      string
+// 	MsgId        int
+// }
+
+// type Response struct {
+// 	ToUserName   string `xml:"xml>ToUserName"`
+// 	FromUserName string `xml:"xml>FromUserName"`
+// 	CreateTime   string `xml:"xml>CreateTime"`
+// 	MsgType      string `xml:"xml>MsgType"`
+// 	Content      string `xml:"xml>Content"`
+// 	MsgId        int    `xml:"xml>MsgId"`
+// }
+
+func str2sha1(data string) string {
+	t := sha1.New()
+	io.WriteString(t, data)
+	return fmt.Sprintf("%x", t.Sum(nil))
+}
+
+// func action(w http.ResponseWriter, r *http.Request) {
+// 	postedMsg, err := ioutil.ReadAll(r.Body)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	r.Body.Close()
+// 	v := Request{}
+// 	xml.Unmarshal(postedMsg, &v)
+// 	if v.MsgType == "text" {
+// 		v := Request{v.ToUserName, v.FromUserName, v.CreateTime, v.MsgType, v.Content, v.MsgId}
+// 		output, err := xml.MarshalIndent(v, " ", " ")
+// 		if err != nil {
+// 			fmt.Printf("error:%v\n", err)
+// 		}
+// 		fmt.Fprintf(w, string(output))
+// 	} else if v.MsgType == "event" {
+// 		Content := `"欢迎关注
+//                                 我的微信"`
+// 		v := Request{v.ToUserName, v.FromUserName, v.CreateTime, v.MsgType, Content, v.MsgId}
+// 		output, err := xml.MarshalIndent(v, " ", " ")
+// 		if err != nil {
+// 			fmt.Printf("error:%v\n", err)
+// 		}
+// 		fmt.Fprintf(w, string(output))
+// 	}
+// }

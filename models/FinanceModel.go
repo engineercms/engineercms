@@ -131,14 +131,15 @@ func GetFinance(id int64) (Finance1 *Finance, err error) {
 }
 
 //修改
-func UpdateFinance(id int64, amount int, content string) error {
+func UpdateFinance(id int64, amount int, content,financedate string) error {
 	o := orm.NewOrm()
 	finance := &Finance{Id: id}
 	if o.Read(finance) == nil {
 		finance.Amount = amount
 		finance.Content = content
+		finance.Financedate=financedate
 		finance.Updated = time.Now()
-		_, err := o.Update(finance, "Amount", "Content", "Updated")
+		_, err := o.Update(finance, "Amount", "Content", "Financedate","Updated")
 		if err != nil {
 			return err
 		}

@@ -120,6 +120,19 @@ func AddUserOpenID(userid int64, openid string) (id int64, err error) {
 	return id, err //这里需要改改，否则，即使已经存在，则err为空。
 }
 
+//取出所有openid
+func GetOpenIDs() (openids []*UserOpenID, err error) {
+	o := orm.NewOrm()
+	// openid := new(UserOpenID)
+	qs := o.QueryTable("UserOpenID")
+	_, err = qs.All(&openids)
+	if err != nil {
+		return nil, err
+	}
+	// count, _ = qs.Count()
+	return openids, err
+}
+
 //添加用户头像
 func AddUserAvator(userid int64, avatarurl string) (id int64, err error) {
 	o := orm.NewOrm()

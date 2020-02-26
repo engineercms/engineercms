@@ -15,10 +15,19 @@ import (
 	// "github.com/casbin/beego-orm-adapter"
 	// "github.com/casbin/casbin"
 	"net/http"
+	// "strings"
 )
 
 // CMSWX login API
 type LoginController struct {
+	beego.Controller
+}
+
+type SuccessController struct {
+	beego.Controller
+}
+
+type ServiceValidateController struct {
 	beego.Controller
 }
 
@@ -250,7 +259,7 @@ func (c *LoginController) LoginPost() {
 	} else {
 		islogin = 1
 	}
-	beego.Info(islogin)
+	// beego.Info(islogin)
 	// if name == "admin" && pwd == "123456" {
 	// 	c.SetSession("loginuser", "adminuser")
 	// 	fmt.Println("当前的session:")
@@ -626,6 +635,141 @@ func (c *LoginController) Islogin() {
 	c.ServeJSON()
 }
 
+//*********SSO单点登录JWT token
+// @Title get sso login
+// @Description get sso logintpl
+// @Param service query string  false "The service of login"
+// @Success 200 {object} success
+// @Failure 400 Invalid page supplied
+// @Failure 404 articl not found
+// @router /ssologin [get]
+func (c *LoginController) SsoLogin() {
+	c.Data["service"] = c.GetString("service")
+	// beego.Info(c.GetString("service"))
+	// token_head := c.Ctx.GetCookie("TOKEN")
+	authString := c.Ctx.GetCookie("TOKEN") //
+	// beego.Info(authString)
+	// authString = c.Ctx.Input.Header("Authorization")
+	// beego.Info(authString)
+
+	// authString = c.Ctx.Request.Header.Get("Authorization")
+	// beego.Info(authString)
+	// beego.Debug("AuthString:", authString)
+
+	// kv := strings.Split(authString, " ")
+	// if len(kv) != 2 || kv[0] != "Bearer" {
+	// beego.Error("AuthString invalid:", authString)
+	// return
+	// }
+	// tokenString := kv[1]
+
+	c.Data["service"] = c.GetString("service")
+	username, err := utils.CheckToken(authString)
+	if err != nil {
+		beego.Error(err)
+		c.TplName = "sso/index.tpl"
+	} else if username != "" {
+		c.TplName = "sso/success.tpl"
+	} else {
+		c.TplName = "sso/index.tpl"
+	}
+}
+
+// @Title post sso login
+// @Description post sso login data
+// @Param login_name query string  true "The name of user"
+// @Param password query string  true "The password of user"
+// @Param service query string  false "The service of location.href"
+// @Success 200 {object} success
+// @Failure 400 Invalid page supplied
+// @Failure 404 articl not found
+// @router /ssologinpost [post]
+func (c *LoginController) SsoLoginPost() {
+	//获取service
+	login_name := c.GetString("login_name")
+	password := c.GetString("password")
+	service := c.GetString("service")
+	//returnurl := this.GetString("returnurl")
+	// 验证用户名密码
+	if len(password) == 0 || len(login_name) == 0 {
+		c.Data["json"] = map[string]interface{}{"success": -1, "message": "用户名或密码为空"}
+		c.ServeJSON()
+		return
+	}
+	//密码md5加密
+	var user models.User
+	// user.Username = c.Input().Get("uname")
+	// Pwd1 := c.Input().Get("pwd")
+	// autoLogin := c.Input().Get("autoLogin") == "on"
+	md5Ctx := md5.New()
+	md5Ctx.Write([]byte(password))
+	cipherStr := md5Ctx.Sum(nil)
+
+	user.Password = hex.EncodeToString(cipherStr)
+	user.Username = login_name
+	err := models.ValidateUser(user)
+	if err != nil {
+		// return nil, errors.New("Error: 未找到该用户")
+		c.Data["json"] = map[string]interface{}{"success": -1, "message": "未找到该用户", "service": service}
+		c.ServeJSON()
+		return
+	} else {
+		//更新user表的lastlogintime
+		err = models.UpdateUserlastlogintime(user.Username)
+		if err != nil {
+			beego.Error(err)
+			utils.FileLogs.Error(user.Username + " 更新用户登录时间 " + err.Error())
+		} else {
+			tokenString, err := utils.CreateToken(login_name)
+			if err != nil {
+				beego.Error(err)
+			}
+			//请求中head中设置token
+
+			// c.Ctx.Output.Header("TOKEN", tokenString)
+			// c.Ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
+
+			//下面是写在response head中，没什么用处
+			c.Ctx.Output.Header("Authorization", tokenString)
+			// response := utils.Token{tokenString}
+			// json, err := json.Marshal(response)
+			// if err != nil {
+			// 	http.Error(c.Ctx.ResponseWriter, err.Error(), http.StatusInternalServerError)
+			// 	return
+			// }
+			// c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
+			// c.Ctx.ResponseWriter.Header().Set("Content-Type", "application/json")
+			// c.Ctx.ResponseWriter.Write(json)
+			// beego.Info(tokenString)
+			//设置cookie 名称,值,时间,路径
+			c.Ctx.SetCookie("TOKEN", tokenString, "3600", "/")
+			// this.Ctx.SetCookie("USERID", user.Id, "3600", "/")    "user": user,
+			c.Data["json"] = map[string]interface{}{"success": 0, "msg": "登录成功", "service": service}
+			c.ServeJSON()
+		}
+	}
+}
+
+func (c *SuccessController) Get() {
+	c.TplName = "Success.html"
+}
+
+func (c *ServiceValidateController) Get() {
+	ticket := c.GetString("ticket")
+	userName, err := utils.CheckToken(ticket)
+	if err != nil {
+		beego.Error(err)
+	}
+	if userName != "" {
+		c.Data["json"] = map[string]interface{}{"success": 0, "msg": "登录成功", "user": userName}
+	} else {
+		c.Data["json"] = map[string]interface{}{"success": -1, "msg": "用户未登录"}
+	}
+	c.ServeJSON()
+}
+
+//********
+
 // func Authorizer1(e *casbin.Enforcer, users models.User) func(next http.Handler) http.Handler {
 // 	role, err := session.GetString(r, "role")
 // 	if err != nil {
@@ -687,5 +831,42 @@ func (c *LoginController) Islogin() {
 // 	// 通过 post title 查询这个 post 有哪些 tag
 // 	// var tags []*Tag
 // 	// num, err := dORM.QueryTable("tag").Filter("Posts__Post__Title", "Introduce Beego ORM").All(&tags)
+// }
 
+// func (this *UserController) HandleLogin() {
+// 	//1.获取数据
+// 	userName := this.GetString("username")
+// 	pwd := this.GetString("pwd")
+// 	check := this.GetString("check")
+// 	if userName == "" || pwd == "" {
+// 		this.Data["errmsg"] = "用户名或密码不能为空,请重新登陆！"
+// 		this.TplName = "login.html"
+// 		return
+// 	}
+// 	//2.查询数据
+// 	o := orm.NewOrm()
+// 	user := models.User{Name: userName}
+// 	err := o.Read(&user, "Name")
+// 	if err != nil {
+// 		this.Data["errmsg"] = "用户名或密码错误,请重新登陆！"
+// 		this.TplName = "login.html"
+// 		return
+// 	}
+// 	if user.PassWord != pwd {
+// 		this.Data["errmsg"] = "用户名或密码错误,请重新登陆！"
+// 		this.TplName = "login.html"
+// 		return
+// 	}
+// 	if user.Active != true {
+// 		this.Data["errmsg"] = "该用户没有激活，请先激活！"
+// 		this.TplName = "login.html"
+// 		return
+// 	}
+// 	if check == "on" {
+// 		this.Ctx.SetCookie("username", userName, time.Second*3600)
+// 	} else {
+// 		this.Ctx.SetCookie("username", userName, -1)
+// 	}
+// 	this.SetSession("userName", userName)
+// 	this.Redirect("/", 302)
 // }

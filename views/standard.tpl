@@ -39,7 +39,7 @@
     <div class="input-group">
       <input type="text" class="form-control" placeholder="请输入关键字或编号进行搜索" name="name" autocomplete="off" size="30" id="name" onkeypress="getKey();">
       <span class="input-group-btn">
-        <button class="btn btn-default" type="button" id="search">
+        <button class="btn btn-default" type="button" id="search2">
           <i class="glyphicon glyphicon-search"></i>
           Search!
         </button>
@@ -407,7 +407,7 @@ $(document).ready(function(){
       $('#table1').bootstrapTable('refresh', {url:'/standard/valid'});
     })
 
-  $("#search").click(function(){//这里应该用button的id来区分按钮的哪一个,因为本页有好几个button
+  $("#search2").click(function(){//这里应该用button的id来区分按钮的哪一个,因为本页有好几个button
     var title = $('#name').val();
     if (title.length>=2){
           $.ajax({

@@ -157,8 +157,14 @@ type Checkin struct {
 	SelectDate time.Time `orm:"auto_now_add;type(date)"`
 }
 
+type OpenidTmplId struct {
+	Id     int64
+	OpenID string
+	TmplId string
+}
+
 func init() {
-	orm.RegisterModel(new(Activity), new(Apply), new(Checkin))
+	orm.RegisterModel(new(Activity), new(Apply), new(Checkin), new(OpenidTmplId))
 }
 
 // activity
@@ -336,6 +342,27 @@ func GetCheckUser2(selectmonth1, selectmonth2 time.Time, activityid int64, limit
 	return users, engine.Table("checkin").Join("INNER", "user", "checkin.user_id = user.id").Where("checkin.select_date >= ? AND checkin.select_date <= ? AND checkin.activity_id = ?", selectmonth1, selectmonth2, activityid).Distinct("checkin.user_id", "user.nickname").Limit(limit, offset).Find(&users)
 	// return users, engine.Sql("SELECT * from checkin").Find(&users)
 	//distinct和limit不能和sql组合
+}
+
+//存储用户订阅消息模板id和用户openid
+func AddWxSubscribeMessage(openid, tmplid string) (id int64, err error) {
+	o := orm.NewOrm()
+	//查询数据库中有无打卡
+	var opentmpid OpenidTmplId
+	//判断是否有重名
+	err = o.QueryTable("OpenidTmplId").Filter("OpenId", openid).Filter("TmplId", tmplid).One(&opentmpid, "Id")
+	if err == orm.ErrNoRows {
+		// 没有找到记录
+		opentmpid := &OpenidTmplId{
+			OpenID: openid,
+			TmplId: tmplid,
+		}
+		id, err = o.Insert(opentmpid)
+		if err != nil {
+			return id, err
+		}
+	}
+	return id, nil
 }
 
 // UserId Id

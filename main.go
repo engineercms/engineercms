@@ -1,10 +1,12 @@
 package main
 
 import (
+	"github.com/3xxx/engineercms/controllers"
 	_ "github.com/3xxx/engineercms/controllers/version"
 	_ "github.com/3xxx/engineercms/routers"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego/toolbox"
 	// "github.com/go-xorm/xorm"
 	// "github.com/astaxie/beego/plugins/cors"
 	"github.com/3xxx/engineercms/models"
@@ -40,6 +42,14 @@ func main() {
 	models.InsertUser()
 	// insertGroup()
 	// models.InsertRole()
+	// time1 := "0/" + time + " * * * * *"
+
+	time1 := "* 30 8 * * 1-5"
+	//"* 30 8 * * 1-5"
+	tk1 := toolbox.NewTask("tk1", time1, func() error { controllers.SendMessage(); return nil }) //func() error { fmt.Println("tk1"); return nil }
+	toolbox.AddTask("tk1", tk1)
+	toolbox.StartTask()
+	defer toolbox.StopTask()
 	beego.Run()
 }
 

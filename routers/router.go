@@ -8,7 +8,7 @@ import (
 	"github.com/3xxx/engineercms/controllers"
 	// "githsub.com/3xxx/engineercms/controllers/checkin"
 	"github.com/astaxie/beego"
-	// "github.com/astaxie/beego/context"
+	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/plugins/cors"
 )
 
@@ -35,68 +35,6 @@ import (
 // 	}
 // }
 
-// var filterFunc = func(ctx *context.Context) {
-// 	username := ctx.Input.Session("username")
-// 	if username == nil {
-// 		ctx.Redirect(302, "/login")
-// 	}
-// }
-
-// func (this *UserController) HandleLogin() {
-// 	//1.获取数据
-// 	userName := this.GetString("username")
-// 	pwd := this.GetString("pwd")
-// 	check := this.GetString("check")
-// 	if userName == "" || pwd == "" {
-// 		this.Data["errmsg"] = "用户名或密码不能为空,请重新登陆！"
-// 		this.TplName = "login.html"
-// 		return
-// 	}
-// 	//2.查询数据
-// 	o := orm.NewOrm()
-// 	user := models.User{Name: userName}
-// 	err := o.Read(&user, "Name")
-// 	if err != nil {
-// 		this.Data["errmsg"] = "用户名或密码错误,请重新登陆！"
-// 		this.TplName = "login.html"
-// 		return
-// 	}
-// 	if user.PassWord != pwd {
-// 		this.Data["errmsg"] = "用户名或密码错误,请重新登陆！"
-// 		this.TplName = "login.html"
-// 		return
-// 	}
-// 	if user.Active != true {
-// 		this.Data["errmsg"] = "该用户没有激活，请先激活！"
-// 		this.TplName = "login.html"
-// 		return
-// 	}
-// 	if check == "on" {
-// 		this.Ctx.SetCookie("username", userName, time.Second*3600)
-// 	} else {
-// 		this.Ctx.SetCookie("username", userName, -1)
-// 	}
-// 	this.SetSession("userName", userName)
-// 	this.Redirect("/", 302)
-// }
-
-// var FilterUser = func(ctx *context.Context) {
-//     _, ok := ctx.Input.Session("uid").(int)
-//     if !ok && ctx.Request.RequestURI != "/login" {
-//         ctx.Redirect(302, "/login")
-//     }
-// }
-
-// beego.InsertFilter("/*",beego.BeforeRouter,FilterUser)
-
-// var FilterUser = func(ctx *context.Context) {
-//     _, ok := ctx.Input.Session("uid").(int)
-//     if !ok {
-//         ctx.Redirect(302, "/login")
-//     }
-// }
-// beego.InsertFilter("/user/:id([0-9]+)",beego.BeforeRouter,FilterUser)
-
 func init() {
 	//运行跨域请求
 	//在http请求的响应流头部加上如下信息
@@ -105,10 +43,27 @@ func init() {
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
+		AllowHeaders:     []string{"Origin", "Token", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
+
+	// $.ajax({
+	// 	url: ‘http://192.168.1.221:8080/v1/login/doLogin’,
+	// 	type: ‘Post’,
+	// 	dataType: ‘json’,
+	// 	headers: {
+	// 		Token:“wesdf2346dfioerjl2423mFADFOEJFds23SDFF”, //所有请求都带token 登陆就会得到token
+	// 	},
+	// 	data: {UserName: “retertsssssssssssssss”,UserId: ‘ertert22222222222’},
+	// 	success: function(res){
+	// 		console.log(res)
+	// 	},
+	// 	error: function(e) {
+	// 		console.log(“errr==”)
+	// 	}
+	// });
+
 	//自动化文档
 	ns :=
 		beego.NewNamespace("/v1",
@@ -201,6 +156,16 @@ func init() {
 	beego.Router("/url-to-callback", &controllers.OnlyController{}, "*:UrltoCallback")
 	//cms中预览office回调
 	beego.Router("/officeviewcallback", &controllers.OnlyController{}, "*:OfficeViewCallback")
+
+	var FilterUser = func(ctx *context.Context) {
+		// v := ctx.Input.CruSession.Get("uname")
+		v := ctx.Input.Session("uname")
+		// uname = v.(string)//uid---v.(int)
+		if v == nil {
+			ctx.Redirect(302, "/login")
+		}
+	}
+	beego.InsertFilter("/onlyoffice", beego.BeforeRouter, FilterUser)
 
 	// beego.Router("/onlyoffice/post", &controllers.OnlyController{}, "post:PostOnlyoffice")
 	beego.Router("/onlyoffice", &controllers.OnlyController{}, "get:Get")

@@ -2,8 +2,9 @@
 
 <head profile="http://gmpg.org/xfn/11">
     <link rel="stylesheet" href="/static/wordpress/header.css" type="text/css">
-    <link rel="stylesheet" type="text/css" href="/static/wordpress/style.css" media="screen">
     <link rel="stylesheet" href="/static/wordpress/style(1).css" type="text/css" media="screen">
+    <link rel="stylesheet" type="text/css" href="/static/wordpress/style.css" media="screen">
+    
     <link rel="stylesheet" href="/static/wordpress/noticons.css">
     <link rel="stylesheet" href="/static/wordpress/blog.css" type="text/css" media="screen">
     <link rel="stylesheet" href="/static/wordpress/blog-sidebar.css" type="text/css" media="screen">
@@ -89,8 +90,8 @@
         background-color: #2196f3;*/
     }
 
-    a:link,
-    a:visited,
+    #editor:link,
+    #editor:visited,
     h2 a:visited {
         color: #fff;
     }
@@ -129,7 +130,7 @@
         justify-content: center;
     }
 
-    button:hover,
+    #deletearticle:hover,
     input[type="submit"]:hover,
     .button:hover,
     .blog-subscribe input[type=submit]:hover {
@@ -189,6 +190,7 @@
             </nav>
         </div>
     </header>
+    <a id="editor" {{if ne true .RoleUpdate}} style="display:none" {{end}} href="/project/product/modifyarticle/{{.article.Id}}" class="floating-button">修改</a>
     <button {{if ne true .RoleUpdate}} style="display:none" {{end}} type="button" class="floating-button2" id="deletearticle">删除</button>
     <div id="wrapper" class="en-wrapper">
         <div id="content" class="widecolumn single">
@@ -225,7 +227,7 @@
                     </div>
                     <img alt="" src="{{.avatar}}" class="avatar avatar-64 grav-hashed grav-hijack" height="64" width="64" id="grav-c88872d732506446e8b44b677a6a20e0-0">
                     <p class="post-author-name">{{.product.Principal}}</p>
-                    <a {{if ne true .RoleUpdate}} style="display:none" {{end}} href="/project/product/modifyarticle/{{.article.Id}}" class="floating-button">修改</a>
+                    
                 </div>
                 <div class="entrytext">
                     {{str2html .article.Content}}

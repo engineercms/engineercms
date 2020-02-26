@@ -290,7 +290,7 @@ func (c *UserController) AddWxUser() {
 	if err == nil && id > 0 {
 		// c.Rsp(true, "Success")
 		// return
-		c.Data["json"] = map[string]interface{}{"info": "succsess", "id": id}
+		c.Data["json"] = map[string]interface{}{"info": "success", "id": id}
 		c.ServeJSON()
 	} else {
 		c.Data["json"] = map[string]interface{}{"info": "添加失败", "id": 0}

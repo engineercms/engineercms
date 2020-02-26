@@ -934,16 +934,21 @@ func (c *ArticleController) GetWxArticle() {
 	}
 
 	id := c.Ctx.Input.Param(":id")
+	if id == "" {
+		return
+	}
 	wxsite := beego.AppConfig.String("wxreqeustsite")
 	var photo string
 	//id转成64为
 	idNum, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		beego.Error(err)
+		return
 	}
 	Article, err := models.GetArticle(idNum)
 	if err != nil {
 		beego.Error(err)
+		return
 	}
 	//查出成果编号，名称和作者
 	prod, err := models.GetProd(Article.ProductId)

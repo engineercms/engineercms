@@ -1,5 +1,9 @@
                        EngineerCMS revision history
 		       
+21,engineercms 1.14 (Feb 14, 2020)
+	+) Update wxflow
+	+) Add wxMsgSecCheck
+
 20, engineercms 1.13 (Nov 03, 2019)
 	+) Add bootstrap fileinput
 	+) Add legislation excle compare

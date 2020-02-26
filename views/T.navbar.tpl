@@ -10,7 +10,7 @@
      a.navbar-brand{ display: inline-block;} 
     }
   </style>
-<nav class="navbar navbar-default navbar-static-top" role = "navigation">
+<nav class="navbar navbar-default navbar-static-top" style="margin-bottom: 5px;" role = "navigation">
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle = "collapse"  data-target = "#target-menu">  
       <span class="sr-only">qieh</span>  
@@ -176,6 +176,9 @@
       <li {{if .IsMonthCheck}}class="active"{{end}}>
         <a href="/v1/checkin/monthchecksum">考勤</a>
       </li>
+      <li>
+        <a href="/diary">日志</a>
+      </li>
       <!-- <li {{if or .IsMeetingroomCalendar .IsCarCalendar .IsOrderCalendar .IsAttendanceCalendar}}class="dropdown active"{{end}} >
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
           预订 <b class="caret"></b>
@@ -207,6 +210,7 @@
                 <li><a href="/admin" title="管理">进入后台</a></li>
                 <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱">邮箱</a></li>
                 <li><a href="javascript:void(0)" id="login">重新登录</a></li>
+                <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
                  <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
                 <li><a href="/project/25001/getcalendar" title="项目日历">项目日历</a></li>
                 <li><a href="/calendar" title="日程安排">日程安排</a></li>
@@ -220,7 +224,8 @@
                 <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱">邮箱</a></li>
                 <li><a href="/user" title="用户资料">用户资料</a></li>
                 <li><a href="javascript:void(0)" id="login">重新登录</a></li>
-		<li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
+                <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
+		            <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
                 <li><a href="/project/25001/getcalendar" title="项目日历">项目日历</a></li>
                 <li><a href="/calendar" title="日程安排">日程安排</a></li>
                 <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
@@ -235,7 +240,8 @@
                 <li><a href="/admin" title="管理">进入后台</a></li>
                 <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱">邮箱</a></li>
                 <li><a href="javascript:void(0)" id="login">重新登录</a></li>
-		 <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
+                <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
+		            <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
                 <li><a href="/project/25001/getcalendar" title="项目日历">项目日历</a></li>
                 <li><a href="/calendar" title="日程安排">日程安排</a></li>
                 <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
@@ -246,6 +252,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{.Username}} <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="javascript:void(0)" id="login">登陆</a></li>
+                <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
               </ul>
             </li>
           {{end}}
@@ -316,61 +323,61 @@
     // 弹出登录模态框
     $("#login").click(function() {
       $('#modalNav').modal({
-      show:true,
-      backdrop:'static'
+        show:true,
+        backdrop:'static'
       });
     })
     
     //登陆功能
     function login(){
-        var uname=document.getElementById("uname");
-        if (uname.value.length==0){
-          alert("请输入账号");
-          return
-        }
-        var pwd=document.getElementById("pwd");
-        if (pwd.value.length==0){
-          alert("请输入密码");
-          return
-        }
+      var uname=document.getElementById("uname");
+      if (uname.value.length==0){
+        alert("请输入账号");
+        return
+      }
+      var pwd=document.getElementById("pwd");
+      if (pwd.value.length==0){
+        alert("请输入密码");
+        return
+      }
 
-        $.ajax({
-          type:'post',
-          url:'/loginpost',
-          data:{
-            "uname":$("#uname").val(),
-            "pwd":$("#pwd").val()
-          },
-          success:function(result){
-            if(result.islogin==0){
-              $("#status").html("登陆成功");
-              $('#modalNav').modal('hide');
-              window.location.reload();
-            }else  if(result.islogin==1){
-              $("#status").html("用户名或密码错误！") 
-            } else if(result.islogin==2){
-              $("#status").html("密码错误") 
-            }
+      $.ajax({
+        type:'post',
+        url:'/loginpost',
+        data:{
+          "uname":$("#uname").val(),
+          "pwd":$("#pwd").val()
+        },
+        success:function(result){
+          if(result.islogin==0){
+            $("#status").html("登陆成功");
+            $('#modalNav').modal('hide');
+            window.location.reload();
+          }else  if(result.islogin==1){
+            $("#status").html("用户名或密码错误！") 
+          } else if(result.islogin==2){
+            $("#status").html("密码错误") 
           }
-        })
+        }
+      })
     }
     //登出功能
     function logout(){
-        $.ajax({
-            type:'get',
-            url:'/logout',
-            data:{},
-            success:function(result){
-              if(result.islogin){
-                // $("#status").html("登出成功");
-                alert("登出成功");
-                window.location.reload();
-              }else {
-               // $("#status").html("登出失败");
-               alert("登出失败")
-             }
-           }
-        })
+      $.ajax({
+        type:'get',
+        url:'/logout',
+        data:{},
+        success:function(result){
+          if(result.islogin){
+            // $("#status").html("登出成功");
+            alert("登出成功");
+            window.location.reload();
+          }else {
+           // $("#status").html("登出失败");
+           alert("登出失败")
+          }
+        }
+      })
     }
 
   function getKey(){  

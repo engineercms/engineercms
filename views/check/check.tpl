@@ -1,7 +1,7 @@
 <!-- 文档列表 -->
 <!DOCTYPE html>
 <head>
-  <title>Check</title>
+  <title>考勤</title>
   <meta name="renderer" content="webkit">
   <!-- 加上这句，360等浏览器就会默认使用google内核，而不是IE内核 。 -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -149,9 +149,8 @@
               type: "GET",
               url: "/v1/checkin/monthcheck?activityId="+data.processing[0].F_ID+"&year="+b+"&month="+d,
               contentType: "application/json;charset=utf-8",
-              
-              data: {page:1,limit:30},
               dataType: "json",
+              data: {page:1,limit:50},
               json: 'callback',
               success: function (json) {
                 var columnsArray = [];
@@ -251,6 +250,7 @@
         url: "/v1/checkin/monthcheck?activityId="+vs+"&year="+b+"&month="+d,
         contentType: "application/json;charset=utf-8",
         dataType: "json",
+        data: {page:1,limit:50},
         json: 'callback',
         success: function (json) {
           var columnsArray = [];

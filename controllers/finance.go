@@ -84,6 +84,7 @@ func (c *FinanceController) GetWxFinance2() {
 // @Title post wx finance by catalogId
 // @Description post finance by projectid
 // @Param amount query string true "The amount of finance"
+// @Param radio query string true "The radio of finance"
 // @Param financedate query string true "The financedate of finance"
 // @Param financeactivity query string true "The financeactivity of finance"
 // @Param content query string true "The content of finance"
@@ -265,6 +266,20 @@ func (c *FinanceController) GetWxfinance2() {
 	}
 }
 
+type WxFinance struct {
+	Id int64 `json:"id",form:"-"`
+	// Title       string    `orm:"sie(20)"`
+	Financedate string    `orm:"sie(20)"`
+	Content     string    `json:"html",orm:"sie(5000)"`
+	ProjectId   int64     `orm:"null"`
+	UserId      int64     `orm:"null"`
+	Amount      int       `json:"amount"`
+	IsArticleMe bool      `json:"isArticleMe"`
+	Views       int64     `orm:"default(0)"`
+	Created     time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated     time.Time `orm:"auto_now_add;type(datetime)"`
+}
+
 // @Title get wx finance by financeId
 // @Description get finance by financeid
 // @Param id path string  true "The id of finance"
@@ -304,14 +319,30 @@ func (c *FinanceController) GetWxFinance() {
 	// hours := 8
 	// const lll = "2006-01-02 15:04"
 	// financetime := Finance.Updated.Add(time.Duration(hours) * time.Hour).Format(lll)
-	wxFinance := &models.Finance{
+	// var openID string
+	var user models.User
+	var isArticleMe bool
+	var wxFinance *WxFinance
+	openid := c.GetSession("openID")
+	if openid != nil {
+		// openID = openid.(string)
+		user, err = models.GetUserByOpenID(openid.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	if Finance.UserId == user.Id { //20191122修改
+		isArticleMe = true
+	}
+	wxFinance = &WxFinance{
 		Id:          Finance.Id,
 		Amount:      Finance.Amount,
 		Financedate: Finance.Financedate,
 		Content:     content, //Finance.Content,
 		// LeassonType: 1,
-		Views:   Finance.Views,
-		Created: Finance.Created,
+		IsArticleMe: isArticleMe,
+		Views:       Finance.Views,
+		Created:     Finance.Created,
 		// Updated:     financetime,
 	}
 	c.Data["json"] = wxFinance
@@ -321,7 +352,9 @@ func (c *FinanceController) GetWxFinance() {
 // @Title post wx finance by financeid
 // @Description post finance by financeid
 // @Param id query string true "The id of finance"
-// @Param title query string true "The title of finance"
+// @Param amount query string true "The amount of finance"
+// @Param radio query string true "The radio of finance"
+// @Param financedate query string true "The financedate of finance"
 // @Param content query string true "The content of finance"
 // @Success 200 {object} models.AddFinance
 // @Failure 400 Invalid page supplied
@@ -333,7 +366,9 @@ func (c *FinanceController) UpdateWxFinance() {
 	//hotqinsessionid携带过来后，用下面的方法获取用户登录存储在服务端的session
 	openid := c.GetSession("openID")
 	if openid == nil {
-		return
+		c.Data["json"] = map[string]interface{}{"info": "ERR", "id": 0, "data": "openid为空"}
+		c.ServeJSON()
+		// return
 	}
 
 	id := c.Input().Get("id")
@@ -342,7 +377,27 @@ func (c *FinanceController) UpdateWxFinance() {
 	if err != nil {
 		beego.Error(err)
 	}
+	radio := c.Input().Get("radio")
+	if radio == "1" {
+		amountint = 0 - amountint
+	}
 	content := c.Input().Get("content")
+
+	financedate := c.Input().Get("financedate")
+	array := strings.Split(financedate, "-")
+	//当月天数
+	const base_format = "2006-01-02"
+	year := array[0]
+	month := array[1]
+	if len(month) == 1 {
+		month = "0" + month
+	}
+	day := array[2]
+	if len(day) == 1 {
+		day = "0" + day
+	}
+	financedate2 := year + "-" + month + "-" + day
+
 	//将content中的http://ip/去掉
 	wxsite := beego.AppConfig.String("wxreqeustsite")
 	content = strings.Replace(content, wxsite, "", -1)
@@ -358,7 +413,7 @@ func (c *FinanceController) UpdateWxFinance() {
 		beego.Error(err)
 	} else {
 		//更新文章
-		err = models.UpdateFinance(idNum, amountint, content)
+		err = models.UpdateFinance(idNum, amountint, content, financedate2)
 		if err != nil {
 			beego.Error(err)
 			c.Data["json"] = map[string]interface{}{"info": "ERR", "id": id}
