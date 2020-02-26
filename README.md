@@ -118,7 +118,7 @@
 
 Linux系统下请替换掉执行文件engineercms(linux)
 
-不清楚的，可以加我QQ504284或者微信hotqin999聊，也可参考quickerstart.txt。
+不清楚的，可以加我QQ504284或者微信hotqin999聊，也可参考[quickstart](https://github.com/3xxx/engineercms/blob/master/quickstart%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.txt)。
 
 [wiki](https://github.com/3xxx/EngineerCMS/wiki)。包括linux系统下的编译。linux系统下的部署参见网盘中的文档。
 
@@ -126,7 +126,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 
 ## Quick Start
 
-* 参见quickstart快速开始。包括后台导入Excel用户，设置用户角色和权限。
+* 参见[quickstart](https://github.com/3xxx/engineercms/blob/master/quickstart%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.txt)快速开始。包括后台导入Excel用户，设置用户角色和权限。
 
 * linux系统上的部署参见网盘中的文档。
 
@@ -149,7 +149,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 6. [goquery](https://github.com/PuerkitoBio/goquery)
 7. [go-sqlite](https://github.com/mattn/go-sqlite3)
 8. [mahonia](https://github.com/axgle/mahonia)
-9. [flow文档流程](https://github.com/js-ojus/flow)
+9. [flow文档流程](https://github.com/js-ojus/flow)[我改造的flow文档流程](https://github.com/3xxx/flow)
 10. [xorm](https://github.com/go-xorm/xorm)
 
 ## 前端
@@ -176,7 +176,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 21. [vue.js](https://github.com/vuejs/vue)
 22. [axios](https://github.com/axios/axios)
 23. [element组件](https://github.com/ElemeFE/element)
-24. [vue-element-extends表格在线编辑](https://github.com/xuliangzhan/vue-element-extends)
+24. [vxe-table表格在线编辑](https://github.com/xuliangzhan/vxe-table)
 
 ## LICENSE
 
