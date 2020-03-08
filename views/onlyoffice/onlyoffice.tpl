@@ -7,16 +7,22 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 	<meta name="renderer" content="webkit">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	
+
+  <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
+
 	</head>
 
 	<body style="height: 100%; margin: 0;">
+    <button type="button" data-name="insertImage" id="insertImage" class="btn btn-default">
+        <i class="fa fa-download">插入图片</i>
+        </button>
 		<div id="placeholder" style="height: 100%"></div>
+
     <script type="text/javascript" src="http://192.168.99.100:9000/web-apps/apps/api/documents/api.js"></script>
-    <!-- http://192.168.99.101:9000/web-apps/apps/api/documents/api.js
-      https://office.ls123.site/web-apps/apps/api/documents/api.js -->
-    <!-- https://docserver.itdos.com/web-apps/apps/api/documents/api.js -->
-    <!-- http://39.104.112.149/ds-vpath/web-apps/apps/api/documents/api.js -->
+      <!-- http://192.168.99.1:9000/web-apps/apps/api/documents/api.js
+        https://office.ls123.site/web-apps/apps/api/documents/api.js -->
+      <!-- https://docserver.itdos.com/web-apps/apps/api/documents/api.js -->
+      <!-- http://39.104.112.149/ds-vpath/web-apps/apps/api/documents/api.js -->
     <script type="text/javascript">
       var onAppReady = function() {
           console.log("ONLYOFFICE Document Editor is ready");
@@ -30,13 +36,55 @@
       var onDocumentStateChange = function (event) {
           if (event.data) {
               console.log("The document changed");
+              // docEditor.downloadAs();
           } else {
               console.log("Changes are collected on document editing service");
+              // 
           }
       };
       var onDownloadAs = function (event) {
           console.log("ONLYOFFICE Document Editor create file: " + event.data);
+          window.top.postMessage(event.data);
+          createAndDownloadFile("test.docx",event.data)
       };
+
+          /**
+          * 创建并下载文件
+          * @param {String} fileName 文件名
+          * @param {String} content 文件内容
+          */
+        function createAndDownloadFile(fileName, content) {
+          var aTag = document.createElement('a');
+          var blob = new Blob([content]);
+          aTag.download = fileName;
+          aTag.href = URL.createObjectURL(blob);
+          aTag.click();
+          URL.revokeObjectURL(blob);
+        }
+      
+      window.addEventListener('message',function(e){
+        console.log(e.data)
+        if (e.data=="downloadAs") {
+          docEditor.downloadAs();
+        }
+      },false)
+
+      $("#insertImage").click(function(event) {    
+          console.log("ONLYOFFICE Document Editor insertImage: "+ event.data);
+          docEditor.insertImage({
+              "fileType": "png",
+              "url": "http://192.168.99.1/attachment/20190728测试上传文件名修改/2020January/1580363537940306800_small.png"
+          });
+      })
+
+      var onRequestInsertImage = function(event) {
+        console.log("ONLYOFFICE Document Editor insertImage" + event.data);
+          docEditor.insertImage({
+              "fileType": "png",
+              "url": "http://192.168.99.1/attachment/20190728测试上传文件名修改/2020January/1580363537940306800_small.png"
+          });
+      };
+
       var onError = function (event) {
           console.log("ONLYOFFICE Document Editor reports an error: code " + event.data.errorCode + ", description " + event.data.errorDescription);
       };
@@ -44,7 +92,7 @@
           location.reload(true);
       };
       var onRequestEditRights = function () {
-          // console.log("ONLYOFFICE Document Editor requests editing rights");
+          console.log("ONLYOFFICE Document Editor requests editing rights");
           // document.location.reload();
           var he=location.href.replace("view","edit");
           location.href=he;
@@ -136,12 +184,12 @@
         // alert(fileurl);
     		docEditor.setHistoryData({
     			//下面这里存变化的位置
-      		// "changesUrl":"http://192.168.100.3700:9000/cache/files/1522475922103673500_7157/changes.zip/changes.zip?md5=syFUueSXdnCWe60Iym001g==&expires=1525068326&disposition=attachment&ooname=output.zip",//string1, //the changesUrl from the JSON object returned after saving the document
+      		// "changesUrl":"http://192.168.99.100:9000/cache/files/1522475922103673500_7157/changes.zip/changes.zip?md5=syFUueSXdnCWe60Iym001g==&expires=1525068326&disposition=attachment&ooname=output.zip",//string1, //the changesUrl from the JSON object returned after saving the document
       		"changesUrl":changeUrl2,
       		"key": key,
       		"previous": {
       		  "key": previousKey,//这里不影响版本切换。与上个版本对比
-      		  "url": previousurl//previousUrl//http://192.168.100.3700:9000/cache/files/1521953170330601700_4540/output.docx/output.docx?md5=eSwnrSSumTeMuh59IoXhCQ==&expires=1524547423&disposition=attachment&ooname=output.docx这里影响版本
+      		  "url": previousurl//previousUrl//http://192.168.99.100:9000/cache/files/1521953170330601700_4540/output.docx/output.docx?md5=eSwnrSSumTeMuh59IoXhCQ==&expires=1524547423&disposition=attachment&ooname=output.docx这里影响版本
       		},
       		"url": fileurl,//fileUrl,
       		"version": version
@@ -161,7 +209,8 @@
           "onRequestEditRights": onRequestEditRights,
           "onRequestHistory": onRequestHistory,
           "onRequestHistoryClose": onRequestHistoryClose,
-          "onRequestHistoryData": onRequestHistoryData
+          "onRequestHistoryData": onRequestHistoryData,
+          "onRequestInsertImage": onRequestInsertImage,
         },
 
       	"document": {
@@ -261,6 +310,7 @@
         "width": "100%"
       });
    	</script>
+
 	</body>
 </html>
 

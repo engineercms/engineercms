@@ -67,6 +67,7 @@
 　　margin-bottom: 2px; 
     }*/
   </style>
+
 </head>
 
 <div class="container-fill">{{template "navbar" .}}</div>
@@ -624,6 +625,28 @@
       }
   })
 
+    //下载为
+  $("#downloadas").click(function(e) {
+      var frame1 = window.frames[0];
+      frame1.postMessage('downloadAs', '*');
+      window.addEventListener('parent get child message',function(e){
+      　　console.log(e.data)
+      },false)
+
+      /**
+       * 创建并下载文件
+       * @param {String} fileName 文件名
+       * @param {String} content 文件内容
+       */
+      // function createAndDownloadFile(fileName, content) {
+      //  var aTag = document.createElement('a');
+      //  var blob = new Blob([content]);
+      //  aTag.download = fileName;
+      //  aTag.href = URL.createObjectURL(blob);
+      //  aTag.click();
+      //  URL.revokeObjectURL(blob);
+      // }
+  })
   // 构造表单下载
     // $('.download').click(function () {
     //   var tt = new Date().getTime();
@@ -1914,6 +1937,9 @@
       // }
     }
   </script>
+
+<!-- ********** -->
+<!-- <iframe src="http://127.0.0.1/onlyoffice/113" frameborder="1"></iframe> -->
 
 </body>
 </html>

@@ -2,6 +2,9 @@ package models
 
 import (
 	"database/sql"
+	"encoding/gob"
+	// "github.com/3xxx/engineercms/commands"
+	"github.com/3xxx/engineercms/conf"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
@@ -92,6 +95,39 @@ type AdminCarousel struct {
 
 func init() {
 	orm.RegisterModel(new(AdminCategory), new(AdminIpsegment), new(AdminCalendar), new(AdminSynchIp), new(AdminDepartment), new(AdminCarousel)) //, new(Article)
+	orm.RegisterModelWithPrefix(conf.GetDatabasePrefix(),
+		new(Member),
+		new(Book),
+		new(Relationship),
+		new(Option),
+		new(Document),
+		new(MindocAttachment),
+		new(Logger),
+		new(MemberToken),
+		new(DocumentHistory),
+		new(Migration),
+		new(Label),
+		new(Blog),
+		new(Template),
+		new(Team),
+		new(TeamMember),
+		new(TeamRelationship),
+		new(Itemsets),
+	)
+
+	orm.RegisterModelWithPrefix("share_", new(Bridge), new(Share))
+
+	//gorm设置默认表名前缀
+	// gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+	// 	return "prefix_" + defaultTableName
+	// }
+	// //gorm自动生成表
+	// db.AutoMigrate(&Product{}, &Email{})
+	// db.CreateTable(&User{})
+
+	gob.Register(Blog{})
+	gob.Register(Document{})
+	gob.Register(Template{})
 
 	var dns string
 	db_type := beego.AppConfig.String("db_type")
@@ -134,6 +170,7 @@ func init() {
 		beego.Critical("Database driver is not allowed:", db_type)
 	}
 	orm.RegisterDataBase("default", db_type, dns, 10)
+
 	// orm.RegisterDriver("sqlite", orm.DRSqlite)
 	// orm.RegisterDataBase("default", "sqlite3", "database/engineer.db", 10)
 }

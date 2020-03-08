@@ -230,7 +230,7 @@ func (c *LoginController) LoginPost() {
 	cipherStr := md5Ctx.Sum(nil)
 	user.Password = hex.EncodeToString(cipherStr)
 	// beego.Info(user.Password)
-	beego.Info(islogin)
+	// beego.Info(islogin)
 	err := models.ValidateUser(user)
 	if err == nil {
 		c.SetSession("uname", user.Username)
@@ -255,7 +255,7 @@ func (c *LoginController) LoginPost() {
 				utils.FileLogs.Error(user.Username + " 更新用户登录时间 " + err.Error())
 			}
 		}
-		beego.Info(islogin)
+		// beego.Info(islogin)
 	} else {
 		islogin = 1
 	}

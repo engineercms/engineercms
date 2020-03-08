@@ -198,6 +198,9 @@
           </li>
         </ul>
       </li> -->
+      <li {{if .IsBook}}class="active"{{end}}>
+        <a href="/mindocindex" title="创作你的书籍" target="_blank">BOOK</a>
+      </li>
     </ul>
 
     <!-- <div class="pull-right"> -->

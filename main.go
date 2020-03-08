@@ -1,15 +1,24 @@
 package main
 
 import (
+	// "github.com/3xxx/engineercms/commands"
+	"github.com/3xxx/engineercms/commands/daemon"
+	"github.com/3xxx/engineercms/conf"
 	"github.com/3xxx/engineercms/controllers"
 	_ "github.com/3xxx/engineercms/controllers/version"
+	"github.com/3xxx/engineercms/models"
 	_ "github.com/3xxx/engineercms/routers"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	_ "github.com/astaxie/beego/session/memcache"
+	_ "github.com/astaxie/beego/session/mysql"
+	_ "github.com/astaxie/beego/session/redis"
 	"github.com/astaxie/beego/toolbox"
+	"github.com/kardianos/service"
+	_ "github.com/mattn/go-sqlite3"
 	// "github.com/go-xorm/xorm"
 	// "github.com/astaxie/beego/plugins/cors"
-	"github.com/3xxx/engineercms/models"
+
 	// _ "github.com/mattn/go-sqlite3"
 	"fmt"
 	"io"
@@ -20,6 +29,7 @@ import (
 	"path"
 	"strings"
 	"time"
+	// _ "github.com/3xxx/engineercms/routers"
 )
 
 func main() {
@@ -50,6 +60,38 @@ func main() {
 	toolbox.AddTask("tk1", tk1)
 	toolbox.StartTask()
 	defer toolbox.StopTask()
+
+	// ********mindoc*********
+	// if len(os.Args) >= 3 && os.Args[1] == "service" {
+	// 	if os.Args[2] == "install" {
+	//    daemon.Install()
+	// 	} else if os.Args[2] == "remove" {
+	// 		daemon.Uninstall()
+	// 	} else if os.Args[2] == "restart" {
+	// 		daemon.Restart()
+	// 	}
+	// }
+
+	initialization()
+	// commands.RegisterCache()
+	// commands.RegisterLogger(conf.LogFile)
+
+	// commands.RegisterCommand()
+
+	d := daemon.NewDaemon()
+
+	s, err := service.New(d, d.Config())
+
+	if err != nil {
+		fmt.Println("Create service error => ", err)
+		os.Exit(1)
+	}
+
+	if err := s.Run(); err != nil {
+		log.Fatal("启动程序失败 ->", err)
+	}
+	// ********mindoc*********
+
 	beego.Run()
 }
 
@@ -79,6 +121,66 @@ func version(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	io.WriteString(w, fmt.Sprintf("%s", out))
+}
+
+//初始化数据
+func initialization() {
+
+	err := models.NewOption().Init()
+
+	if err != nil {
+		panic(err.Error())
+		os.Exit(1)
+	}
+
+	member, err := models.NewMember().FindByFieldFirst("account", "admin")
+	if err == orm.ErrNoRows {
+
+		member.Account = "admin"
+		member.Avatar = conf.URLForWithCdnImage("/static/mindoc/images/headimgurl.jpg")
+		member.Password = "123456"
+		member.AuthMethod = "local"
+		member.Role = 0
+		member.Email = "admin@iminho.me"
+
+		if err := member.Add(); err != nil {
+			panic("Member.Add => " + err.Error())
+			os.Exit(0)
+		}
+
+		book := models.NewBook()
+
+		book.MemberId = member.MemberId
+		book.BookName = "MinDoc演示项目"
+		book.Status = 0
+		book.ItemId = 1
+		book.Description = "这是一个MinDoc演示项目，该项目是由系统初始化时自动创建。"
+		book.CommentCount = 0
+		book.PrivatelyOwned = 0
+		book.CommentStatus = "closed"
+		book.Identify = "mindoc"
+		book.DocCount = 0
+		book.CommentCount = 0
+		book.Version = time.Now().Unix()
+		book.Cover = conf.GetDefaultCover()
+		book.Editor = "markdown"
+		book.Theme = "default"
+
+		if err := book.Insert(); err != nil {
+			panic("初始化项目失败 -> " + err.Error())
+			os.Exit(1)
+		}
+	}
+
+	if !models.NewItemsets().Exist(1) {
+		item := models.NewItemsets()
+		item.ItemName = "默认项目空间"
+		item.MemberId = 1
+		if err := item.Save(); err != nil {
+			panic("初始化项目空间失败 -> " + err.Error())
+			os.Exit(1)
+		}
+	}
 }
 
 // func Create(name string) (file *File, err error)

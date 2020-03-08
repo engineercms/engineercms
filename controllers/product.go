@@ -187,6 +187,11 @@ func (c *ProdController) GetProjProd() {
 	} else {
 		c.Data["RoleDelete"] = "false"
 	}
+	if e.Enforce(useridstring, projurls+"/", "GET", ".1") || isadmin {
+		c.Data["RoleGet"] = "true"
+	} else {
+		c.Data["RoleGet"] = "false"
+	}
 	// var categories []*models.ProjCategory
 	// var err error
 	//id转成64为

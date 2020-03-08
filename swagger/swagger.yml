@@ -1826,6 +1826,42 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
+  /checkin/checksignature:
+    get:
+      tags:
+      - checkin
+      description: get Signature
+      operationId: CheckController.get Signature
+      parameters:
+      - in: query
+        name: signature
+        description: The signature of wx
+        required: true
+        type: string
+      - in: query
+        name: timestamp
+        description: The timestamp of wx
+        required: true
+        type: string
+      - in: query
+        name: nonce
+        description: The nonce for wx
+        required: true
+        type: string
+      - in: query
+        name: echostr
+        description: The echostr for wx
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /checkin/details/date:
     post:
       tags:
@@ -1911,6 +1947,53 @@ paths:
       - in: query
         name: username
         description: The userId for person
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /checkin/sendmessage:
+    post:
+      tags:
+      - checkin
+      description: post Message
+      operationId: CheckController.post Message
+      parameters:
+      - in: query
+        name: app_version
+        description: The app_version of wx
+        required: true
+        type: string
+      - in: query
+        name: template_id
+        description: The template_id of Message
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /checkin/subscribemessage:
+    post:
+      tags:
+      - checkin
+      description: post subscribemessage
+      operationId: CheckController.post subscribemessage
+      parameters:
+      - in: query
+        name: tmplIds
+        description: The tmplIds of wx
         required: true
         type: string
       responses:
@@ -2030,6 +2113,132 @@ paths:
           description: Invalid page supplied
         "404":
           description: data not found
+  /share/browse:
+    get:
+      tags:
+      - share
+      description: get a share
+      operationId: ShareController.get a share
+      parameters:
+      - in: query
+        name: shareUuid
+        description: The shareUuid of share
+        required: true
+        type: string
+      - in: query
+        name: code
+        description: The code of share
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.AddArticle'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /share/create:
+    post:
+      tags:
+      - share
+      description: post create a new share
+      operationId: ShareController.post create a new share
+      parameters:
+      - in: query
+        name: matterUuids
+        description: The matterUuids of share
+        required: true
+        type: string
+      - in: query
+        name: expireInfinity
+        description: The xpireInfinity of share
+        required: true
+        type: boolean
+      - in: query
+        name: expireTime
+        description: The expireTime of share
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.AddArticle'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /share/detail/{id}:
+    get:
+      tags:
+      - share
+      description: get a share
+      operationId: ShareController.get a share
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.AddArticle'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /share/download:
+    post:
+      tags:
+      - share
+      description: download a share
+      operationId: ShareController.download a share
+      parameters:
+      - in: query
+        name: shareUuid
+        description: The shareUuid of share
+        required: true
+        type: string
+      - in: query
+        name: code
+        description: The code of share
+        type: string
+      - in: query
+        name: id
+        description: The id of attachment
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Attachment'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /share/downloadzip:
+    post:
+      tags:
+      - share
+      description: download a share
+      operationId: ShareController.download a share
+      parameters:
+      - in: query
+        name: shareUuid
+        description: The shareUuid of share
+        required: true
+        type: string
+      - in: query
+        name: code
+        description: The code of share
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Attachment'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
   /todo/create:
     post:
       tags:
@@ -2317,6 +2526,11 @@ paths:
         required: true
         type: string
       - in: query
+        name: radio
+        description: The radio of finance
+        required: true
+        type: string
+      - in: query
         name: financedate
         description: The financedate of finance
         required: true
@@ -2383,8 +2597,8 @@ paths:
         required: true
         type: string
       - in: query
-        name: code
-        description: The code of wx
+        name: app_version
+        description: the app_version of wx
         type: string
       - in: query
         name: avatar
@@ -3167,6 +3381,56 @@ paths:
           description: Invalid page supplied
         "404":
           description: standards not found
+  /wx/ssologin:
+    get:
+      tags:
+      - wx
+      description: get sso logintpl
+      operationId: LoginController.get sso login
+      parameters:
+      - in: query
+        name: service
+        description: The service of login
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.success'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /wx/ssologinpost:
+    post:
+      tags:
+      - wx
+      description: post sso login data
+      operationId: LoginController.post sso login
+      parameters:
+      - in: query
+        name: login_name
+        description: The name of user
+        required: true
+        type: string
+      - in: query
+        name: password
+        description: The password of user
+        required: true
+        type: string
+      - in: query
+        name: service
+        description: The service of location.href
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.success'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
   /wx/updatewxdiary:
     post:
       tags:
@@ -3246,8 +3510,18 @@ paths:
         required: true
         type: string
       - in: query
-        name: title
-        description: The title of finance
+        name: amount
+        description: The amount of finance
+        required: true
+        type: string
+      - in: query
+        name: radio
+        description: The radio of finance
+        required: true
+        type: string
+      - in: query
+        name: financedate
+        description: The financedate of finance
         required: true
         type: string
       - in: query
@@ -3520,6 +3794,8 @@ definitions:
   .Adddiary:
     type: object
   .Addfinance:
+    type: object
+  .Attachment:
     type: object
   .DeleteTopicReply:
     type: object
