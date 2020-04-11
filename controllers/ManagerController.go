@@ -11,10 +11,10 @@ import (
 	"strconv"
 
 	"github.com/3xxx/engineercms/conf"
+	"github.com/3xxx/engineercms/controllers/utils"
+	"github.com/3xxx/engineercms/controllers/utils/filetil"
+	"github.com/3xxx/engineercms/controllers/utils/pagination"
 	"github.com/3xxx/engineercms/models"
-	"github.com/3xxx/engineercms/utils"
-	"github.com/3xxx/engineercms/utils/filetil"
-	"github.com/3xxx/engineercms/utils/pagination"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"

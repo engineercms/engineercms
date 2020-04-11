@@ -3,8 +3,8 @@ package models
 import (
 	"errors"
 	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/utils"
-	"github.com/3xxx/engineercms/utils/cryptil"
+	"github.com/3xxx/engineercms/controllers/utils"
+	"github.com/3xxx/engineercms/controllers/utils/cryptil"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"strings"

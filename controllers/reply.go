@@ -30,7 +30,7 @@ type ReplyController struct {
 func (c *ReplyController) AddWxRelease() {
 	//content去验证
 	app_version := c.Input().Get("app_version")
-	accessToken, err := utils.GetAccessToken(app_version)
+	accessToken, _, _, err := utils.GetAccessToken(app_version)
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}

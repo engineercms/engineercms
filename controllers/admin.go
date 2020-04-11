@@ -8,9 +8,12 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 	"github.com/astaxie/beego/logs"
+	"github.com/bitly/go-simplejson"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -1709,6 +1712,168 @@ func (c *AdminController) Testdown() {
 	filename := path.Base(filePath)
 	http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, "static/download/"+filename)
 }
+
+// @Title get wx projectconfig by projectid
+// @Description get wx projectconfig by projectid
+// @Param projectid query string true "The id of project"
+// @Success 200 {object} models.AddArticle
+// @Failure 400 Invalid page supplied
+// @Failure 404 articl not found
+// @router /jsoneditor [get]
+//给jsoneditor返回json数据
+func (c *AdminController) Jsoneditor() {
+	id := c.Input().Get("projectid")
+	c.TplName = "jsoneditor.tpl"
+	c.Data["ProjectId"] = id
+}
+
+// @Title get wx projectconfig by projectid
+// @Description get wx projectconfig by projectid
+// @Param projectid query string true "The id of project"
+// @Success 200 {object} models.AddArticle
+// @Failure 400 Invalid page supplied
+// @Failure 404 articl not found
+// @router /getwxprojectconfig [get]
+//给jsoneditor返回json数据
+func (c *AdminController) GetWxProjectConfig() {
+	id := c.Input().Get("projectid")
+	contents, _ := ioutil.ReadFile("./conf/" + id + ".json")
+	js, err := simplejson.NewJson([]byte(contents))
+	if err != nil {
+		panic("json format error")
+	}
+	c.Data["json"] = js
+	c.ServeJSON()
+}
+
+// type Projectconfig struct {
+// 	Text     string      `json:"text"`
+// 	Collapse []Collapse2 `json:"collapse"`
+// }
+
+// type Collapse2 struct {
+// 	Name  string  `json:"name"`
+// 	Icon  string  `json:"icon"`
+// 	Value string  `json:"value"`
+// 	Title string  `json:"title"`
+// 	Cell  []Cell2 `json:"cell"`
+// }
+
+// type Cell2 struct {
+// 	Icon  string `json:"icon"`
+// 	Title string `json:"title"`
+// 	Url   string `json:"url"`
+// 	Value string `json:"value"`
+// 	Label string `json:"label"`
+// }
+
+// @Title update wx projectconfig by projectid
+// @Description put wx projectconfig by projectid
+// @Param projectid query string true "The id of project"
+// @Param projectconfig query string true "The json of projectconfig"
+// @Success 200 {object} models.AddArticle
+// @Failure 400 Invalid page supplied
+// @Failure 404 articl not found
+// @router /putwxprojectconfig [post]
+//更新json文件
+func (c *AdminController) PutWxProjectConfig() {
+	id := c.Input().Get("projectid")
+	// beego.Info()
+	// beego.Info(c.Input().Get("projectconfig"))
+	// projectconfig := c.Ctx.Input.RequestBody
+	// beego.Info(projectconfig)
+	// var ob Projectconfig
+	// json.Unmarshal(c.Ctx.Input.RequestBody, &ob)
+	// beego.Info(ob)
+
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// defer resp.Body.Close()
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// f, err := os.OpenFile("./attachment/onlyoffice/"+onlyattachment.FileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
+	f, err := os.Create("./conf/" + id + ".json")
+	if err != nil {
+		beego.Error(err)
+	}
+	defer f.Close()
+	// _, err = f.Write(body) //这里直接用resp.Body如何？
+	_, err = f.Write(c.Ctx.Input.RequestBody)
+	// _, err = f.WriteString(str)
+	// _, err = io.Copy(body, f)
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Data["json"] = id + ".json"
+	c.ServeJSON()
+}
+
+//导入json数据
+func (c *AdminController) ImportJson() {
+	//获取上传的文件
+	_, h, err := c.GetFile("json")
+	if err != nil {
+		beego.Error(err)
+	}
+	var path string
+	if h != nil {
+		//保存附件
+		path = "./config/" + h.Filename
+		// f.Close()                                             // 关闭上传的文件，不然的话会出现临时文件不能清除的情况
+		err = c.SaveToFile("json", path) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	contents, _ := ioutil.ReadFile(path)
+	js, err := simplejson.NewJson([]byte(contents))
+	if err != nil {
+		panic("json format error")
+	}
+	c.Data["json"] = js
+	c.ServeJSON()
+}
+
+// 根据conf目录下的json.json文件初始化价值结构
+func (c *AdminController) InitJson() {
+	contents, _ := ioutil.ReadFile("./conf/json.json")
+	// var r List6
+	// err := json.Unmarshal([]byte(contents), &r)
+	// if err != nil {
+	// 	fmt.Printf("err was %v", err)
+	// }
+	js, err := simplejson.NewJson([]byte(contents))
+	if err != nil {
+		panic("json format error")
+	}
+	c.Data["json"] = js
+	c.ServeJSON()
+	//1.获取省水利院
+	// text, err := js.Get("text").String()
+	// Id, err := models.AddCategory(0, text, "", "", "")
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+}
+
+// func NewJsonStruct() *JsonStruct {
+// 	return &JsonStruct{}
+// }
+
+// func (self *JsonStruct) Load(filename string, v interface{}) {
+// 	data, err := ioutil.ReadFile(filename)
+// 	if err != nil {
+// 		return
+// 	}
+// 	datajson := []byte(data)
+// 	err = json.Unmarshal(datajson, v)
+// 	if err != nil {
+// 		return
+// 	}
+// }
 
 // include_once('connect.php');//连接数据库
 //   $sql = "select * from calendar";

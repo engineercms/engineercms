@@ -39,6 +39,30 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminController"],
+		beego.ControllerComments{
+			Method: "GetWxProjectConfig",
+			Router: `/getwxprojectconfig`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminController"],
+		beego.ControllerComments{
+			Method: "Jsoneditor",
+			Router: `/jsoneditor`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminController"],
+		beego.ControllerComments{
+			Method: "PutWxProjectConfig",
+			Router: `/putwxprojectconfig`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminLogController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AdminLogController"],
 		beego.ControllerComments{
 			Method: "ErrLog",
@@ -59,6 +83,14 @@ func init() {
 		beego.ControllerComments{
 			Method: "AddWxArticle",
 			Router: `/addwxarticle`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"],
+		beego.ControllerComments{
+			Method: "AddWxArticleFlow",
+			Router: `/addwxarticleflow/:id`,
 			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})
@@ -105,6 +137,14 @@ func init() {
 
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"],
 		beego.ControllerComments{
+			Method: "GetWxArticleFlow",
+			Router: `/getwxarticleflow/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"],
+		beego.ControllerComments{
 			Method: "GetWxArticles",
 			Router: `/getwxarticles`,
 			AllowHTTPMethods: []string{"get"},
@@ -121,8 +161,24 @@ func init() {
 
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"],
 		beego.ControllerComments{
+			Method: "GetWxArticleType",
+			Router: `/getwxarticletype`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ArticleController"],
+		beego.ControllerComments{
 			Method: "UpdateWxEditorArticle",
 			Router: `/updatewxeditorarticle`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AttachController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:AttachController"],
+		beego.ControllerComments{
+			Method: "AddWxAttachment",
+			Router: `/addwxattachment`,
 			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})
@@ -241,6 +297,14 @@ func init() {
 
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"],
 		beego.ControllerComments{
+			Method: "CheckSignature",
+			Router: `/checksignature`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"],
+		beego.ControllerComments{
 			Method: "Date",
 			Router: `/details/date`,
 			AllowHTTPMethods: []string{"post"},
@@ -271,6 +335,22 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"],
+		beego.ControllerComments{
+			Method: "SendMessage",
+			Router: `/sendmessage`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:CheckController"],
+		beego.ControllerComments{
+			Method: "SubscribeMessage",
+			Router: `/subscribemessage`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:DiaryController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:DiaryController"],
 		beego.ControllerComments{
 			Method: "AddWxDiary",
@@ -291,6 +371,14 @@ func init() {
 		beego.ControllerComments{
 			Method: "GetWxdiaries",
 			Router: `/getwxdiaries`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:DiaryController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:DiaryController"],
+		beego.ControllerComments{
+			Method: "GetWxdiaries2",
+			Router: `/getwxdiaries2`,
 			AllowHTTPMethods: []string{"get"},
 			MethodParams: param.Make(),
 			Params: nil})
@@ -319,10 +407,50 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
-	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FileinputController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FileinputController"],
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"],
 		beego.ControllerComments{
-			Method: "UploadWxEditorImg",
-			Router: `/uploadwxeditorimg`,
+			Method: "AddWxFinance",
+			Router: `/addwxfinance/:id`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"],
+		beego.ControllerComments{
+			Method: "DeleteWxFinance",
+			Router: `/deletewxfinance`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"],
+		beego.ControllerComments{
+			Method: "GetWxFinance",
+			Router: `/getwxfinance/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"],
+		beego.ControllerComments{
+			Method: "GetWxfinance2",
+			Router: `/getwxfinance2/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"],
+		beego.ControllerComments{
+			Method: "GetWxFinanceList",
+			Router: `/getwxfinancelist/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FinanceController"],
+		beego.ControllerComments{
+			Method: "UpdateWxFinance",
+			Router: `/updatewxfinance`,
 			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})
@@ -711,6 +839,54 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlowController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlowController"],
+		beego.ControllerComments{
+			Method: "WxFlowDoc",
+			Router: `/wxflowdoc`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlowController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlowController"],
+		beego.ControllerComments{
+			Method: "WxFlowNext",
+			Router: `/wxflownext`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlowController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlowController"],
+		beego.ControllerComments{
+			Method: "WxFlowUserMailbox2",
+			Router: `/wxflowusermailbox2`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlvController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlvController"],
+		beego.ControllerComments{
+			Method: "Get",
+			Router: `/`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlvController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FlvController"],
+		beego.ControllerComments{
+			Method: "GetFlvList",
+			Router: `/flvlist`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FroalaController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FroalaController"],
+		beego.ControllerComments{
+			Method: "UploadAppreciationPhoto",
+			Router: `/uploadappreciationphoto`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FroalaController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:FroalaController"],
 		beego.ControllerComments{
 			Method: "UploadWxAvatar",
@@ -761,6 +937,22 @@ func init() {
 
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:LoginController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:LoginController"],
 		beego.ControllerComments{
+			Method: "SsoLogin",
+			Router: `/ssologin`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:LoginController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:LoginController"],
+		beego.ControllerComments{
+			Method: "SsoLoginPost",
+			Router: `/ssologinpost`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:LoginController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:LoginController"],
+		beego.ControllerComments{
 			Method: "WxHasSession",
 			Router: `/wxhassession`,
 			AllowHTTPMethods: []string{"get"},
@@ -771,6 +963,22 @@ func init() {
 		beego.ControllerComments{
 			Method: "WxLogin",
 			Router: `/wxlogin/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:MainController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:MainController"],
+		beego.ControllerComments{
+			Method: "GetWxPdf",
+			Router: `/getwxpdf/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:MainController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:MainController"],
+		beego.ControllerComments{
+			Method: "GetWxPdfList",
+			Router: `/getwxpdflist`,
 			AllowHTTPMethods: []string{"get"},
 			MethodParams: param.Make(),
 			Params: nil})
@@ -796,6 +1004,86 @@ func init() {
 			Method: "Conversion",
 			Router: `/conversion`,
 			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:OnlyController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:OnlyController"],
+		beego.ControllerComments{
+			Method: "DownloadOnlyDoc",
+			Router: `/downloadonlydoc`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"],
+		beego.ControllerComments{
+			Method: "AddWxUserPays",
+			Router: `/addwxuserpays`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"],
+		beego.ControllerComments{
+			Method: "GetWxPay",
+			Router: `/getwxpay`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"],
+		beego.ControllerComments{
+			Method: "GetWxUserGetAppreciations",
+			Router: `/getwxusergetappreciations`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"],
+		beego.ControllerComments{
+			Method: "GetWxUserMoney",
+			Router: `/getwxusermoney`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"],
+		beego.ControllerComments{
+			Method: "GetWxUserPayAppreciations",
+			Router: `/getwxuserpayappreciations`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PayController"],
+		beego.ControllerComments{
+			Method: "GetWxUserPays",
+			Router: `/getwxuserpays`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PdfCpuController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PdfCpuController"],
+		beego.ControllerComments{
+			Method: "AddWatermarks",
+			Router: `/addwatermarks/:id`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PdfCpuController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PdfCpuController"],
+		beego.ControllerComments{
+			Method: "OnlyPdf",
+			Router: `/onlypdf/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PdfCpuController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:PdfCpuController"],
+		beego.ControllerComments{
+			Method: "Test",
+			Router: `/test/:id`,
+			AllowHTTPMethods: []string{"get"},
 			MethodParams: param.Make(),
 			Params: nil})
 
@@ -863,6 +1151,46 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"],
+		beego.ControllerComments{
+			Method: "Browse",
+			Router: `/browse`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"],
+		beego.ControllerComments{
+			Method: "Create",
+			Router: `/create`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"],
+		beego.ControllerComments{
+			Method: "Detail",
+			Router: `/detail/:id`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"],
+		beego.ControllerComments{
+			Method: "Download",
+			Router: `/download`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:ShareController"],
+		beego.ControllerComments{
+			Method: "DownloadZip",
+			Router: `/downloadzip`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:StandardController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:StandardController"],
 		beego.ControllerComments{
 			Method: "SearchWxStandards",
@@ -899,6 +1227,14 @@ func init() {
 		beego.ControllerComments{
 			Method: "UpdateTodo",
 			Router: `/updatetodo`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:UserController"] = append(beego.GlobalControllerRouter["github.com/3xxx/engineercms/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "AddWxUser",
+			Router: `/addwxuser`,
 			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})

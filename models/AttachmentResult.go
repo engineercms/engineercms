@@ -3,7 +3,7 @@ package models
 import (
 	"strings"
 
-	"github.com/3xxx/engineercms/utils/filetil"
+	"github.com/3xxx/engineercms/controllers/utils/filetil"
 	"github.com/astaxie/beego/orm"
 )
 

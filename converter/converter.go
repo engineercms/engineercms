@@ -14,9 +14,9 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/3xxx/engineercms/utils/cryptil"
-	"github.com/3xxx/engineercms/utils/filetil"
-	"github.com/3xxx/engineercms/utils/ziptil"
+	"github.com/3xxx/engineercms/controllers/utils/cryptil"
+	"github.com/3xxx/engineercms/controllers/utils/filetil"
+	"github.com/3xxx/engineercms/controllers/utils/ziptil"
 	"html"
 	"sync"
 )
@@ -502,7 +502,7 @@ func (this *Converter) convertToEpub() (err error) {
 	//fmt.Println("正在转换EPUB文件", args[0])
 	//return cmd.Run()
 
-	return filetil.CopyFile(args[0],args[1])
+	return filetil.CopyFile(args[0], args[1])
 }
 
 //转成mobi

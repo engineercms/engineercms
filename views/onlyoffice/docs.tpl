@@ -9,6 +9,10 @@
   <!-- <link type='text/css' href='/static/oo/files-3TmaoIbj3PAed78NYLoa7w2.css' rel='stylesheet' />
     <link type='text/css' href='/static/oo/common-HLDWebQ4QDcrVRYNq4-rWA2.css' rel='stylesheet' />
     <link type='text/css' href='/static/oo/files-CUBYqoHsKUGuN7k-PidXtQ2.css' rel='stylesheet' /> -->
+    <!-- 收藏用logo图标 -->
+    <link rel="bookmark"  type="image/x-icon"  href="/static/img/only.ico"/>
+    <!-- 网站显示页logo图标 -->
+    <link rel="shortcut icon" href="/static/img/only.ico">
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css"/>
   <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
@@ -51,6 +55,7 @@
     #modalDialog9 .modal-header {cursor: move;}
     #modalDialog10 .modal-header {cursor: move;}
     #modalDialog11 .modal-header {cursor: move;}
+    #modalDialog12 .modal-header {cursor: move;}
       /*.form-group .datepicker{
         z-index: 9999;
       }*/
@@ -75,18 +80,18 @@
 <body>
 
 <div class="col-lg-12">
-  <h3>文档列表</h3>
+  <!-- <h3>文档列表</h3> -->
 
   <div id="toolbar1" class="btn-group">
-        <button type="button" data-name="createButton" id="createButton" class="btn btn-default" title="新建"> <i class="fa fa-plus">新建</i>
-        </button>
+        <!-- <button type="button" data-name="createButton" id="createButton" class="btn btn-default" title="新建"> <i class="fa fa-plus">新建</i>
+        </button> -->
         <!-- 多文件批量上传 -->
         <button type="button" data-name="addButton" id="addButton" class="btn btn-default" title="批量上传模式"> <i class="fa fa-plus">添加</i>
         </button>
         <button type="button" data-name="editorProdButton" id="editorProdButton" class="btn btn-default"> <i class="fa fa-edit" title="修改成果信息">编辑</i>
         </button>
-        <button type="button" data-name="editorAttachButton" id="editorAttachButton" class="btn btn-default"> <i class="fa fa-edit" title="修改成果附件">编辑</i>
-        </button>
+        <!-- <button type="button" data-name="editorAttachButton" id="editorAttachButton" class="btn btn-default"> <i class="fa fa-edit" title="修改成果附件">编辑</i>
+        </button> -->
         <button type="button" data-name="deleteButton" id="deleteButton" class="btn btn-default">
         <i class="fa fa-trash">删除</i>
         </button>
@@ -96,14 +101,14 @@
         <button type="button" data-name="download" id="download" class="btn btn-default">
         <i class="fa fa-download">下载</i>
         </button>
-        <button type="button" data-name="downloadas" id="downloadas" class="btn btn-default">
+        <!-- <button type="button" data-name="downloadas" id="downloadas" class="btn btn-default">
         <i class="fa fa-download">下载为</i>
-        </button>
+        </button> -->
   </div>
 <!--data-click-to-select="true" -->
   <table id="table0" 
         data-toggle="table" 
-        data-url="/onlyoffice/data"
+        data-url="/onlyoffice/getdata"
         data-search="true"
         data-show-refresh="true"
         data-show-toggle="true"
@@ -133,10 +138,10 @@
         <th data-field="Principal" data-halign="center" data-align="center">负责人</th>
         <th data-field="Uname" data-halign="center" data-align="center">上传者</th>
         <th data-field="Docxlink" data-formatter="setDocx" data-events="actionEvents" data-halign="center" data-align="center">协作</th>
-        <th data-field="Docxlink" data-formatter="setPermission" data-events="actionEvents" data-halign="center" data-align="center">权限</th>
+        <th data-field="Docxlink" data-formatter="setPermission" data-halign="center" data-align="center">权限</th>
         <!-- <th data-field="Xlsxlink" data-formatter="setXlsx" data-events="actionEvents" data-halign="center" data-align="center">XLSX</th> -->
         <!-- <th data-field="Pptxlink" data-formatter="setPptx" data-events="actionEvents" data-halign="center" data-align="center">PPTX</th> -->
-        <th data-field="End" data-formatter="localDateFormatter" data-halign="center" data-align="center">结束时间</th>
+        <!-- <th data-field="End" data-formatter="localDateFormatter" data-halign="center" data-align="center">结束时间</th> -->
         <!-- <th data-field="Created" data-formatter="localDateFormatter" data-halign="center" data-visible="false" data-align="center">建立时间</th> -->
         <th data-field="Updated" data-formatter="localDateFormatter1" data-halign="center" data-align="center">更新时间</th>
       </tr>
@@ -211,21 +216,21 @@
   function setDocx(value,row,index){
     if (value){
       if (value.length==1){
-        if (value[0].Suffix=="docx"){
+        if (value[0].Suffix=="docx"||value[0].Suffix=="doc"){
           if (value[0].Permission=="4"){
             docUrl= '<a href=# title="拒绝访问"><i class="fa fa-file-word-o fa-lg"></i></a>';
           }else{
             docUrl= '<a href=/onlyoffice/'+value[0].Id+' title="协作" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
           }
           return docUrl;
-        }else if(value[0].Suffix=="xlsx"){
+        }else if(value[0].Suffix=="xlsx"||value[0].Suffix=="xls"){
           if (value[0].Permission=="4"){
             xlsUrl= '<a href=# title="拒绝访问"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
           }else{
             xlsUrl= '<a href=/onlyoffice/'+value[0].Id+' title="协作" target="_blank"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
           }
           return xlsUrl;
-        }else if(value[0].Suffix=="pptx"){
+        }else if(value[0].Suffix=="pptx"||value[0].Suffix=="ppt"){
           if (value[0].Permission=="4"){
             pptUrl= '<a href=# title="拒绝访问"><i class="fa fa-file-powerpoint-o fa-lg" style="color:Red;"></i></a>';
           }else{
@@ -236,7 +241,7 @@
           if (value[0].Permission=="4"){
             pdfUrl= '<a href=# title="拒绝访问"><i class="fa fa-file-pdf-o fa-lg" style="color:Brown;"></i></a>';
           }else{
-            pdfUrl= '<a href=/onlyoffice/'+value[0].Id+' title="协作" target="_blank"><i class="fa fa-file-pdf-o fa-lg" style="color:Brown;"></i></a>';
+            pdfUrl= '<a href=/v1/pdfcpu/onlypdf/'+value[0].Id+' title="协作" target="_blank"><i class="fa fa-file-pdf-o fa-lg" style="color:Brown;"></i></a>';
           }
           return pdfUrl;
         }else if(value[0].Suffix=="txt"){
@@ -340,6 +345,12 @@
         backdrop:'static'
       }); 
     },
+
+    'click .remove': function (e, value, row, index) {
+        var username=[]
+        username[0]=row.name
+        $tableRight.bootstrapTable('remove', {field: 'name', values: username});
+    }
   };
 
   //最后面弹出doc列表中用的_根据上面的click，弹出模态框，给模态框中的链接赋值
@@ -475,7 +486,7 @@
 
       uploader.on( 'uploadComplete', function( file ) {
         $( '#'+file.id ).find('.progress').fadeOut();
-        $('#table0').bootstrapTable('refresh', {url:'/onlyoffice/data'});
+        $('#table0').bootstrapTable('refresh', {url:'/onlyoffice/getdata'});
       });
 
       uploader.on( 'all', function( type ) {
@@ -973,14 +984,14 @@
                 <div class="col-sm-7">
                   <input type="tel" class="form-control" id="prodlabel" placeholder="以英文,号分割"></div>
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                   <label class="col-sm-3 control-label">结束时间</label>
                   <div class="col-sm-3">
                     <span style="position: relative;z-index: 9999;">
                       <input type="text" class='datepicker' id='Date'/>
                     </span>
                   </div>    
-              </div>
+              </div> -->
               <div class="form-group must">
                 <label class="col-sm-3 control-label">负责人</label>
                 <div class="col-sm-7">
@@ -1283,6 +1294,45 @@
     </div>
   </div>
 
+    <!-- 多附件列表 -->
+    <div class="form-horizontal">
+      <div class="modal fade" id="modaldocx">
+        <div class="modal-dialog" id="modalDialog12">
+          <div class="modal-content">
+            <div class="modal-header" style="background-color: #8bc34a">
+              <button type="button" class="close" data-dismiss="modal">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h3 class="modal-title">文档列表</h3>
+            </div>
+            <div class="modal-body">
+              <div class="modal-body-content">
+                <!-- <div id="pdfs" style="display:none"> -->
+                <!-- <h3>工程目录分级</h3> -->
+                <table id="docx" data-toggle="table" data-page-size="5" data-page-list="[5, 25, 50, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-click-to-select="true" data-search="true">
+                  <thead>
+                    <tr>
+                      <th data-width="10" data-checkbox="true"></th>
+                      <th data-formatter="index1">#</th>
+                      <th data-field="Title" data-sortable="true">名称</th>
+                      <th data-field="FileSize" data-sortable="true">大小</th>
+                      <th data-field="Link" data-formatter="setPdflink">查看</th>
+                      <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
+                      <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
+                    </tr>
+                  </thead>
+                </table>
+                <!-- </div> -->
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </div>
 
 <script type="text/javascript">
@@ -1485,6 +1535,7 @@
         $("#modalDialog9").draggable({ handle: ".modal-header" });
         $("#modalDialog10").draggable({ handle: ".modal-header" });
         $("#modalDialog11").draggable({ handle: ".modal-header" });
+        $("#modalDialog12").draggable({ handle: ".modal-header" });
         $("#myModal").css("overflow", "hidden");//禁止模态对话框的半透明背景滚动
     })
 
@@ -1851,12 +1902,13 @@
       return '<a class="remove" href="javascript:void(0)" title="删除"><i class="glyphicon glyphicon-remove"></i></a>';
     }
 
-    window.actionEvents = {
-      'click .remove': function (e, value, row, index) {
-        var username=[]
-        username[0]=row.name
-        $tableRight.bootstrapTable('remove', {field: 'name', values: username});
-      }        
+    // window.actionEvents = {
+      //  'click .remove': function (e, value, row, index) {
+      //   var username=[]
+      //   username[0]=row.name
+      //   $tableRight.bootstrapTable('remove', {field: 'name', values: username});
+      // }   
+
       // 'click .remove': function (e, value, row, index) {
       //   var map = {};
       // map['username'] = row.Username;
@@ -1874,7 +1926,7 @@
       //   values: username//username
       // }); 
       // }
-    };
+    // };
 
     //添加用户/角色权限
     function saveusers(){

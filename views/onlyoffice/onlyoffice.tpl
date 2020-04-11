@@ -2,27 +2,67 @@
 <html style="height: 100%;">
 	<head>
 	  <title>{{.Doc.FileName}}</title>
+    <!-- 收藏用logo图标 -->
+    <link rel="bookmark"  type="image/x-icon"  href="/static/img/only.ico"/>
+    <!-- 网站显示页logo图标 -->
+    <link rel="shortcut icon" href="/static/img/only.ico">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-	<meta name="renderer" content="webkit">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <!-- <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script> -->
+    <script type="text/javascript" src="/static/js/jquery-2.1.3.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css"/> 
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/codehandle.js"></script>
 
-  <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
-
+    <style type="text/css">
+    .floating-button2 {
+        display: block;
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: #f44336;
+        color: #fff;
+        margin: 0 auto;
+        text-align: center;
+        float: right;
+        /* background-color: #fff; */
+        position: fixed;
+        top: 40px; 
+        /*bottom: 20px;*/
+        right: 250px;
+        /* border: 0 solid #fff; */
+        /* border-radius: 500px; */
+        box-shadow: 4px 1px 1px #ccc;
+        opacity: 0.6;
+        z-index: 999;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+    }
+    </style>
 	</head>
 
 	<body style="height: 100%; margin: 0;">
-    <button type="button" data-name="insertImage" id="insertImage" class="btn btn-default">
-        <i class="fa fa-download">插入图片</i>
-        </button>
+    <!-- <button type="button" data-name="insertImage" id="insertImage" class="btn btn-default">
+      <i class="fa fa-download">插入图片</i>
+    </button> -->
+    <button type="button" class="floating-button2" id="getSignature">获取签名</button>
 		<div id="placeholder" style="height: 100%"></div>
 
     <script type="text/javascript" src="http://192.168.99.100:9000/web-apps/apps/api/documents/api.js"></script>
-      <!-- http://192.168.99.1:9000/web-apps/apps/api/documents/api.js
-        https://office.ls123.site/web-apps/apps/api/documents/api.js -->
-      <!-- https://docserver.itdos.com/web-apps/apps/api/documents/api.js -->
-      <!-- http://39.104.112.149/ds-vpath/web-apps/apps/api/documents/api.js -->
+      <!-- http://47.105.199.253:9000/web-apps/apps/api/documents/api.js -->
     <script type="text/javascript">
       var onAppReady = function() {
           console.log("ONLYOFFICE Document Editor is ready");
@@ -310,6 +350,231 @@
         "width": "100%"
       });
    	</script>
+
+    <script type="text/javascript">
+  var ret_data = ""
+  function myAjax(json) {
+    var code = 0;
+    //请求加上时间戳，防止浏览器缓存
+    $.ajax({
+      /* type: "get",
+            cache:false,   */
+      // url: "http://127.0.0.1:28810/" + "'" + codeHandler.encode(JSON.stringify(json), 'base64') + "'" + "time=" + Date.parse(new Date()),
+      async: false,
+      url: "http://192.168.99.1/v1/pdfcpu/test/" + "'" + codeHandler.encode(JSON.stringify(json), 'base64') + "'" + "time=" + Date.parse(new Date()),
+      success: function(result) {
+        // if (!result.ret.startWith("00")) {
+        //   code = -1;
+        //   alert("Windows服务返回错误,ACTION:" + json.action);
+        // } else {
+          alert("解析图片数据！");
+          // var ret_data = ""
+          //ret_data = window.atob(result.bmpdata);
+          ret_data = result.bmpdata;
+          // $("#fin").attr('src', "data:image/bmp;base64," + ret_data);
+
+          // pdf合并签名，成功后reload
+            // $.ajax({
+            //   cache: false,
+            //   type: 'POST',
+            //   url: "http://127.0.0.1/v1/pdfcpu/addwatermarks/"+{{.DocId}},
+            //   async: false,
+            //   dataType: 'json',
+            //   data: { image: ret_data },
+            //   success: function (data) {
+            //     alert("签名成功!");
+            //     window.location.reload(true);
+            //   }
+            // });
+        // }
+      },
+      error: function(result) {
+        code = -1;
+        alert("Windows服务调用异常,ACTION:" + json.action);
+        console.log(result);
+        // var ret_data = "";
+        ret_data = window.atob(result.retustring);
+        // $("#fin").attr('src', "data:image/bmp;base64," + ret_data);
+      }
+    });
+    return code;
+  }
+
+  function getpdf(json) {
+    var code = 0;
+    //请求加上时间戳，防止浏览器缓存
+    $.ajax({
+      // url: "http://127.0.0.1:28810/" + "'" + codeHandler.encode(JSON.stringify(json), 'base64') + "'" + "time=" + Date.parse(new Date()),
+      success: function(result) {
+        if (!result.ret.startWith("00")) {
+          code = -1;
+          alert("Windows服务返回错误,ACTION:" + json.action);
+        } else {
+          var ret_data = ""
+          ret_data = result.retCode;
+          alert("成功生成!");
+          //$("#fin").attr('src',"data:image/bmp;base64," + ret_data);     
+        }
+      },
+      error: function(result) {
+        code = -1;
+        alert("Windows服务调用异常,ACTION:" + json.action);
+        console.log(result);
+        var ret_data = "";
+        ret_data = window.atob(result.retustring);
+        $("#fin").attr('src', "data:image/bmp;base64," + ret_data);
+        //attr('src',''+encodedata)
+      }
+    });
+    return code;
+  }
+
+  function popSig() {
+    var json;
+    try {
+      //开始签名
+      json = { "action": "01" };
+      myAjax(json);
+    } catch (e) {
+      alert("数据采集失败");
+      console.log(e);
+    }
+  }
+
+  function showsig() {
+    //获取图片
+    var ret_data = "";
+    var json = { "action": "01" };
+    $.ajax({
+      url: "http://127.0.0.1:28810/" + "'" + window.btoa(JSON.stringify(json)) + "'" + "time=" + Date.parse(new Date()),
+      success: function(result) {
+        console.log(result);
+        if (!result.ret.startWith("00")) {
+          alert("获取图片失败");
+        } else {
+          ret_data = window.atob(result.retustring);
+          $("#fin").attr('src', "data:image/bmp;base64," + ret_data);
+        }
+      },
+      error: function(result) {
+        alert("Windows服务发生错误");
+      }
+    });
+  }
+
+  function popFP() {
+    var json;
+    try {
+      //弹出采集界面
+      json = { "action": "06" };
+      if (myAjax(json) != 0) return;
+      //设置采集图片大小
+      // showfp();
+    } catch (e) {
+      // alert("数据采集失败");
+      console.log(e);
+    }
+  }
+
+  function showfp() {
+    // 获取图片
+    var ret_data = "";
+    var json = { "action": "02", "variable1": "01" };
+    $.ajax({
+      url: "http://localhost:28810/" + "'" + window.btoa(JSON.stringify(json)) + "'" + "time=" + Date.parse(new Date()),
+      success: function(result) {
+        console.log(result);
+        if (!result.ret.startWith("00")) {
+          alert("获取图片失败");
+        } else {
+          ret_data = window.atob(result.retustring);
+          $("#fin").attr('src', "data:image/bmp;base64," + ret_data);
+        }
+      },
+      error: function(result) {
+        alert("Windows服务发生错误");
+      }
+    });
+  }
+
+  function popFPSig() {
+    //获取图片
+    var json;
+    try {
+      json = { "action": "03" };
+      myAjax(json);
+    } catch (e) {
+      alert("数据采集失败");
+      console.log(e);
+    }
+  }
+
+  // 获取签名和指纹
+  // $("#getSignature").click(function() {
+  //   var json;
+  //     try {
+  //       //开始签名
+  //       json = { "action": "01" };
+  //       myAjax(json);
+  //     } catch (e) {
+  //       alert("数据采集失败");
+  //       console.log(e);
+  //     }
+  // })
+  $("#getSignature").click(function() {
+    // document.getElementById('pageNumber').addEventListener('click', onNextPage);
+    // alert("当前页码："+document.getElementById('pageNumber').value);
+    // alert("总页码："+document.getElementById('numPages').innerHTML);
+    // var pageNumber=document.getElementById('pageNumber').value;
+    // var numPages=document.getElementById('numPages').innerHTML;
+    // 从页面的左下角（br=botom right）为原点计算偏移量，笛卡尔坐标系
+    var offsetdx="-30"
+    var offsetdy="40"
+    //缩放比例
+    var scale="1.0"
+    // return;
+    popSig();
+    // popFP();
+    // popFPSig();
+    alert(ret_data)
+    // $.ajax({
+    //   async: true,
+    //   url: "http://192.168.99.1/v1/pdfcpu/test/" + "'" + codeHandler.encode(JSON.stringify(json), 'base64') + "'" + "time=" + Date.parse(new Date()),
+    //   success: function(result) {
+    //       alert("解析图片数据！");
+    //       ret_data = result.bmpdata;
+    //   },
+    //   error: function(result) {
+    //     code = -1;
+    //     alert("Windows服务调用异常,ACTION:" + json.action);
+    //     console.log(result);
+    //     ret_data = window.atob(result.retustring);
+    //   }
+    // });
+    docEditor.insertImage({
+              "fileType": "png",
+              "url": "data:image/bmp;base64," + ret_data
+              // "url": "http://192.168.99.1/attachment/onlyoffice/signature/2020March/1584852817365874800.png"
+          });
+    // pdf合并签名，成功后reload
+    // $.ajax({
+    //     cache: false,
+    //     type: 'POST',
+    //     url: "http://127.0.0.1/v1/pdfcpu/addwatermarks/"+{{.DocId}},
+    //     async: false,
+    //     dataType: 'json',
+    //     data: { image: ret_data, pageNumber: pageNumber, numPages: numPages, offsetdx:offsetdx, offsetdy:offsetdy, scale:scale },
+    //     success: function (data) {
+    //       alert("签名+手印 成功!");
+    //       window.location.reload(true);
+    //     },
+    //     error: function(data) {
+    //       alert("签名失败！");
+    //       console.log(result);
+    //     }
+    //   });
+  })
+</script>
 
 	</body>
 </html>

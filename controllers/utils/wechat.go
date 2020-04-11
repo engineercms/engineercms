@@ -3,7 +3,7 @@ package utils
 import (
 	"encoding/json"
 	// "encoding/xml"
-	"errors"
+	// "errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/cache"
 	// "io/ioutil"
@@ -62,7 +62,7 @@ func init() {
 }
 
 //验证token时效性
-func GetAccessToken(app_version string) (accesstoken string, err error) {
+func GetAccessToken(app_version string) (accesstoken string, errcode float64, errmsg string, err error) {
 	// category := BM.Get("category")
 	//   if category == nil{
 	//       return nil
@@ -84,13 +84,12 @@ func GetAccessToken(app_version string) (accesstoken string, err error) {
 			SECRET = beego.AppConfig.String(secretstring)
 		}
 		// 重新获取，存入缓存，返回值
-		accessToken, err := requestToken(APPID, SECRET)
-		if err != nil {
-			// beego.Error(err)
-			return "", nil
-		} else {
+		accessToken, errcode, errmsg, err := requestToken(APPID, SECRET)
+		if accessToken != "" {
 			bm.Put("access_token", accessToken, 7200*time.Second)
-			return accessToken, nil
+			return accessToken, 0, "", nil
+		} else {
+			return "", errcode, errmsg, err
 		}
 		// timeoutDuration := 10000000 * time.Second
 		// accessToken, err = cache.NewCache("memory", `{"interval":7200}`)
@@ -98,12 +97,12 @@ func GetAccessToken(app_version string) (accesstoken string, err error) {
 	} else {
 		// var data string
 		// data = resultToken.(string)
-		return resultToken.(string), nil
+		return resultToken.(string), 0, "", nil
 	}
 }
 
 //请求获得accessToken
-func requestToken(appid, secret string) (string, error) {
+func requestToken(appid, secret string) (accessToken string, errcode float64, errmsg string, err error) {
 	u, err := url.Parse("https://api.weixin.qq.com/cgi-bin/token")
 	if err != nil {
 		log.Fatal(err)
@@ -120,23 +119,23 @@ func requestToken(appid, secret string) (string, error) {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		return "", errors.New("request token err :" + err.Error())
+		return "", 0, "", err //errors.New("request token err :" + err.Error())
 	}
 
 	jMap := make(map[string]interface{})
 	err = json.NewDecoder(resp.Body).Decode(&jMap)
 	if err != nil {
-		return "", errors.New("request token response json parse err :" + err.Error())
+		return "", 0, "", err //errors.New("request token response json parse err :" + err.Error())
 	}
-	if jMap["errcode"] == nil || jMap["errcode"] == 0 {
-		accessToken, _ := jMap["access_token"].(string)
-		return accessToken, nil
+	if jMap["errcode"] == nil || jMap["errcode"].(float64) == 0 {
+		accessToken, _ = jMap["access_token"].(string)
+		return accessToken, 0, "", nil
 	} else {
 		//返回错误信息
-		errcode := jMap["errcode"].(string)
+		errcode := jMap["errcode"].(float64)
 		errmsg := jMap["errmsg"].(string)
-		err = errors.New(errcode + ":" + errmsg)
-		return "", err
+		// err = errors.New(errcode + ":" + errmsg)
+		return "", errcode, errmsg, err
 	}
 }
 

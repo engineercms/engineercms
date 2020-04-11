@@ -533,7 +533,7 @@ func (c *ArticleController) GetWxArticles() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
 // @router /getwxarticless/:id [get]
-//小程序取得我的文章列表，分页_plus_通用_函文章状态
+//小程序取得我的文章列表，分页_plus_通用_含文章状态
 func (c *ArticleController) GetWxArticless() {
 	id := c.Ctx.Input.Param(":id")
 	// id := beego.AppConfig.String("wxcatalogid") //"26159" //25002珠三角设代日记id26159
@@ -603,8 +603,9 @@ func (c *ArticleController) GetWxArticless() {
 			document, err = flow.Documents.Get(tx, flow.DocTypeID(proddoc.DocTypeId), flow.DocumentID(proddoc.DocumentId))
 			if err != nil {
 				beego.Error(err)
+			} else {
+				articlearr[0].DocState = document.State
 			}
-			articlearr[0].DocState = document.State
 			articlearr[0].ProdDoc = proddoc
 			// linkarr[0].DocState = document.State
 			// linkarr[0].ProdDoc = proddoc
@@ -966,10 +967,13 @@ func (c *ArticleController) GetWxArticle() {
 		document, err = flow.Documents.Get(tx, flow.DocTypeID(proddoc.DocTypeId), flow.DocumentID(proddoc.DocumentId))
 		if err != nil {
 			beego.Error(err)
+		} else {
+			wxArticle = &WxArticle{
+				DocState: document.State,
+			}
 		}
 		wxArticle = &WxArticle{
-			DocState: document.State,
-			ProdDoc:  proddoc,
+			ProdDoc: proddoc,
 		}
 		// linkarr[0].DocState = document.State
 		// linkarr[0].ProdDoc = proddoc

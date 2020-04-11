@@ -8,17 +8,20 @@
 ——基于engineercms的设代资料管理平台（真实应用环境）
 
 1. 本系统采用go语言（基于[beego](https://github.com/astaxie/beego)框架）开发，运行文件为编译后的二进制可执行文件，所以无需像其他语言（php、nodejs、java等语言）编写的web应用那样，需要配置运行服务环境。
-本系统既可以运行于工程师个人电脑，也可以放到服务器上运行，仅运行可执行文件即可实现网络化管理项目知识资料，免维护，轻量，开源，功能齐全，采用大量开源的先进插件，是工程师不可或缺的工具。
+本系统既可以运行于工程师个人电脑，也可以放到局域网、公网服务器上运行，仅运行可执行文件即可实现网络化管理项目知识资料，免维护，轻量，开源，功能齐全，采用大量开源的先进插件，是工程师不可或缺的工具。
 2. 数据库采用sqlite嵌入式数据库，所以也无需配置数据库服务环境。
 3. 开箱即用，无需网络开发知识。
 4. 新增加对onlyoffice document server的二次开发，实现企业的实时文档协作，非常方便，避免了文档的汇总等繁琐事物，效率大大提高，协作更加优雅有趣。除了支持office的docx，xlsx及pptx格式外，还支持国产wps，et和dps格式。
 5. 在线直接预览dwg文件，避免了图纸转换成pdf的麻烦，也避免了先下载附件然后用本机电脑打开图纸的麻烦，方便设计人员查阅图纸。
 6. 采用最新的froala富文本编辑器，支持word图文直接粘贴发布，word中的图片自动上传，发布文章轻松快捷，文章支持视频和文件附件。
 7. 微信小程序客户端访问和添加图文，打开微信，搜索“珠三角设代”或“青少儿书画”即可看到小程序了，小程序端也[开源](https://github.com/3xxx/wechatengineercms)。
+8. 微信小程序多项目切换。
 8. swagger API自动化文档，方便前后端分离。
 9. 可在conf里定制9个导航条菜单。
 10. 后台查看日志。
 11. 通用的文档流程设置。文档审批，文档校审，合同评审流程，图纸校审流程，……
+12. 整合了[mindoc](https://github.com/lifei6671/mindoc)，实现了在线创作、查阅、分享、导入、导出电子书籍。
+13. 文件分享提取码。
 
 一 特性：
 
@@ -44,7 +47,7 @@
 
 √关键字检索和全文检索。
 
-√图纸易得，能更好地控制工程质量——pdf设计文件参建单位都可以阅读，提高效率，减少障碍。 
+√图纸易得，能更好地控制工程质量——pdf设计文件参建单位都可以阅读，提高效率，减少障碍。
 
 √基于“用户——角色——权限”的权限设置。独创的根据文件扩展名来进行权限管理。
 
@@ -94,19 +97,21 @@
 
 二 todo:
 
-×规范标准库编辑，爬虫；
+× 规范标准库编辑，爬虫；
 
-×首页搜索后转入新页面，首页vue.js；
+× 首页搜索后转入新页面，首页vue.js；
 
-×读取文件属性——完成时间，作为月度统计依据，或提供选择，以上传时间为统计口径，生成某个目录下月度成果报表，与上个月对比柱状图。
+× 读取文件属性——完成时间，作为月度统计依据，或提供选择，以上传时间为统计口径，生成某个目录下月度成果报表，与上个月对比柱状图；
 
-×检查responsebodyclose()；
+× 项目目录编辑完善：ztree目录拖动；
 
-×项目目录编辑完善：ztree目录拖动；
+× 多关键字检索；
 
-×多关键字检索；
+× 项目合并和拆分：将2个项目目录合并起来，其中一个项目合并到另一个项目的子目录中，手动合并文件夹，自动修改数据库；
 
-×项目合并和拆分：将2个项目目录合并起来，其中一个项目合并到另一个项目的子目录中，手动合并文件夹，自动修改数据库；
+× 流媒体服务；
+
+× websocket聊天室；
 
 ## 下载和安装
 
@@ -123,6 +128,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 [wiki](https://github.com/3xxx/EngineerCMS/wiki)。包括linux系统下的编译。linux系统下的部署参见网盘中的文档。
 
 技术开发过程详见[CSDN我的博客](https://blog.csdn.net/hotqin888)
+系统简单使用见[mindoc文档](https://zsj.itdos.com/docs/engineercms_008)
 
 ## Quick Start
 
@@ -133,6 +139,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 ## Documentation
 
 * [中文文档]——请查阅document文件夹
+* 系统简单使用见[mindoc文档](https://zsj.itdos.com/docs/engineercms_008)
 
 ## 免费开源和问题反馈
 
@@ -151,6 +158,9 @@ Linux系统下请替换掉执行文件engineercms(linux)
 8. [mahonia](https://github.com/axgle/mahonia)
 9. [flow文档流程](https://github.com/js-ojus/flow)[我改造的flow文档流程](https://github.com/3xxx/flow)
 10. [xorm](https://github.com/go-xorm/xorm)
+11. [gorm](https://github.com/jinzhu/gorm)
+12. [unioffice](github.com/unidoc/unioffice)
+13. [pdfcpu](https://github.com/pdfcpu/pdfcpu)
 
 ## 前端
 1. [onlyoffice document server文档协作](https://github.com/ONLYOFFICE/DocumentServer)

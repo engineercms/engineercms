@@ -15,9 +15,17 @@
   <link rel="stylesheet" href="/static/css/custom.css">
 
   <script type="text/javascript" src="/static/js/bootstrap-treeview.js"></script>
-  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-treeview.css"/>
-
-  <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css"/>
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-treeview.css" />
+  <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" />
+  <style type="text/css">
+.page-wrapper.toggled .sidebar-wrapper {
+  position: absolute;
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+}
+}
+  </style>
 </head>
 <body>
 

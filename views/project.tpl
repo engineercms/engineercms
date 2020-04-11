@@ -2,228 +2,192 @@
 <!DOCTYPE html>
 {{template "header"}}
 <title>项目详细-EngiCMS</title>
-  <script src="/static/js/bootstrap-treeview.js"></script>
-  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-treeview.css"/>
+<script src="/static/js/bootstrap-treeview.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/css/bootstrap-treeview.css" />
+
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css">
+  <link rel="stylesheet" href="/static/css/jquery.mCustomScrollbar.min.css">
+  <link rel="stylesheet" href="/static/css/custom.css">
+  <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" />
+  <script src="/static/js/jquery.mCustomScrollbar.concat.min.js"></script>
+  <script src="/static/js/custom.js"></script>
+  <!-- <style type="text/css">
+    @import 'https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css';
+    
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: sans-serif;
+    }
+    
+    .sidebar {
+      float: left;
+      width: 100px;
+      height: 100%;
+      margin-left: -100px;
+      background: #2c3e50;
+      overflow: hidden;
+      transition: 0.8s all;
+    }
+    
+    .side {
+      margin-left: 0;
+    }
+    
+    .sidebar ul {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .sidebar ul li {
+      list-style: none;
+    }
+    
+    .sidebar ul li a {
+      text-decoration: none;
+      color: white;
+      height: 80px;
+      width: 100%;
+      font-size: 40px;
+      line-height: 80px;
+      text-align: center;
+      display: block;
+      transition: 0.6s all;
+    }
+    
+    .sidebar ul li a:hover {
+      background: #34495e;
+    }
+    
+    .btn {
+      float: left;
+      padding: 0 10px;
+      font-size: 40px;
+      text-decoration: none;
+      color: #2c5e50;
+      font-family: ionicons;
+      cursor: pointer;
+    }
+    
+    .btn:before {
+      content: '\f32a';
+    }
+    
+    .btnc:before {
+      content: '\f2c0';
+    }
+  </style> -->
 </head>
-<!-- <div class="navbar navbar-default navbar-static-top"> -->
-  <div class="container-fill">{{template "navbar" .}}</div>
-<!-- </div> -->
+
+<div class="container-fill">{{template "navbar" .}}</div>
 <body>
-<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-  <div id="tree"></div>
-</div>
-
+  <div class="page-wrapper toggled">
+    <nav id="sidebar" class="sidebar-wrapper">
+      <div class="sidebar-content mCustomScrollbar _mCS_1 mCS-autoHide desktop">
+        <div id="mCSB_1" class="mCustomScrollBox mCS-light mCSB_vertical mCSB_inside" tabindex="0" style="max-height: none;">
+          <div id="mCSB_1_container" class="mCSB_container" dir="ltr">
+            <a href="#" id="toggle-sidebar"> <i class="fa fa-bars"></i>
+            </a>
+            <div class="sidebar-brand">
+              <a href="#">pro sidebar</a>
+            </div>
+            <div class="sidebar-menu">
+              <ul id="tree"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <main class="page-content">
+      <div class="breadcrumbs">
+        <ol class="breadcrumb" style="margin-bottom: 2px;" split="&gt;">
+          <li>
+            <a href="javascript:gototree({{.Category.Id}})"> <i class="fa fa-home" aria-hidden="true"></i>
+              项目编号：{{.Category.Code}}
+            </a>
+          </li>
+        </ol>
+      </div>
+      <div class="container-fluid">
+        <iframe src="/project/{{.Id}}/{{.Id}}" name='iframepage' id="iframepage" frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" onload="this.height=800"></iframe>
+      </div>
+    </main>
+  </div>
+  
 <script type="text/javascript">
-    $(function () {
-            // return data;
-          $('#tree').treeview({
-            // data: data,         // data is not optional
-            data:[{{.json}}],
-            levels: 2,
-            showTags:true,
-            loadingIcon:"fa fa-hourglass",
-            lazyLoad:loaddata,
-              // var $Tree = $('#tv').treeview({
-              // data: defaultData,
-              // lazyLoad: function (node, display) {
-              //     data = defaultData2;
-              //     display(data);
-              // }
-              // });
-            // enableLinks: true,
-            // multiSelect: true
-          });  
-        // }
-          // alert(JSON.stringify({{.json}}));
-         // $('#treeview').treeview('collapseAll', { silent: true });
-          // $('#tree').treeview({
-          // data: [{{.json}}],//defaultData,
-          // data:alternateData,
-          // levels: 3,// expanded to 5 levels
-          // enableLinks:true,
-          // showTags:true,
-          // collapseIcon:"glyphicon glyphicon-chevron-up",
-          // expandIcon:"glyphicon glyphicon-chevron-down",
-        // });
-        $('#tree').on('nodeSelected', function(event, data) {
-            // alert("名称："+data.text);
-            // alert("节点id："+data.nodeId);
-            // alert("部门id："+data.id);  
-            // alert("部门级别："+data.Level);
-            // $("#regis").html(data.text);//显示部门名称
-            // $("#regis").css("color","black");
-            //点击任何一级，都是显示这一级下的成果
-          document.getElementById("iframepage").src="/project/{{.Id}}/"+data.id;
-          // $("#iframepage").contents().find("#table0").bootstrapTable('refresh', {url:'/project/products/'+data.id});
-          // $('#table0').bootstrapTable('refresh', {url:'/project/products/'+data.id});
-          //?secid="+data.Id+"&level="+data.Level;
-          //这里用刷新右侧表格中的数据refresh行不通！！！！
-          $.ajax({
-            type:"get",
-            url:"/project/navbar/"+data.id,
-            // data: { uname: $("#uname").val()},
-            // dataType:'json',//dataType:JSON,这种是jquerylatest版本的表达方法。不支持新版jquery。
-            success:function(data,status){
-              // $.each(data,function(i,d){
-                $(".breadcrumb #nav").remove();
-                for (i=0;i<data.length;i++){
-                    // $(".breadcrumb").append('<li><a href="javascript:void(0)"><i class="fa fa-home">项目编号：' + {{.Category.Code}}+ '</a></li>');onclick="SomeJavaScriptCode"
-                    $(".breadcrumb").append('<li id="nav"><a href="javascript:gototree(' + data[i].Id + ')">' + data[i].Title + '</a></li>');
-                }
-              // });
-            }
-          });
-        }); 
-        // var obj = {};
-        // obj.text = "123";
-        $("#btn").click(function (e) {
-            var arr = $('#tree').treeview('getSelected');
-            for (var key in arr) {
-                c.innerHTML = c.innerHTML + "," + arr[key].id;
-            }
-        });
-    })
+  // $('.btn').on('click', function() {
+  //   $('.btn').toggleClass('btnc');
+  //   $('.sidebar').toggleClass('side');
+  // })
 
-    function loaddata(node,func){//这个技巧真高，即能返回参数，又能把参数通过函数发回去
-      // alert(node.id);
-      // alert(func);
+  $(function() {
+    $('#tree').treeview({
+      data: [{{.json }}],
+      levels: 2,
+      showTags: true,
+      loadingIcon: "fa fa-minus",
+      lazyLoad: loaddata,
+    });
+    $('#tree').on('nodeSelected', function(event, data) {
+      document.getElementById("iframepage").src = "/project/{{.Id}}/" + data.id;
       $.ajax({
-        type:"get",
-        url:"/project/getprojcate",
-        data: {id:node.id},
-        success:function(data,status){
-          if (data){
-            func(data);
+        type: "get",
+        url: "/project/navbar/" + data.id,
+        success: function(data, status) {
+          $(".breadcrumb #nav").remove();
+          for (i = 0; i < data.length; i++) {
+            $(".breadcrumb").append('<li id="nav"><a href="javascript:gototree(' + data[i].Id + ')">' + data[i].Title + '</a></li>');
           }
         }
       });
-      // var singleNode = {
-      //   text: "projcatename2",
-      //   id:"08",
-      // };
-      //var _this = this;
-      // this._options.lazyLoad(node, function (nodes) {
-        // Adding the node will expand its parent automatically
-        // _this.addNode(nodes, node);
-      // });
-      // func(singleNode);//这样明显优雅很多
-      // $("#tree").treeview("addNode", [singleNode,node]);这一句和上面一句等同
-      // if (projcatename2)
-      //   {  
-      //       $.ajax({
-      //           type:"post",
-      //           url:"/admin/project/addprojectcate",
-      //           data: {id:arr[0].id,name:projcatename2,code:projcatecode2},
-      //           success:function(data,status){
-      //             alert("添加“"+data+"”成功！(status:"+status+".)");
-      //             var singleNode = {
-      //               text: projcatename2,
-      //               id:data,
-      //               code:projcatecode2
-      //             };
-      //             $("#tree").treeview("addNode", [singleNode,arr]);
-      //             $('#modalTable2').modal('hide');
-      //            }
-      //       });  
-      //   } 
-    }
+    });
+    $("#btn").click(function(e) {
+      var arr = $('#tree').treeview('getSelected');
+      for (var key in arr) {
+        c.innerHTML = c.innerHTML + "," + arr[key].id;
+      }
+    });
+  })
 
-    function gototree(e){
-      document.getElementById("iframepage").src="/project/{{.Id}}/"+e;
-      var findCheckableNodess = function() {
-        return $('#tree').treeview('findNodes', [e, 'id']);
-      }; 
-      var checkableNodes = findCheckableNodess();
-        $('#tree').treeview('toggleNodeSelected', [ checkableNodes, { silent: true } ]);
-        $('#tree').treeview('toggleNodeExpanded', [ checkableNodes, { silent: true } ]);
-        $('#tree').treeview('revealNode', [ checkableNodes, { silent: true } ]);
-    }
-        // Select/unselect/toggle nodes
-        // $('#input-select-node').on('keyup', function (e) {
-        //   selectableNodes = findSelectableNodes();
-        //   $('.select-node').prop('disabled', !(selectableNodes.length >= 1));
-        // });
-        // $('#btn-select-node.select-node').on('click', function (e) {
-        //   $selectableTree.treeview('selectNode', [ selectableNodes, { silent: $('#chk-select-silent').is(':checked') }]);
-        // });
-        // $('#btn-unselect-node.select-node').on('click', function (e) {
-        //   $selectableTree.treeview('unselectNode', [ selectableNodes, { silent: $('#chk-select-silent').is(':checked') }]);
-        // });
-        // $('#btn-toggle-selected.select-node').on('click', function (e) {
-        //   $selectableTree.treeview('toggleNodeSelected', [ selectableNodes, { silent: $('#chk-select-silent').is(':checked') }]);
-        // });
-    function index1(value,row,index){
-    // alert( "Data Loaded: " + index );
-      return index+1
-    }
-</script>
+  function loaddata(node, func) {
+    $.ajax({
+      type: "get",
+      url: "/project/getprojcate",
+      data: { id: node.id },
+      success: function(data, status) {
+        if (data) {
+          func(data);
+        }
+      }
+    });
+  }
 
-<div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-<!-- 面包屑导航 -->
-  <!-- <div class="breadcrumbs"> -->
-    <ol class="breadcrumb" style="margin-bottom: 2px;" split="&gt;">
-      <li>
-        <a href="javascript:gototree({{.Category.Id}})"> <i class="fa fa-home" aria-hidden="true"></i>
-          项目编号：{{.Category.Code}}
-        </a>
-      </li>
-      <!-- {{range $index, $elem :=.jishu}}
-      <li>
-        <a href="javascript:void(0)">
-          jibie.title
-        </a>
-      </li>
-      {{end}}-->
-    </ol>
-  <!-- </div> -->
-    <!-- <div class="form-group"> -->
-        <!-- <label class="control-label" id="regis" for="LoginForm-UserName"></label> 显示部门名称  -->
-    <!-- </div> -->
-        <!-- <iframe src="/secofficeshow" name='main' id="iframepage" frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" onLoad="iFrameHeight()"></iframe> -->
-        <!-- <iframe src="/secofficeshow" name='main' id="iframepage" frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" onload="changeFrameHeight()"></iframe> -->
-        <!-- 默认显示所有成果？还是项目简介？当为项目id时，判断是一级，显示里面的成果 -->
-       <iframe src="/project/{{.Id}}/{{.Id}}" name='iframepage' id="iframepage" frameborder="0"  width="100%" scrolling="no" marginheight="0" marginwidth="0"  onload="this.height=800"></iframe> 
-</div>  
+  function gototree(e) {
+    document.getElementById("iframepage").src = "/project/{{.Id}}/" + e;
+    var findCheckableNodess = function() {
+      return $('#tree').treeview('findNodes', [e, 'id']);
+    };
+    var checkableNodes = findCheckableNodess();
+    $('#tree').treeview('toggleNodeSelected', [checkableNodes, { silent: true }]);
+    $('#tree').treeview('toggleNodeExpanded', [checkableNodes, { silent: true }]);
+    $('#tree').treeview('revealNode', [checkableNodes, { silent: true }]);
+  }
 
-
-<script type="text/javascript">
- function reinitIframe(){//http://caibaojian.com/frame-adjust-content-height.html
-  var iframe = document.getElementById("iframepage");
-    try{
-    var bHeight = iframe.contentWindow.document.body.scrollHeight;
-    var dHeight = iframe.contentWindow.document.documentElement.scrollHeight; var height = Math.max(bHeight, dHeight,800); iframe.height = height;
-      // console.log(height);//这个显示老是在变化
-    }catch (ex){
-    } 
-    } 
-    window.setInterval("reinitIframe()", 200);
-
-
-    // $(function () {
-    //     $('#search').click(function () {
-    //       var productid=$("#productid").val();
-    //       var keyword=$("#keyword").val();
-    //       if (productid){
-    //         var url="/projects/search"
-    //       }else{
-    //         var url="/project/product/search"
-    //       }
-    //       $.ajax({
-    //         type:"post",//这里是否一定要用post？？？
-    //         url:url,
-    //         data: {productid:productid,keyword:keyword},
-    //         success:function(data,status){//数据提交成功时返回数据
-    //           $("#attachtitle").html(rowtitle+'—附件列表');
-    //           $('#attachs').bootstrapTable('refresh', {url:'/achievement/catalog/attachment/'+row.id});
-    //           $('#modalattach').modal({
-    //             show:true,
-    //             backdrop:'static'
-    //           });
-    //         }
-    //       });
-
-    //     });
-    // });
- </script>
+  function reinitIframe() {
+    var iframe = document.getElementById("iframepage");
+    try {
+      var bHeight = iframe.contentWindow.document.body.scrollHeight;
+      var dHeight = iframe.contentWindow.document.documentElement.scrollHeight;
+      var height = Math.max(bHeight, dHeight, 800);
+      iframe.height = height;
+    } catch (ex) {}
+  }
+  window.setInterval("reinitIframe()", 200);
+  </script>
 </body>
+
 </html>

@@ -16,13 +16,14 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 	// "mime/multipart"
+	"bytes"
 	"github.com/astaxie/beego/httplib"
-	// "bytes"
 	// "github.com/astaxie/beego/utils/pagination"
 	// "crypto/aes"
 	// "crypto/cipher"
@@ -488,7 +489,7 @@ func (c *OnlyController) GetData() {
 	var myRes, roleRes [][]string
 	if useridstring != "0" {
 		myRes = e.GetPermissionsForUser(useridstring)
-		// beego.Info(myRes)
+		beego.Info(myRes)
 	}
 	myResall := e.GetPermissionsForUser("") //取出所有设置了权限的数据
 
@@ -532,9 +533,9 @@ func (c *OnlyController) GetData() {
 				if w.Uid != uid { //如果不是作者本人
 					for _, k := range myResall { //所有设置了权限的都不能看
 						// beego.Info(k)
-						if strconv.FormatInt(v.Id, 10) == path.Base(k[1]) {
-							// docxarr[0].Permission = "4"
-							docxarr[0].Permission = "3"
+						if strconv.FormatInt(v.Id, 10) == path.Base(k[1]) && !isadmin {
+							docxarr[0].Permission = "4"
+							// docxarr[0].Permission = "3"
 						}
 					}
 
@@ -574,8 +575,8 @@ func (c *OnlyController) GetData() {
 						// beego.Info(i)
 						// beego.Info(strconv.FormatInt(v.Id, 10))
 						// beego.Info(path.Base(k[1]))
-						docxarr[0].Permission = "3"
-						// docxarr[0].Permission = "4"
+						// docxarr[0].Permission = "3"
+						docxarr[0].Permission = "4"
 						// beego.Info(strconv.FormatInt(v.Id, 10))
 						// beego.Info(path.Base(k[1]))
 					}
@@ -619,8 +620,8 @@ func (c *OnlyController) GetData() {
 		// Xlsxslice = make([]XlsxLink, 0) //再把slice置0
 		// Pptxslice = make([]PptxLink, 0)
 		//无权限的不显示
-		//如果permission=4，则不赋值给link
-		if linkarr[0].Docxlink[0].Permission != "4" {
+		//如果permission！=4或者是管理，则赋值给link
+		if linkarr[0].Docxlink[0].Permission != "4" || isadmin {
 			link = append(link, linkarr...)
 		}
 	}
@@ -713,8 +714,8 @@ func (c *OnlyController) OnlyOffice() {
 			Permission = "1"
 			for _, k := range myResall {
 				if strconv.FormatInt(onlyattachment.Id, 10) == path.Base(k[1]) {
-					// Permission = "4"
-					Permission = "3"
+					Permission = "4"
+					// Permission = "3"
 				}
 			}
 			for _, k := range myRes {
@@ -752,8 +753,8 @@ func (c *OnlyController) OnlyOffice() {
 		Permission = "1"
 		for _, k := range myResall { //所有设置了权限的不能看
 			if strconv.FormatInt(onlyattachment.Id, 10) == path.Base(k[1]) {
-				Permission = "3"
-				// Permission = "4"
+				// Permission = "3"
+				Permission = "4"
 			}
 			//如果设置了everyone用户权限，则按everyone的权限
 		}
@@ -812,6 +813,7 @@ func (c *OnlyController) OnlyOffice() {
 	} else if Permission == "4" {
 		// route := c.Ctx.Request.URL.String()
 		// c.Redirect("/roleerr?url="+route, 302)
+		c.TplName = "onlyoffice/login.tpl"
 		return
 	}
 
@@ -1102,7 +1104,8 @@ func (c *OnlyController) UrltoCallback() {
 	var callback Callback
 	json.Unmarshal(c.Ctx.Input.RequestBody, &callback)
 	// beego.Info(string(c.Ctx.Input.RequestBody))
-	// beego.Info(callback)
+	beego.Info(callback.Status)
+	beego.Info(callback.Forcesavetype)
 	if callback.Status == 1 || callback.Status == 4 {
 		//•	1 - document is being edited,
 		//•	4 - document is closed with no changes,
@@ -1254,7 +1257,7 @@ func (c *OnlyController) UrltoCallback() {
 
 		c.Data["json"] = map[string]interface{}{"error": 0}
 		c.ServeJSON()
-	} else if callback.Status == 6 && callback.Forcesavetype == 1 {
+	} else if callback.Status == 6 && callback.Forcesavetype == 1 || callback.Forcesavetype == 0 {
 		//•	6 - document is being edited, but the current document state is saved,
 		resp, err := http.Get(callback.Url)
 		if err != nil {
@@ -1278,13 +1281,14 @@ func (c *OnlyController) UrltoCallback() {
 		_, err = f.Write(body) //这里直接用resp.Body如何？
 		if err != nil {
 			beego.Error(err)
-		} else {
-			//更新文档更新时间
-			err = models.UpdateDocTime(onlyattachment.DocId)
-			if err != nil {
-				beego.Error(err)
-			}
 		}
+		// else {
+		//更新文档更新时间_不能更新时间，会造成key失效
+		// err = models.UpdateDocTime(onlyattachment.DocId)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// }
 		c.Data["json"] = map[string]interface{}{"error": 0}
 		c.ServeJSON()
 	} else if callback.Status == 3 || callback.Status == 7 {
@@ -1602,56 +1606,252 @@ func (c *OnlyController) DownloadDoc() {
 	// 	}
 	// 	useridstring = strconv.FormatInt(user.Id, 10)
 	// }
-	//1.url处理中文字符路径，[1:]截掉路径前面的/斜杠
-	// filePath1 := path.Base(c.Ctx.Request.RequestURI)
-	// beego.Info(filePath1)
-	filePath, err := url.QueryUnescape(c.Ctx.Request.RequestURI[1:]) //attachment/SL2016测试添加成果/A/FB/1/Your First Meteor Application.pdf
+	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
+	// docid := c.Ctx.Input.Param(":id")
+	// beego.Info(docid)
+	//pid转成64为
+	// idNum, err := strconv.ParseInt(docid, 10, 64)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	//根据成果id取得所有附件
+	// attachments, err := models.GetOnlyAttachments(idNum)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// filePath := "attachment/onlyoffice/" + attachments[0].FileName
+
+	filePath, err := url.QueryUnescape(c.Ctx.Request.RequestURI[1:]) //attachment/onlyoffice/id
 	if err != nil {
 		beego.Error(err)
 	}
+	//由附件名取得附件id
+	var downloadfile models.OnlyAttachment
 	if strings.Contains(filePath, "?hotqinsessionid=") {
 		filePathtemp := strings.Split(filePath, "?")
 		filePath = filePathtemp[0]
-		// beego.Info(filePath)
+		beego.Info(filePath)
 	}
-	// beego.Info(filePath)
-	// fileext := path.Ext(filePath)
-	//根据路由path.Dir——再转成数组strings.Split——查出项目id——加上名称——查出下级id
-	// beego.Info(path.Dir(filePath))
-	// filepath1 := path.Dir(filePath)
-	// array := strings.Split(filepath1, "/")
-	// beego.Info(strings.Split(filepath1, "/"))
-	http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)
+	filename := filepath.Base(filePath)
+	downloadfile, err = models.GetOnlyAttachbyName(filename)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	//1.管理员或者没有设置权限的文档直接可以下载。
+	police := e.GetFilteredPolicy(1, "/onlyoffice/"+strconv.FormatInt(downloadfile.Id, 10))
+	beego.Info(police)
+	if isadmin || len(police) == 0 {
+		// c.Ctx.Output.Download(filePath) //这个能保证下载文件名称正确
+		http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)
+		return
+	}
+
+	//2.取得用户权限
+	police = e.GetFilteredPolicy(0, strconv.FormatInt(uid, 10), "/onlyoffice/"+strconv.FormatInt(downloadfile.Id, 10))
+	beego.Info(police)
+	for _, v2 := range police {
+		beego.Info(v2)
+		v2int, err := strconv.ParseInt(v2[2], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		if v2int <= 3 {
+			// canidown = true
+			// c.Ctx.Output.Download(filePath) //这个能保证下载文件名称正确
+			http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)
+			return
+		}
+	}
+
+	//3.取得用户角色——取得角色的权限
+	userroles := e.GetRolesForUser(strconv.FormatInt(uid, 10))
+	beego.Info(userroles)
+	// userrole := make([]Userrole, 0)
+	// var canidown bool
+	for _, v1 := range userroles {
+		police := e.GetFilteredPolicy(0, v1, "/onlyoffice/"+strconv.FormatInt(downloadfile.Id, 10))
+		beego.Info(police)
+		for _, v2 := range police {
+			beego.Info(v2)
+			v2int, err := strconv.ParseInt(v2[2], 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
+			if v2int <= 3 {
+				// canidown = true
+				// c.Ctx.Output.Download(filePath) //这个能保证下载文件名称正确
+				http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)
+				return
+			}
+		}
+	}
+	//1.url处理中文字符路径，[1:]截掉路径前面的/斜杠
+	// filePath1 := path.Base(c.Ctx.Request.RequestURI)
+	// beego.Info(filePath1)
+	// c.Data["json"] = "无权限下载"//这个导致文档被覆盖，不可取
+	// c.ServeJSON()
 }
 
-//文档管理页面下载文档
+// @Title post download onlydoc
+// @Description post download onlydoc by id
+// @Param id query string true "The id of onlydoc"
+// @Param url query string true "The url of onlyofficeserver"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articls not found
+// @router /downloadonlydoc [post]
+//文档管理页面下载最新的文档——先检查是否有人打开文档
+func (c *OnlyController) DownloadOnlyDoc() {
+	id := c.Input().Get("id")
+	// key := c.Input().Get("key")
+	// beego.Info(id)
+	url := c.Input().Get("url")
+	// array := strings.Split(ids, ",")
+	// for _, v := range array {
+	//pid转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"errNo": 0, "info": "ERR", "data": "字符转int64错误", "msg": "字符转int64错误"}
+		c.ServeJSON()
+		return
+	}
+	//根据附件id取得附件的prodid，路径
+	onlyattachment, err := models.GetOnlyAttachbyId(idNum)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"errNo": 1, "info": "ERR", "data": "查询onlyattachment错误", "msg": "查询onlyattachment错误"}
+		c.ServeJSON()
+		return
+	}
+	key := strconv.FormatInt(onlyattachment.Updated.UnixNano(), 10)
+
+	// For the interaction with the document command service the POST requests are used.
+	// The request parameters are entered in JSON format in the request body.
+	requestUrl := url + "/coauthoring/CommandService.ashx"
+	b, err := json.Marshal(map[string]string{
+		"c":        "forcesave",
+		"key":      key,
+		"userdata": "sample userdata",
+	})
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"errNo": 2, "info": "ERR", "data": "json转换错误", "msg": "json转换错误"}
+		c.ServeJSON()
+		return
+	}
+	resp, err := http.Post(requestUrl, "application/x-www-form-urlencoded", bytes.NewBuffer(b)) //注意，这里是post
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"errNo": 3, "info": "ERR", "data": "post请求错误", "msg": "post请求错误"}
+		c.ServeJSON()
+		return
+	}
+	// beego.Info(resp)
+	// beego.Info(resp.Body)
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"errNo": 4, "info": "ERR", "data": "请求返回错误", "msg": "请求返回错误"}
+		c.ServeJSON()
+		return
+	}
+	var msgdata map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&msgdata)
+	if err != nil {
+		c.Data["json"] = map[string]interface{}{"errNo": 5, "info": "ERR", "data": "解码错误", "msg": "解码错误"}
+		c.ServeJSON()
+		return
+	}
+	// beego.Info(msgdata)
+	if msgdata["error"].(float64) == 0 {
+		c.Data["json"] = map[string]interface{}{"errNo": 6, "info": "SUCCESS", "data": "forcesave成功", "msg": "forcesave成功"}
+		c.ServeJSON()
+		return
+	} else if msgdata["error"].(float64) == 4 {
+		c.Data["json"] = map[string]interface{}{"errNo": 7, "info": "ERR", "data": "文档无修改", "msg": "文档无修改"}
+		c.ServeJSON()
+		return
+	}
+}
+
+//文档管理页面下载文档2
 func (c *OnlyController) Download() {
 	// c.Data["IsLogin"] = checkAccount(c.Ctx)
 	//4.取得客户端用户名
-	// var uname, useridstring string
-	v := c.GetSession("uname")
-	if v != nil {
-		uname := v.(string)
-		beego.Info(uname)
-		// 	c.Data["Uname"] = v.(string)
-		// 	user, err := models.GetUserByUsername(uname)
-		// 	if err != nil {
-		// 		beego.Error(err)
-		// 	}
-		// 	useridstring = strconv.FormatInt(user.Id, 10)
-	}
+	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
 	docid := c.Ctx.Input.Param(":id")
+	// beego.Info(docid)
 	//pid转成64为
 	idNum, err := strconv.ParseInt(docid, 10, 64)
 	if err != nil {
 		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"errNo": 0, "info": "ERR", "data": "字符转int64错误", "msg": "字符转int64错误"}
+		c.ServeJSON()
+		return
 	}
 	//根据成果id取得所有附件
 	attachments, err := models.GetOnlyAttachments(idNum)
 	if err != nil {
 		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"errNo": 1, "info": "ERR", "data": "查询onlyattachment错误", "msg": "查询onlyattachment错误"}
+		c.ServeJSON()
+		return
 	}
 	filePath := "attachment/onlyoffice/" + attachments[0].FileName
+	//管理员或者没有设置权限的文档直接可以下载。
+	police := e.GetFilteredPolicy(1, "/onlyoffice/"+docid)
+	if isadmin || len(police) == 0 {
+		c.Ctx.Output.Download(filePath) //这个能保证下载文件名称正确
+		return
+	}
+	// beego.Info(police[0][0])
+
+	userroles := e.GetRolesForUser(strconv.FormatInt(uid, 10))
+	// beego.Info(userroles)
+	// userrole := make([]Userrole, 0)
+	// var canidown bool
+
+	for _, v1 := range userroles {
+		police := e.GetFilteredPolicy(0, v1, "/onlyoffice/"+docid)
+		// beego.Info(police)
+		for _, v2 := range police {
+			// beego.Info(v2)
+			v2int, err := strconv.ParseInt(v2[2], 10, 64)
+			if err != nil {
+				beego.Error(err)
+				c.Data["json"] = map[string]interface{}{"errNo": 2, "info": "ERR", "data": "字符转int64错误", "msg": "字符转int64错误"}
+				c.ServeJSON()
+				return
+			}
+			if v2int <= 3 {
+				// canidown = true
+				c.Ctx.Output.Download(filePath) //这个能保证下载文件名称正确
+				return
+			}
+		}
+	}
+	c.Data["json"] = map[string]interface{}{"errNo": 3, "info": "ERR", "data": "无权下载", "msg": "无权下载"}
+	c.ServeJSON()
+	// var paths []beegoormadapter.CasbinRule
+	// o := orm.NewOrm()
+	// qs := o.QueryTable("casbin_rule")
+	// _, err := qs.Filter("PType", "p").Filter("v0", "role_"+roleid).Filter("v1", "/onlyoffice"+docid).All(&paths)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// beego.Info(paths)
+
+	// var projids []string
+	// for _, v1 := range paths {
+	// 	beego.Info(v1.V2)
+	// projid := strings.Replace(v1.V1, "/*", "", -1)
+	// projids = append(projids, path.Base(projid))
+	// }
+
+	// if e.Enforce(useridstring, "attachment/onlyoffice/" +docid, c.Ctx.Request.Method, fileext) || isadmin {
+
 	// beego.Info(filePath)
 	//1.url处理中文字符路径，[1:]截掉路径前面的/斜杠
 	// filePath := path.Base(ctx.Request.RequestURI)
@@ -1666,8 +1866,8 @@ func (c *OnlyController) Download() {
 	// array := strings.Split(filepath1, "/")
 	// beego.Info(strings.Split(filepath1, "/"))
 	// http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)//这个下载文件名不对
-	c.Ctx.Output.Download(filePath) //这个能保证下载文件名称正确
 
+	// }
 	// *******解密****************
 	// aesKey := "0123456789123456"
 	// ciphertext, err := ioutil.ReadFile("attachment/onlyoffice/MyXLSXFile1.xlsx")

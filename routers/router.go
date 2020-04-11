@@ -64,6 +64,14 @@ func init() {
 	// 		console.log(“errr==”)
 	// 	}
 	// });
+	var FilterUser = func(ctx *context.Context) {
+		// v := ctx.Input.CruSession.Get("uname")
+		v := ctx.Input.Session("uname")
+		// uname = v.(string)//uid---v.(int)
+		if v == nil {
+			ctx.Redirect(302, "/login")
+		}
+	}
 
 	//自动化文档
 	ns :=
@@ -136,6 +144,18 @@ func init() {
 					&controllers.FileinputController{},
 				),
 			),
+			beego.NSNamespace("/pdfcpu",
+				beego.NSBefore(FilterUser),
+				beego.NSInclude(
+					&controllers.PdfCpuController{},
+				),
+			),
+			beego.NSNamespace("/flv",
+				beego.NSBefore(FilterUser),
+				beego.NSInclude(
+					&controllers.FlvController{},
+				),
+			),
 			// beego.NSNamespace("/cms",
 			// 	beego.NSInclude(
 			// 		&controllers.CMSController{},
@@ -163,23 +183,16 @@ func init() {
 	//cms中预览office回调
 	beego.Router("/officeviewcallback", &controllers.OnlyController{}, "*:OfficeViewCallback")
 
-	var FilterUser = func(ctx *context.Context) {
-		// v := ctx.Input.CruSession.Get("uname")
-		v := ctx.Input.Session("uname")
-		// uname = v.(string)//uid---v.(int)
-		if v == nil {
-			ctx.Redirect(302, "/login")
-		}
-	}
 	beego.InsertFilter("/onlyoffice", beego.BeforeRouter, FilterUser)
 
 	// beego.Router("/onlyoffice/post", &controllers.OnlyController{}, "post:PostOnlyoffice")
 	beego.Router("/onlyoffice", &controllers.OnlyController{}, "get:Get")
 	//table获取所有数据给上面界面使用
-	beego.Router("/onlyoffice/data", &controllers.OnlyController{}, "*:GetData")
+	beego.Router("/onlyoffice/getdata", &controllers.OnlyController{}, "*:GetData")
 	//添加一个文档
 	beego.Router("/onlyoffice/addattachment", &controllers.OnlyController{}, "post:AddOnlyAttachment")
 	//在onlyoffice中打开文档协作
+	beego.InsertFilter("/onlyoffice/:id:string", beego.BeforeRouter, FilterUser)
 	beego.Router("/onlyoffice/:id:string", &controllers.OnlyController{}, "*:OnlyOffice")
 	//cms中预览office
 	beego.Router("/officeview/:id:string", &controllers.OnlyController{}, "*:OfficeView")
@@ -318,6 +331,8 @@ func init() {
 	beego.Router("/admin/department/deletedepartment", &controllers.AdminController{}, "*:DeleteDepartment")
 
 	//***后台用户管理
+	beego.Router("/jsoneditor", &controllers.AdminController{}, "get:Jsoneditor")
+
 	//如果后面不带id，则显示所有用户
 	beego.Router("/admin/user/?:id:string", &controllers.UserController{}, "*:User")
 	//添加用户
@@ -636,7 +651,7 @@ func init() {
 	//微信登录
 	// beego.Router("/wx/wxlogin", &controllers.LoginController{}, "*:WxLogin")
 
-	beego.Router("/mindocindex", &controllers.HomeController{}, "*:Index")
+	beego.Router("/mindoc", &controllers.HomeController{}, "*:Index")
 
 	beego.Router("/mindoclogin", &controllers.AccountController{}, "*:Login")
 	beego.Router("/logout", &controllers.AccountController{}, "*:Logout")

@@ -1102,7 +1102,7 @@ func (c *CheckController) SubscribeMessage() {
 func (c *CheckController) SendMessage() {
 	// POST https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=ACCESS_TOKEN
 	app_version := c.Input().Get("app_version")
-	accessToken, err := utils.GetAccessToken(app_version)
+	accessToken, _, _, err := utils.GetAccessToken(app_version)
 
 	if err != nil {
 		beego.Error(err)
@@ -1114,30 +1114,36 @@ func (c *CheckController) SendMessage() {
 	// openid := "opl4B5YvCVXaatKF6VGUSbohMlWQ" //"opl4B5auOWiSxXo5-RB3NTitcHxk"
 	//查出所有openid
 	openids, err := models.GetOpenIDs()
-	for _, i := range openids {
-		errcode, errmsg, err := utils.SendMessage(accessToken, i.OpenID, template_id)
-		if err != nil {
-			beego.Error(err)
-			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
-			c.ServeJSON()
-		} else if errcode == 40003 {
-			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "touser字段openid为空或者不正确", "errmsg": errmsg}
-			c.ServeJSON()
-		} else if errcode == 40037 {
-			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "订阅模板id为空不正确", "errmsg": errmsg}
-			c.ServeJSON()
-		} else if errcode == 43101 {
-			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "用户拒绝接受消息，如果用户之前曾经订阅过，则表示用户取消了订阅关系", "errmsg": errmsg}
-			c.ServeJSON()
-		} else if errcode == 47003 {
-			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "模板参数不准确，可能为空或者不满足规则，errmsg会提示具体是哪个字段出错", "errmsg": errmsg}
-			c.ServeJSON()
-		} else if errcode == 41030 {
-			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "page路径不正确，需要保证在现网版本小程序中存在，与app.json保持一致", "errmsg": errmsg}
-			c.ServeJSON()
-		} else {
-			c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "data": "成功！"}
-			c.ServeJSON()
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "openid为空！"}
+		c.ServeJSON()
+	} else {
+		for _, i := range openids {
+			errcode, errmsg, err := utils.SendMessage(accessToken, i.OpenID, template_id)
+			if err != nil {
+				beego.Error(err)
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+				c.ServeJSON()
+			} else if errcode == 40003 {
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "touser字段openid为空或者不正确", "errmsg": errmsg}
+				c.ServeJSON()
+			} else if errcode == 40037 {
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "订阅模板id为空不正确", "errmsg": errmsg}
+				c.ServeJSON()
+			} else if errcode == 43101 {
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "用户拒绝接受消息，如果用户之前曾经订阅过，则表示用户取消了订阅关系", "errmsg": errmsg}
+				c.ServeJSON()
+			} else if errcode == 47003 {
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "模板参数不准确，可能为空或者不满足规则，errmsg会提示具体是哪个字段出错", "errmsg": errmsg}
+				c.ServeJSON()
+			} else if errcode == 41030 {
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "page路径不正确，需要保证在现网版本小程序中存在，与app.json保持一致", "errmsg": errmsg}
+				c.ServeJSON()
+			} else {
+				c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "data": "成功！"}
+				c.ServeJSON()
+			}
 		}
 	}
 	// 40003	touser字段openid为空或者不正确
@@ -1155,7 +1161,7 @@ func (c *CheckController) SendMessage() {
 
 func SendMessage() {
 	app_version := "4"
-	accessToken, err := utils.GetAccessToken(app_version)
+	accessToken, _, _, err := utils.GetAccessToken(app_version)
 	if err != nil {
 		beego.Error(err)
 	}

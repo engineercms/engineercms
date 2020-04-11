@@ -31,7 +31,7 @@
             <form role="form" method="post">
             {{ .xsrfdata }}
                 <h3 class="text-center">用户登录</h3>
-                <h4 class="text-center">用户名admin，密码123456【请勿修改密码】</h4>
+                <h4 class="text-center">用户名demo，密码123456【请勿修改密码】</h4>
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon">

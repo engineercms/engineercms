@@ -46,7 +46,7 @@ func main() {
 	//创建附件目录ModePerm FileMode = 0777 // 覆盖所有Unix权限位（用于通过&获取类型位）
 	os.Mkdir("attachment", os.ModePerm)
 	//创建轮播图片存放目录
-	os.Mkdir("attachment//carousel", os.ModePerm)
+	os.Mkdir("attachment/carousel", os.ModePerm)
 	//自动建表
 	orm.RunSyncdb("default", false, true)
 	models.InsertUser()
@@ -54,13 +54,14 @@ func main() {
 	// models.InsertRole()
 	// time1 := "0/" + time + " * * * * *"
 
-	time1 := "* 30 8 * * 1-5"
-	//"* 30 8 * * 1-5"
-	tk1 := toolbox.NewTask("tk1", time1, func() error { controllers.SendMessage(); return nil }) //func() error { fmt.Println("tk1"); return nil }
-	toolbox.AddTask("tk1", tk1)
-	toolbox.StartTask()
-	defer toolbox.StopTask()
-
+	// time1 := "* 30 8 * * 1-5"
+	time1 := beego.AppConfig.String("tasktime")
+	if time1 != "" {
+		tk1 := toolbox.NewTask("tk1", time1, func() error { controllers.SendMessage(); return nil }) //func() error { fmt.Println("tk1"); return nil }
+		toolbox.AddTask("tk1", tk1)
+		toolbox.StartTask()
+		defer toolbox.StopTask()
+	}
 	// ********mindoc*********
 	// if len(os.Args) >= 3 && os.Args[1] == "service" {
 	// 	if os.Args[2] == "install" {

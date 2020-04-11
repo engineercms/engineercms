@@ -179,6 +179,14 @@ func GetOnlyAttachbyId(Id int64) (attach OnlyAttachment, err error) {
 	return attach, err
 }
 
+//根据附件id查询附件
+func GetOnlyAttachbyName(name string) (attach OnlyAttachment, err error) {
+	o := orm.NewOrm()
+	qs := o.QueryTable("OnlyAttachment")
+	err = qs.Filter("file_name", name).One(&attach)
+	return attach, err
+}
+
 //修改附件的日期和changesurl修改记录地址
 func UpdateOnlyAttachment(cid int64, filename string) (err error) {
 	o := orm.NewOrm()

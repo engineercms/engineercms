@@ -3155,11 +3155,12 @@ func (c *FlowController) WxFlowUserMailbox2() {
 			document, err := flow.Documents.Get(tx, v.Message.DocType.ID, v.Message.DocID)
 			if err != nil {
 				beego.Error(err)
+			} else {
+				// linkarr[0].DocState = document.State
+				// linkarr[0].ProdDoc = proddoc
+				// }
+				articlearr[0].DocState = document.State
 			}
-			// linkarr[0].DocState = document.State
-			// linkarr[0].ProdDoc = proddoc
-			// }
-			articlearr[0].DocState = document.State
 			articlearr[0].DocNotification.Message.ID = v.Message.ID
 			articlearr[0].ProdDoc = productdoc
 

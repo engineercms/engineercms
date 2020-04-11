@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/3xxx/engineercms/conf"
+	"github.com/3xxx/engineercms/controllers/utils"
 	"github.com/3xxx/engineercms/graphics"
 	"github.com/3xxx/engineercms/models"
-	"github.com/3xxx/engineercms/utils"
 	"github.com/astaxie/beego/logs"
 )
 

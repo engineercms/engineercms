@@ -1,69 +1,68 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" data-placeholder-focus="false">
 
 <head profile="http://gmpg.org/xfn/11">
-    <link rel="stylesheet" href="/static/wordpress/header.css" type="text/css">
-    <link rel="stylesheet" href="/static/wordpress/style(1).css" type="text/css" media="screen">
-    <link rel="stylesheet" type="text/css" href="/static/wordpress/style.css" media="screen">
-    
-    <link rel="stylesheet" href="/static/wordpress/noticons.css">
-    <link rel="stylesheet" href="/static/wordpress/blog.css" type="text/css" media="screen">
-    <link rel="stylesheet" href="/static/wordpress/blog-sidebar.css" type="text/css" media="screen">
-    <meta name="description" content="With Recurring Payments, your supporters become your sustainers, and a reliable income stream frees you to push your creative boundaries.">
-    <title>{{.product.Title}}</title>
-    <!-- <link rel="alternate" type="application/rss+xml" title="The WordPress.com Blog » A New Way to Earn Money on WordPress.com Comments Feed" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/feed/"> -->
-    <script src="/static/wordpress/quant.js" async="" type="text/javascript"></script>
-    <script src="/static/wordpress/rules-p-3Ma3jHaQMB_bS.js" async=""></script>
-    <script src="/static/wordpress/wp-emoji-release.min.js" type="text/javascript" defer=""></script>
-    <script src="/static/wordpress/wp-emoji-release.min.js" type="text/javascript" defer=""></script>
-    <!-- <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" /> -->
-    <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
-    <style type="text/css">
-    img.wp-smiley,
-    img.emoji {
-        display: inline !important;
-        border: none !important;
-        box-shadow: none !important;
-        height: 1em !important;
-        width: 1em !important;
-        margin: 0 .07em !important;
-        vertical-align: -0.1em !important;
-        background: none !important;
-        padding: 0 !important;
-    }
+  <link rel="stylesheet" href="/static/wordpress/header.css" type="text/css">
+  <link rel="stylesheet" href="/static/wordpress/style(1).css" type="text/css" media="screen">
+  <link rel="stylesheet" type="text/css" href="/static/wordpress/style.css" media="screen">
+  <link rel="stylesheet" href="/static/wordpress/noticons.css">
+  <link rel="stylesheet" href="/static/wordpress/blog.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="/static/wordpress/blog-sidebar.css" type="text/css" media="screen">
+  <meta name="description" content="With Recurring Payments, your supporters become your sustainers, and a reliable income stream frees you to push your creative boundaries.">
+  <title>{{.product.Title}}</title>
+  <!-- <link rel="alternate" type="application/rss+xml" title="The WordPress.com Blog » A New Way to Earn Money on WordPress.com Comments Feed" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/feed/"> -->
+  <script src="/static/wordpress/quant.js" async="" type="text/javascript"></script>
+  <script src="/static/wordpress/rules-p-3Ma3jHaQMB_bS.js" async=""></script>
+  <script src="/static/wordpress/wp-emoji-release.min.js" type="text/javascript" defer=""></script>
+  <script src="/static/wordpress/wp-emoji-release.min.js" type="text/javascript" defer=""></script>
+  <!-- <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" /> -->
+  <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
+  <style type="text/css">
+  img.wp-smiley,
+  img.emoji {
+    display: inline !important;
+    border: none !important;
+    box-shadow: none !important;
+    height: 1em !important;
+    width: 1em !important;
+    margin: 0 .07em !important;
+    vertical-align: -0.1em !important;
+    background: none !important;
+    padding: 0 !important;
+  }
 
-    .floating-button {
-        display: block;
-        width: 58px;
-        height: 58px;
-        border-radius: 50%;
-        background: #31b0d5;
-        color: #fff;
-        margin: 0 auto;
-        text-align: center;
-        float: right;
-        /* background-color: #fff; */
-        position: fixed;
-        /* top: 20px; */
-        bottom: 80px;
-        right: 20px;
-        /* border: 0 solid #fff; */
-        /* border-radius: 500px; */
-        box-shadow: 4px 1px 1px #ccc;
-        opacity: 0.6;
+  .floating-button {
+    display: block;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #31b0d5;
+    color: #fff;
+    margin: 0 auto;
+    text-align: center;
+    float: right;
+    /* background-color: #fff; */
+    position: fixed;
+    /* top: 20px; */
+    bottom: 80px;
+    right: 20px;
+    /* border: 0 solid #fff; */
+    /* border-radius: 500px; */
+    box-shadow: 4px 1px 1px #ccc;
+    opacity: 0.6;
 
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: -webkit-flex;
-        display: flex;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        -webkit-align-items: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -ms-flex-pack: center;
-        -webkit-justify-content: center;
-        justify-content: center;
-        /*color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    /*color: #fff;
         position: relative;
         right: 16px;
         bottom: 88px;
@@ -88,150 +87,161 @@
         -webkit-justify-content: center;
         justify-content: center;
         background-color: #2196f3;*/
-    }
+  }
 
-    #editor:link,
-    #editor:visited,
-    h2 a:visited {
-        color: #fff;
-    }
+  #editor:link,
+  #editor:visited,
+  h2 a:visited {
+    color: #fff;
+  }
 
-    .floating-button2 {
-        display: block;
-        width: 58px;
-        height: 58px;
-        border-radius: 50%;
-        background: #f44336;
-        color: #fff;
-        margin: 0 auto;
-        text-align: center;
-        float: right;
-        /* background-color: #fff; */
-        position: fixed;
-        /* top: 20px; */
-        bottom: 20px;
-        right: 20px;
-        /* border: 0 solid #fff; */
-        /* border-radius: 500px; */
-        box-shadow: 4px 1px 1px #ccc;
-        opacity: 0.6;
+  .floating-button2 {
+    display: block;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #f44336;
+    color: #fff;
+    margin: 0 auto;
+    text-align: center;
+    float: right;
+    /* background-color: #fff; */
+    position: fixed;
+    /* top: 20px; */
+    bottom: 20px;
+    right: 20px;
+    /* border: 0 solid #fff; */
+    /* border-radius: 500px; */
+    box-shadow: 4px 1px 1px #ccc;
+    opacity: 0.6;
 
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: -webkit-flex;
-        display: flex;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        -webkit-align-items: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -ms-flex-pack: center;
-        -webkit-justify-content: center;
-        justify-content: center;
-    }
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+  }
 
-    #deletearticle:hover,
-    input[type="submit"]:hover,
-    .button:hover,
-    .blog-subscribe input[type=submit]:hover {
-        background: #f44336;
-        border-color: #a8bece;
-        color: #2e4453;
-    }
-    </style>
-    <style id="wp-block-library-inline-css">
-    .has-text-align-justify {
-        text-align: justify;
-    }
-    </style>
-    <style id="jetpack-global-styles-frontend-style-inline-css">
-    :root {
-        --font-headings: unset;
-        --font-base: unset;
-        --font-headings-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-        --font-base-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-    }
-    </style>
-    <link rel="stylesheet" type="text/css" id="gravatar-card-css" href="/static/wordpress/hovercard.min.css">
-    <link rel="stylesheet" type="text/css" id="gravatar-card-services-css" href="/static/wordpress/services.min.css">
-    <script type="text/javascript" src="/static/wordpress/PEJHFPIHPJC2PD3IMTCWTT"></script>
-    <script async="true" type="text/javascript" src="/static/wordpress/WV6A5O5PBJBIBDYGZHVBM5"></script>
+  #deletearticle:hover,
+  input[type="submit"]:hover,
+  .button:hover,
+  .blog-subscribe input[type=submit]:hover {
+    background: #f44336;
+    border-color: #a8bece;
+    color: #2e4453;
+  }
+
+  /*.demo {
+    width: 400px;
+    height: 300px;
+    margin: 50px auto;
+  }*/
+
+  img {
+    -webkit-filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, .5));
+    /*考虑浏览器兼容性：兼容 Chrome, Safari, Opera */
+    filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, .5));
+  }
+  </style>
+  <style id="wp-block-library-inline-css">
+  .has-text-align-justify {
+    text-align: justify;
+  }
+  </style>
+  <style id="jetpack-global-styles-frontend-style-inline-css">
+  :root {
+    --font-headings: unset;
+    --font-base: unset;
+    --font-headings-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    --font-base-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  }
+  </style>
+  <link rel="stylesheet" type="text/css" id="gravatar-card-css" href="/static/wordpress/hovercard.min.css">
+  <link rel="stylesheet" type="text/css" id="gravatar-card-services-css" href="/static/wordpress/services.min.css">
+  <script type="text/javascript" src="/static/wordpress/PEJHFPIHPJC2PD3IMTCWTT"></script>
+  <script async="true" type="text/javascript" src="/static/wordpress/WV6A5O5PBJBIBDYGZHVBM5"></script>
 </head>
 
 <body class="wpcomblog" style="padding-top: 40px; position: relative;">
-    <header class="toolbar wpcom-masterbar wpcom-header" id="yeeId_3">
-        <div class="wpcom-navigation site-navigation wpcom-nav" role="navigation">
-            <h1 class="wpcom-title"><a class="wpcom-logo" href="https://zsj.itdos.com/"><span>EngineerCMS.com</span></a></h1>
-            <nav class="wpcom-pages">
-                <a class="menu-toggle">Menu</a>
-                <ul class="pages-menu">
-                    <li class="menu-features">
-                        <a href="https://zsj.itdos.com/index" title="Features">首页</a>
-                    </li>
-                    <li class="menu-themes">
-                        <a href="https://zsj.itdos.com/project" title="WordPress Themes for Blogs at WordPress.com">项目</a>
-                    </li>
-                    <li class="menu-plans">
-                        <a href="https://zsj.itdos.com/projectgant" title="Plans">进度</a>
-                    </li>
-                    <li class="menu-news">
-                        <a href="https://zsj.itdos.com/article" title="Blog">文章</a>
-                    </li>
-                    <li class="menu-support">
-                        <a href="https://zsj.itdos.com/standard" title="Support">规范</a>
-                    </li>
-                    <li class="menu-signup">
-                        <a href="https://zsj.itdos.com/register" title="Sign Up">注册</a>
-                    </li>
-                    <li class="menu-login">
-                        <a href="https://zsj.itdos.com/login" title="Log In" class="login-link">登录</a>
-                    </li>
-                </ul>
-            </nav>
+  <header class="toolbar wpcom-masterbar wpcom-header" id="yeeId_3">
+    <div class="wpcom-navigation site-navigation wpcom-nav" role="navigation">
+      <h1 class="wpcom-title"><a class="wpcom-logo" href="https://zsj.itdos.com/"><span>EngineerCMS.com</span></a></h1>
+      <nav class="wpcom-pages">
+        <a class="menu-toggle">Menu</a>
+        <ul class="pages-menu">
+          <li class="menu-features">
+            <a href="https://zsj.itdos.com/index" title="Features">首页</a>
+          </li>
+          <li class="menu-themes">
+            <a href="https://zsj.itdos.com/project" title="WordPress Themes for Blogs at WordPress.com">项目</a>
+          </li>
+          <li class="menu-plans">
+            <a href="https://zsj.itdos.com/projectgant" title="Plans">进度</a>
+          </li>
+          <li class="menu-news">
+            <a href="https://zsj.itdos.com/article" title="Blog">文章</a>
+          </li>
+          <li class="menu-support">
+            <a href="https://zsj.itdos.com/standard" title="Support">规范</a>
+          </li>
+          <li class="menu-signup">
+            <a href="https://zsj.itdos.com/register" title="Sign Up">注册</a>
+          </li>
+          <li class="menu-login">
+            <a href="https://zsj.itdos.com/login" title="Log In" class="login-link">登录</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <a id="editor" {{if ne true .RoleUpdate}} style="display:none" {{end}} href="/project/product/modifyarticle/{{.article.Id}}" class="floating-button">修改</a>
+  <button {{if ne true .RoleUpdate}} style="display:none" {{end}} type="button" class="floating-button2" id="deletearticle">删除</button>
+  <div id="wrapper" class="en-wrapper">
+    <div id="content" class="widecolumn single">
+      <style type="text/css">
+      #post-focus.has-header-img {
+        background-image: url("/static/wordpress/anthony-delanoix-hzgs56ze49s-unsplash.jpg?w=2000");
+      }
+      </style>
+      <div id="blog-header" class="single has-header-img">
+        <div class="inner">
+          <h2 id="blog-title"><a href="https://zsj.itdos.com/">The EngineerCMS Blog</a></h2>
+          <p id="blog-tagline"><a href="https://zsj.itdos.com/">The EngineerCMS Blog</a></p>
         </div>
-    </header>
-    <a id="editor" {{if ne true .RoleUpdate}} style="display:none" {{end}} href="/project/product/modifyarticle/{{.article.Id}}" class="floating-button">修改</a>
-    <button {{if ne true .RoleUpdate}} style="display:none" {{end}} type="button" class="floating-button2" id="deletearticle">删除</button>
-    <div id="wrapper" class="en-wrapper">
-        <div id="content" class="widecolumn single">
-            <style type="text/css">
-            #post-focus.has-header-img {
-                background-image: url("/static/wordpress/anthony-delanoix-hzgs56ze49s-unsplash.jpg?w=2000");
-            }
-            </style>
-            <div id="blog-header" class="single has-header-img">
-                <div class="inner">
-                    <h2 id="blog-title"><a href="https://zsj.itdos.com/">The EngineerCMS Blog</a></h2>
-                    <p id="blog-tagline"><a href="https://zsj.itdos.com/">The EngineerCMS Blog</a></p>
-                </div>
-            </div>
-            <div id="post-focus" class="has-header-img post-41687 single">
-                <div id="post-focus-alignment">
-                </div>
-            </div>
-            <div class="post" id="post-41687">
-                <div class="post-title-top">
-                    <h2 class="post-title">{{.product.Code}}-{{.product.Title}}</h2>
-                    <div class="entry">
-                        <p>{{.article.Subtext}}</p>
-                    </div>
-                </div>
-                <div class="post-meta-top">
-                    <div id="wpcom-comments-date">
-                        <span class="date"><svg class="icon icon-clock" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
-                                <g id="time">
-                                    <path d="M12,4c4.411,0,8,3.589,8,8s-3.589,8-8,8s-8-3.589-8-8S7.589,4,12,4 M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10 s10-4.477,10-10S17.523,2,12,2L12,2z M15.8,15.4L13,11.667V7h-2v5.333l3.2,4.266L15.8,15.4z"></path>
-                                </g>
-                                <g id="Layer_1"></g>
-                            </svg>{{dateformat .product.Created "2006-01-02 15:04:05"}}</span>
-                    </div>
-                    <img alt="" src="{{.avatar}}" class="avatar avatar-64 grav-hashed grav-hijack" height="64" width="64" id="grav-c88872d732506446e8b44b677a6a20e0-0">
-                    <p class="post-author-name">{{.product.Principal}}</p>
-                    
-                </div>
-                <div class="entrytext">
-                    {{str2html .article.Content}}
-                    <!-- <div style="margin-top: 2em" class="blog-subscribe">
+      </div>
+      <div id="post-focus" class="has-header-img post-41687 single">
+        <div id="post-focus-alignment">
+        </div>
+      </div>
+      <div class="post" id="post-41687">
+        <div class="post-title-top">
+          <h2 class="post-title">{{.product.Code}}-{{.product.Title}}</h2>
+          <div class="entry">
+            <p>{{.article.Subtext}}</p>
+          </div>
+        </div>
+        <div class="post-meta-top">
+          <div id="wpcom-comments-date">
+            <span class="date"><svg class="icon icon-clock" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+                <g id="time">
+                  <path d="M12,4c4.411,0,8,3.589,8,8s-3.589,8-8,8s-8-3.589-8-8S7.589,4,12,4 M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10 s10-4.477,10-10S17.523,2,12,2L12,2z M15.8,15.4L13,11.667V7h-2v5.333l3.2,4.266L15.8,15.4z"></path>
+                </g>
+                <g id="Layer_1"></g>
+              </svg>{{dateformat .product.Created "2006-01-02 15:04:05"}}</span>
+          </div>
+          <img alt="" src="{{.avatar}}" class="avatar avatar-64 grav-hashed grav-hijack" height="64" width="64" id="grav-c88872d732506446e8b44b677a6a20e0-0">
+          <p class="post-author-name">{{.product.Principal}}</p>
+        </div>
+        <div class="entrytext">
+          {{str2html .article.Content}}
+          <!-- <div style="margin-top: 2em" class="blog-subscribe">
                         <hr>
                         <p><strong><label for="subscribe-field">Email Newsletter</label></strong></p>
                         <form action="https://subscribe.wordpress.com/" method="post" accept-charset="utf-8" id="subscribe-blog">
@@ -296,8 +306,8 @@
                             </div>
                         </div>
                     </div> -->
-                </div>
-                <!-- <div id="entry-side">
+        </div>
+        <!-- <div id="entry-side">
                     <ul id="post-meta">
                         <li class="time"></li>
                         <li class="categories"><svg class="icon icon-category" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -316,14 +326,14 @@
                         </li>
                     </ol>
                 </div> -->
-                <div id="entry-comments">
-                    <h3 id="comments" class="commentsheader">26 Comments</h3>
-                    <p class="nocomments"><span>Comments are closed.</span></p>
-                    <div class="commentnav">
-                        <div class="alignleft"></div>
-                        <div class="alignright"></div>
-                    </div>
-                    <!-- <ol class="commentlist">
+        <div id="entry-comments">
+          <h3 id="comments" class="commentsheader">26 Comments</h3>
+          <p class="nocomments"><span>Comments are closed.</span></p>
+          <div class="commentnav">
+            <div class="alignleft"></div>
+            <div class="alignright"></div>
+          </div>
+          <!-- <ol class="commentlist">
                         <li class="comment byuser comment-author-partylovin even thread-even depth-1 highlander-comment" id="comment-412460">
                             <cite class="comment-author"> <img alt="" src="/static/wordpress/1147531e08420de0f09cb2dc7344219c.png" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-1147531e08420de0f09cb2dc7344219c-0"> <a href="http://partylovin.com/" rel="external nofollow ugc" class="url">Ana</a></cite>
                             <small class="commentmetadata">
@@ -414,36 +424,36 @@
                         </ul>
                         
                     </ol> -->
-                    <div class="commentnav">
-                        <div class="alignleft"></div>
-                        <div class="alignright"></div>
-                    </div>
-                    <div style="clear: both; margin-top: 15px;"></div>
-                </div>
-            </div>
+          <div class="commentnav">
+            <div class="alignleft"></div>
+            <div class="alignright"></div>
+          </div>
+          <div style="clear: both; margin-top: 15px;"></div>
         </div>
+      </div>
     </div>
+  </div>
 </body>
 <script type="text/javascript">
 // 删除文章
 $("#deletearticle").click(function() {
-    if ({{.product.Uid }} === {{.Uid }} || {{.RoleUpdate }} == "true") {
-        if (confirm("确定删除吗？一旦删除将无法恢复！")) {
-            $.ajax({
-                type: "post",
-                url: "/project/product/deletearticle",
-                data: { pid: {{.article.Id }} },
-                success: function(data, status) {
-                    alert("删除“" + data + "”成功！(status:" + status + ".)");
-                    //关闭标签
-                    window.close();
-                }
-            });
+  if ({{.product.Uid }} === {{.Uid }} || {{.RoleUpdate }} == "true") {
+    if (confirm("确定删除吗？一旦删除将无法恢复！")) {
+      $.ajax({
+        type: "post",
+        url: "/project/product/deletearticle",
+        data: { pid: {{.article.Id }} },
+        success: function(data, status) {
+          alert("删除“" + data + "”成功！(status:" + status + ".)");
+          //关闭标签
+          window.close();
         }
-    } else {
-        alert("权限不够！" + {{.Uid }});
-        return;
+      });
     }
+  } else {
+    alert("权限不够！" + {{.Uid }});
+    return;
+  }
 })
 </script>
 

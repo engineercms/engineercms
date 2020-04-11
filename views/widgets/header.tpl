@@ -1,7 +1,7 @@
 <header class="navbar navbar-static-top navbar-fixed-top manual-header" role="banner">
     <div class="container">
         <div class="navbar-header col-sm-12 col-md-9 col-lg-8">
-            <a href="{{.BaseUrl}}/mindocindex" class="navbar-brand" title="{{.SITE_NAME}}">
+            <a href="{{.BaseUrl}}/mindoc" class="navbar-brand" title="{{.SITE_NAME}}">
                 {{if .SITE_TITLE}}
                 {{.SITE_TITLE}}
                 {{else}}
@@ -89,6 +89,7 @@
                         <li>
                             <a href="{{urlfor "AccountController.Logout"}}" title="退出登录"><i class="fa fa-sign-out"></i> 退出登录</a>
                         </li>
+                        <li><a href="{{urlfor "AccountController.Login"}}" title="用户登录">登录</a></li>
                     </ul>
                 </li>
                 {{else}}

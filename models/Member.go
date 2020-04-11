@@ -18,7 +18,7 @@ import (
 	"gopkg.in/ldap.v2"
 
 	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/utils"
+	"github.com/3xxx/engineercms/controllers/utils"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"

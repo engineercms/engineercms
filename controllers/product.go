@@ -439,8 +439,9 @@ func (c *ProdController) GetProducts() {
 			document, err := flow.Documents.Get(tx, flow.DocTypeID(proddoc.DocTypeId), flow.DocumentID(proddoc.DocumentId))
 			if err != nil {
 				beego.Error(err)
+			} else {
+				linkarr[0].DocState = document.State
 			}
-			linkarr[0].DocState = document.State
 			linkarr[0].ProdDoc = proddoc
 		}
 		// }

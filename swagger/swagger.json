@@ -1894,6 +1894,70 @@
                 }
             }
         },
+        "/admin/getwxprojectconfig": {
+            "get": {
+                "tags": [
+                    "admin"
+                ],
+                "description": "get wx projectconfig by projectid",
+                "operationId": "AdminController.get wx projectconfig by projectid",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "projectid",
+                        "description": "The id of project",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.AddArticle"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "articl not found"
+                    }
+                }
+            }
+        },
+        "/admin/jsoneditor": {
+            "get": {
+                "tags": [
+                    "admin"
+                ],
+                "description": "get wx projectconfig by projectid",
+                "operationId": "AdminController.get wx projectconfig by projectid",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "projectid",
+                        "description": "The id of project",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.AddArticle"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "articl not found"
+                    }
+                }
+            }
+        },
         "/admin/liucheng": {
             "get": {
                 "tags": [
@@ -1961,6 +2025,45 @@
                     },
                     "404": {
                         "description": "data not found"
+                    }
+                }
+            }
+        },
+        "/admin/putwxprojectconfig": {
+            "post": {
+                "tags": [
+                    "admin"
+                ],
+                "description": "put wx projectconfig by projectid",
+                "operationId": "AdminController.update wx projectconfig by projectid",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "projectid",
+                        "description": "The id of project",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "projectconfig",
+                        "description": "The json of projectconfig",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.AddArticle"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "articl not found"
                     }
                 }
             }
@@ -3043,6 +3146,29 @@
                 }
             }
         },
+        "/flv/": {
+            "get": {
+                "tags": [
+                    "flv"
+                ],
+                "description": "get admin page",
+                "operationId": "FlvController.getFlv",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.success"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page"
+                    },
+                    "404": {
+                        "description": "page not found"
+                    }
+                }
+            }
+        },
         "/onlyoffice/conversion": {
             "post": {
                 "tags": [
@@ -3062,6 +3188,140 @@
                     },
                     "404": {
                         "description": "articl not found"
+                    }
+                }
+            }
+        },
+        "/pdfcpu/addwatermarks/{id}": {
+            "post": {
+                "tags": [
+                    "pdfcpu"
+                ],
+                "description": "post signature to pdf",
+                "operationId": "PdfCpuController.post signature to pdf",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id of pdf",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "pageNumber",
+                        "description": "The pageNumber of pdf",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "numPages",
+                        "description": "The numPages of pdf",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offsetdx",
+                        "description": "The offsetdx of signature",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offsetdy",
+                        "description": "The offsetdy of signature",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "scale",
+                        "description": "The scale of signature",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "image",
+                        "description": "The base64 image of signature",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.AddSignature"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "pdf not found"
+                    }
+                }
+            }
+        },
+        "/pdfcpu/onlypdf/{id}": {
+            "get": {
+                "tags": [
+                    "pdfcpu"
+                ],
+                "description": "get only pdf",
+                "operationId": "PdfCpuController.get only pdf",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id of pdf",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.GetOnlyPdf"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "pdf not found"
+                    }
+                }
+            }
+        },
+        "/pdfcpu/test/{id}": {
+            "get": {
+                "tags": [
+                    "pdfcpu"
+                ],
+                "description": "get test",
+                "operationId": "PdfCpuController.get test",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id of test",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.Gettest"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "pdf not found"
                     }
                 }
             }
@@ -5691,6 +5951,9 @@
         ".AddFinance": {
             "type": "object"
         },
+        ".AddSignature": {
+            "type": "object"
+        },
         ".AddTopicLike": {
             "type": "object"
         },
@@ -5730,10 +5993,16 @@
         ".GetFinance": {
             "type": "object"
         },
+        ".GetOnlyPdf": {
+            "type": "object"
+        },
         ".GetProductsPage": {
             "type": "object"
         },
         ".GetUserMoney": {
+            "type": "object"
+        },
+        ".Gettest": {
             "type": "object"
         },
         ".SUCCESS": {
@@ -5770,6 +6039,14 @@
         {
             "name": "fileinput",
             "description": "CMSWX froala API\n"
+        },
+        {
+            "name": "pdfcpu",
+            "description": "CMSADMIN API\n"
+        },
+        {
+            "name": "flv",
+            "description": "CMSFLV API\n"
         }
     ]
 }
