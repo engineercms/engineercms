@@ -19,6 +19,7 @@ import (
 //待办事件
 type Todo struct {
 	Id        int64  `json:"todoid"`
+	ProjectId int64  `json:"projectid"`
 	Name      string `json:"todoname"`
 	UserId    int64
 	Completed bool      `json:"completed"`
@@ -39,9 +40,10 @@ func init() {
 	orm.RegisterModel(new(Todo), new(Todolog))
 }
 
-func TodoCreate(name string, userid int64) (id int64, err error) {
+func TodoCreate(projectid int64, name string, userid int64) (id int64, err error) {
 	o := orm.NewOrm()
 	todo := &Todo{
+		ProjectId: projectid,
 		Name:      name,
 		UserId:    userid,
 		Completed: false,
@@ -56,9 +58,9 @@ type TodoUser struct {
 	User `xorm:"extends"`
 }
 
-func GetTodoUser(limit, offset int) ([]*TodoUser, error) {
+func GetTodoUser(projectid int64, limit, offset int) ([]*TodoUser, error) {
 	users := make([]*TodoUser, 0)
-	return users, engine.Table("todo").Join("INNER", "user", "todo.user_id = user.id").Desc("todo.created").Limit(limit, offset).Find(&users)
+	return users, engine.Table("todo").Join("INNER", "user", "todo.user_id = user.id").Where("todo.project_id=?", projectid).Desc("todo.created").Limit(limit, offset).Find(&users)
 }
 
 //修改

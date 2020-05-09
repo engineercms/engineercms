@@ -138,7 +138,7 @@
     var projectconfig=JSON.stringify(json)
     $.ajax({
       type: "POST",
-      url: "v1/admin/putwxprojectconfig?projectid=1",
+      url: "v1/admin/putwxprojectconfig?projectid="+{{.ProjectId}},
       data: JSON.stringify(json),//{ projectid: "1",projectconfig:projectconfig},
       success: function(data, status) {
         alert("存储“"+data+"”成功！(status:"+status+".)");

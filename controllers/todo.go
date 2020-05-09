@@ -28,6 +28,7 @@ type TodoController struct {
 // @Title post todo
 // @Description post todo
 // @Param name query string true "The name for todo"
+// @Param projectid query string true "The projectid of todo"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
@@ -49,8 +50,12 @@ func (c *TodoController) Create() {
 	}
 
 	name := c.Input().Get("name")
-
-	todoid, err := models.TodoCreate(name, userid)
+	projectid := c.Input().Get("projectid")
+	ProjectId, err := strconv.ParseInt(projectid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	todoid, err := models.TodoCreate(ProjectId, name, userid)
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = map[string]interface{}{"message": "写入数据库出错"}
@@ -63,6 +68,7 @@ func (c *TodoController) Create() {
 
 // @Title get todolist
 // @Description get tolist
+// @Param projectid query string true "The projectid of todo"
 // @Param page query string false "The page of todo"
 // @Param limit query string false "The size of todo"
 // @Success 200 {object} models.GetProductsPage
@@ -98,7 +104,12 @@ func (c *TodoController) GetTodo() {
 	} else {
 		offset = (page1 - 1) * limit1
 	}
-	todos, err := models.GetTodoUser(limit1, offset)
+	projectid := c.Input().Get("projectid")
+	ProjectId, err := strconv.ParseInt(projectid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	todos, err := models.GetTodoUser(ProjectId, limit1, offset)
 	if err != nil {
 		beego.Error(err)
 	}

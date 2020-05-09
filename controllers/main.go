@@ -351,6 +351,56 @@ func (c *MainController) Getmeritmsapi() {
 	c.TplName = "meritmsapi.tpl"
 }
 
+// @Title get usermanage
+// @Description get usermanage
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /usermanage [get]
+func (c *MainController) UserManage() {
+	// beego.Info(c.Ctx.Input.UserAgent())
+	u := c.Ctx.Input.UserAgent()
+	// re := regexp.MustCompile("Trident")
+	// loc := re.FindStringIndex(u)
+	// loc[0] > 1
+	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	if err != nil {
+		beego.Error(err)
+	}
+	if matched == true {
+		// beego.Info("移动端~")
+		c.TplName = "userManagement.html"
+	} else {
+		// beego.Info("电脑端！")
+		c.TplName = "userManagement.html"
+	}
+}
+
+// @Title get photoswipe
+// @Description get photoswipe
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /photoswipe [get]
+func (c *MainController) PhotoSwipe() {
+	// beego.Info(c.Ctx.Input.UserAgent())
+	u := c.Ctx.Input.UserAgent()
+	// re := regexp.MustCompile("Trident")
+	// loc := re.FindStringIndex(u)
+	// loc[0] > 1
+	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	if err != nil {
+		beego.Error(err)
+	}
+	if matched == true {
+		// beego.Info("移动端~")
+		c.TplName = "photoswipe.html"
+	} else {
+		// beego.Info("电脑端！")
+		c.TplName = "photoswipe.html"
+	}
+}
+
 func (c *MainController) Test() {
 	// beego.Info(c.Ctx.Input.UserAgent())
 	u := c.Ctx.Input.UserAgent()

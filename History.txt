@@ -1,5 +1,12 @@
                        EngineerCMS revision history
 		       
+21,engineercms 1.15 (Apr 11, 2020)
+	+) Add flv
+	+) Add photoswipe
+	+) Add mindoc
+	+) Add sharecode
+  +) Add photoswipe
+
 21,engineercms 1.14 (Feb 14, 2020)
 	+) Update wxflow
 	+) Add wxMsgSecCheck

@@ -42,24 +42,24 @@
   <a class="navbar-brand" href="#">Sticky top</a>
 </nav> -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top navbar-light bg-light">
-    <a class="navbar-brand" href="/v1/flv">Navbar</a>
+    <a class="navbar-brand" href="/">首页</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarText">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="javascript:show_random_toast();">Home <span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="javascript:show_random_toast();">视频<span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Features</a>
+          <a class="nav-link" href="/v1/flv/flvlist">直播</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Pricing</a>
+          <a class="nav-link" href="#">点播</a>
         </li>
       </ul>
-      <span class="navbar-text">
-        Navbar text with an inline element
+      <span class="navbar-text">培训 工程 音乐
+        <!-- <a class="nav-link" href="#"></a> -->
       </span>
     </div>
   </nav>

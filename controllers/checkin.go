@@ -13,9 +13,9 @@ import (
 	// "net/http"
 	// "net/url"
 	// "path"
-	"strconv"
-	// "strings"
 	"fmt"
+	"strconv"
+	"strings"
 	// "reflect"
 	"sort"
 	"time"
@@ -77,6 +77,7 @@ func (c *CheckController) Person() {
 // @Title post checkin activity
 // @Description post person
 // @Param CreaterId query string true "The CreaterId for activity"
+// @Param projectid query string true "The projectid of activity"
 // @Param Caption query string true "The Caption for activity"
 // @Param Desc query string true "The Desc for activity"
 // @Param Location query string true "The Location for activity"
@@ -164,6 +165,14 @@ func (c *CheckController) Create() {
 	if err != nil {
 		beego.Error(err)
 	}
+	projectid := c.Input().Get("projectid")
+	var ProjectId int64
+	if projectid != "" {
+		ProjectId, err = strconv.ParseInt(projectid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
 	Caption := c.Input().Get("activity_name")
 	Desc := c.Input().Get("activity_desc")
 	Location := c.Input().Get("location")
@@ -175,13 +184,34 @@ func (c *CheckController) Create() {
 	Lng, err := strconv.ParseFloat(lng, 64)
 
 	startdate := c.Input().Get("startDate")
-	// beego.Info(startdate)
+	datearray := strings.Split(startdate, "-")
+	year := datearray[0]
+	month := datearray[1]
+	if len(month) == 1 {
+		month = "0" + month
+	}
+	day := datearray[2]
+	if len(day) == 1 {
+		day = "0" + day
+	}
+	startdate = year + "-" + month + "-" + day
 	const base_format = "2006-01-02"
 	StartDate, err := time.Parse(base_format, startdate)
 	if err != nil {
 		beego.Error(err)
 	}
 	enddate := c.Input().Get("endDate")
+	datearray = strings.Split(enddate, "-")
+	year = datearray[0]
+	month = datearray[1]
+	if len(month) == 1 {
+		month = "0" + month
+	}
+	day = datearray[2]
+	if len(day) == 1 {
+		day = "0" + day
+	}
+	enddate = year + "-" + month + "-" + day
 	// beego.Info(enddate)
 	EndDate, err := time.Parse(base_format, enddate)
 	if err != nil {
@@ -193,7 +223,7 @@ func (c *CheckController) Create() {
 	IfPhoto, err := strconv.ParseBool(ifphoto) // string 转bool
 	iflocation := c.Input().Get("ifLocation")
 	IfLocation, err := strconv.ParseBool(iflocation) // string 转bool
-	_, err = models.CheckCreate(CreaterId, Caption, Desc, Location, Lat, Lng, StartDate, EndDate, IfFace, IfPhoto, IfLocation)
+	_, err = models.CheckCreate(CreaterId, ProjectId, Caption, Desc, Location, Lat, Lng, StartDate, EndDate, IfFace, IfPhoto, IfLocation)
 	if err != nil {
 		beego.Error(err)
 	} else {
@@ -217,6 +247,7 @@ type detail struct {
 
 // @Title post checkin person
 // @Description post person
+// @Param projectid query string true "The projectid of activity"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
@@ -256,8 +287,18 @@ func (c *CheckController) Getall() {
 	//           callback(res);
 	//       })
 	//   },
+	var ProjectId int64
+	var err error
+	projectid := c.Input().Get("projectid")
+	if projectid != "" {
+		ProjectId, err = strconv.ParseInt(projectid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+
 	//查出未过期的
-	activities, err := models.GetAll()
+	activities, err := models.GetAll(ProjectId)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -828,6 +869,7 @@ func (c *CheckController) Apply() {
 //********************统计**************
 // @Title get mothcheckin
 // @Description get monthcheck
+// @Param projectid query string true "The projectid of check"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
@@ -835,6 +877,7 @@ func (c *CheckController) Apply() {
 func (c *CheckController) MonthCheckSum() {
 	c.TplName = "check/check.tpl"
 	c.Data["IsMonthCheck"] = true
+	c.Data["ProjectId"] = c.Input().Get("projectid")
 }
 
 //后端分页的数据结构

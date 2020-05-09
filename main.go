@@ -184,6 +184,19 @@ func initialization() {
 	}
 }
 
+// *******Golang 各种类型的默认值*********
+// bool //默认值为false
+// string //默认值为空字符串
+// int int8 int16 int32 int64 //默认值为0
+// uint uint8 uint16 uint32 uint64 uintptr //默认值为0
+// byte // uint8 的别名
+// rune // int32 的别名
+// float32 float64 //默认值为0
+// complex64 complex128 //默认值为0
+// 在Go语言中，布尔类型的"0"（初始值）为false，数值类型的"0"为0，
+// 字符串类型的"0"为空字符串""，而指针/切片/映射/通道/函数和接口的"0"即为nil
+// 当你声明一个结构体变量并未初始化时，该结构体所有的域(Field)都为"0""nil"（初始值）
+
 // func Create(name string) (file *File, err error)
 // func OpenFile(name string, flag int, perm FileMode) (file *File, err error)
 //这里的flag int是用下面的这些方式，O_CREAT

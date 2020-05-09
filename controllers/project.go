@@ -93,6 +93,7 @@ func (c *ProjController) Get() {
 
 // @Title get cms projectlist...
 // @Description get projectlist..
+// @Param projectid query string false "The id of project"
 // @Param page query string false "The page of projectlist"
 // @Param limit query string false "The size of page"
 // @Success 200 {object} models.GetProductsPage
@@ -102,10 +103,14 @@ func (c *ProjController) Get() {
 //分页提供给项目列表页的table中json数据
 //http://127.0.0.1/project/getprojects?limit=15&pageNo=1
 func (c *ProjController) GetProjects() {
-	id := c.Ctx.Input.Param(":id")
-
+	// id := c.Ctx.Input.Param(":id")
+	id := c.Input().Get("projectid")
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
 	var offset, limit1, page1 int64
-	var err error
+	// var err error
 	limit := c.Input().Get("limit")
 	if limit == "" {
 		limit1 = 0
@@ -143,6 +148,7 @@ func (c *ProjController) GetProjects() {
 	// 	beego.Error(err)
 	// }
 	searchText := c.Input().Get("searchText")
+	projects1 := make([]Project1, 0)
 	if id == "" {
 		//显示全部
 		// var offset int64
@@ -169,7 +175,7 @@ func (c *ProjController) GetProjects() {
 		// start := time.Now()
 
 		//取得每个项目的成果数量
-		projects1 := make([]Project1, 0) //这里不能加*号
+		// projects1 := make([]Project1, 0) //这里不能加*号
 		for _, v := range projects {
 			aa := make([]Project1, 1)
 			aa[0].Id = v.Id
@@ -220,7 +226,34 @@ func (c *ProjController) GetProjects() {
 		// elapsed := time.Since(start)
 		// beego.Info(elapsed)
 	} else {
-		//根据标签查询
+		//根据id查询下级
+		projects, err := models.GetProjSonbyId(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		//取得每个项目的成果数量
+		// projects1 := make([]Project1, 0) //这里不能加*号
+		for _, v := range projects {
+			aa := make([]Project1, 1)
+			aa[0].Id = v.Id
+			aa[0].Code = v.Code
+			aa[0].Title = v.Title
+			aa[0].Label = v.Label
+			aa[0].Principal = v.Principal
+
+			aa[0].Created = v.Created
+			aa[0].Updated = v.Updated
+			projects1 = append(projects1, aa...)
+		}
+		// count, err := models.GetProjectsCount(searchText)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		count := int64(len(projects))
+		table := Tableserver{projects1, page1, count}
+
+		c.Data["json"] = table
+		c.ServeJSON()
 	}
 }
 

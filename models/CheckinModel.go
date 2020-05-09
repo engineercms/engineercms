@@ -111,8 +111,9 @@ import (
 // SET FOREIGN_KEY_CHECKS = 1;
 
 type Activity struct {
-	Id         int64 `json:"F_ID"`
-	CreaterId  int64
+	Id         int64  `json:"F_ID"`
+	CreaterId  int64  `json:"userid"`
+	ProjectId  int64  `json:"projectid"`
 	Caption    string `json:"F_Caption"`
 	Desc       string
 	Location   string `json:"F_Location"`
@@ -133,17 +134,17 @@ type Apply struct {
 	ApplyDate  time.Time `orm:"auto_now_add;type(date)"`
 }
 
-//打卡记录
-type Check struct {
-	Id         int64
-	ActivityId int64
-	UserId     int64
-	CheckDate  time.Time `orm:"auto_now_add;type(date)"`
-	PhotoUrl   string
-	Lat        float64
-	Lng        float64
-	SelectDate time.Time `orm:"auto_now_add;type(date)"`
-}
+//打卡记录_作废
+// type Check struct {
+// 	Id         int64
+// 	ActivityId int64
+// 	UserId     int64
+// 	CheckDate  time.Time `orm:"auto_now_add;type(date)"`
+// 	PhotoUrl   string
+// 	Lat        float64
+// 	Lng        float64
+// 	SelectDate time.Time `orm:"auto_now_add;type(date)"`
+// }
 
 //打卡记录
 type Checkin struct {
@@ -184,7 +185,7 @@ func init() {
 //     });
 // },
 
-func CheckCreate(CreaterId int64, Caption, Desc, Location string, Lat, Lng float64, StartDate, EndDate time.Time, IfFace, IfPhoto, IfLocation bool) (id int64, err error) {
+func CheckCreate(CreaterId, projectid int64, Caption, Desc, Location string, Lat, Lng float64, StartDate, EndDate time.Time, IfFace, IfPhoto, IfLocation bool) (id int64, err error) {
 	o := orm.NewOrm()
 	// var category AdminCategory
 	// if pid == "" {
@@ -204,6 +205,7 @@ func CheckCreate(CreaterId int64, Caption, Desc, Location string, Lat, Lng float
 
 	activity := &Activity{
 		CreaterId:  CreaterId,
+		ProjectId:  projectid,
 		Caption:    Caption,
 		Desc:       Desc,
 		Location:   Location,
@@ -233,12 +235,19 @@ func CheckCreate(CreaterId int64, Caption, Desc, Location string, Lat, Lng float
 //         callback(res);
 //     })
 // },
-func GetAll() (activity []*Activity, err error) {
+func GetAll(projectid int64) (activity []*Activity, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("Activity")
-	_, err = qs.All(&activity)
-	if err != nil {
-		return nil, err
+	if projectid != 0 {
+		_, err = qs.Filter("ProjectId", projectid).All(&activity)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		_, err = qs.All(&activity)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return activity, err
 }

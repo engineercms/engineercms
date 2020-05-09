@@ -1680,6 +1680,11 @@ paths:
         required: true
         type: string
       - in: query
+        name: projectid
+        description: The projectid of activity
+        required: true
+        type: string
+      - in: query
         name: Caption
         description: The Caption for activity
         required: true
@@ -1744,6 +1749,12 @@ paths:
       - checkin
       description: post person
       operationId: CheckController.post checkin person
+      parameters:
+      - in: query
+        name: projectid
+        description: The projectid of activity
+        required: true
+        type: string
       responses:
         "200":
           description: ""
@@ -1996,6 +2007,12 @@ paths:
       - checkin
       description: get monthcheck
       operationId: CheckController.get mothcheckin
+      parameters:
+      - in: query
+        name: projectid
+        description: The projectid of check
+        required: true
+        type: string
       responses:
         "200":
           description: ""
@@ -2103,6 +2120,21 @@ paths:
           description: Invalid page
         "404":
           description: page not found
+  /flv/flvlist:
+    get:
+      tags:
+      - flv
+      description: get admin page
+      operationId: FlvController.getFlv
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.success'
+        "400":
+          description: Invalid page
+        "404":
+          description: page not found
   /onlyoffice/conversion:
     post:
       tags:
@@ -2118,6 +2150,32 @@ paths:
           description: Invalid page supplied
         "404":
           description: articl not found
+  /onlyoffice/downloadonlydoc:
+    post:
+      tags:
+      - onlyoffice
+      description: post download onlydoc by id
+      operationId: OnlyController.post download onlydoc
+      parameters:
+      - in: query
+        name: id
+        description: The id of onlydoc
+        required: true
+        type: string
+      - in: query
+        name: url
+        description: The url of onlyofficeserver
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /pdfcpu/addwatermarks/{id}:
     post:
       tags:
@@ -2214,6 +2272,10 @@ paths:
       description: get projectlist..
       operationId: ProjController.get cms projectlist...
       parameters:
+      - in: query
+        name: projectid
+        description: The id of project
+        type: string
       - in: query
         name: page
         description: The page of projectlist
@@ -2423,6 +2485,11 @@ paths:
         description: The name for todo
         required: true
         type: string
+      - in: query
+        name: projectid
+        description: The projectid of todo
+        required: true
+        type: string
       responses:
         "200":
           description: ""
@@ -2459,6 +2526,11 @@ paths:
       description: get tolist
       operationId: TodoController.get todolist
       parameters:
+      - in: query
+        name: projectid
+        description: The projectid of todo
+        required: true
+        type: string
       - in: query
         name: page
         description: The page of todo
@@ -3498,6 +3570,21 @@ paths:
           description: Invalid page supplied
         "404":
           description: data not found
+  /wx/photoswipe:
+    get:
+      tags:
+      - wx
+      description: get photoswipe
+      operationId: MainController.get photoswipe
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetAttachbyId'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pdf not found
   /wx/searchwxdrawings:
     get:
       tags:
@@ -3827,6 +3914,21 @@ paths:
           description: Invalid page supplied
         "404":
           description: articl not found
+  /wx/usermanage:
+    get:
+      tags:
+      - wx
+      description: get usermanage
+      operationId: MainController.get usermanage
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetAttachbyId'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pdf not found
   /wx/wxhassession:
     get:
       tags:
