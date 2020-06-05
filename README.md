@@ -119,7 +119,7 @@
 
 将二进制文件放到源码文件夹下直接运行即可。
 
-或者去百度网盘下载，直接运行。[https://pan.baidu.com/s/1JgYvx_Rpl6oF4_QMNaU3qg 提取码：jlt6](https://pan.baidu.com/s/1JgYvx_Rpl6oF4_QMNaU3qg)
+或者去百度网盘下载，直接运行。[链接：https://pan.baidu.com/s/1MDJ-QfCmv_LiychDSLn8jw 提取码：nhar ](https://pan.baidu.com/s/1MDJ-QfCmv_LiychDSLn8jw)
 
 Linux系统下请替换掉执行文件engineercms(linux)
 
