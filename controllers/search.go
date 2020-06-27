@@ -2,9 +2,13 @@ package controllers
 
 import (
 	"github.com/3xxx/engineercms/models"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/astaxie/beego"
+	"io"
 	"path"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type SearchController struct {
@@ -235,6 +239,20 @@ func (c *SearchController) SearchWxDrawings() {
 				Pdfslice = append(Pdfslice, pdfarr...)
 			}
 		}
+
+		//取得文章
+		// Articles, err := models.GetArticles(w.Id)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// for _, x := range Articles {
+		// 	articlearr := make([]ArticleContent, 1)
+		// 	articlearr[0].Id = x.Id
+		// 	articlearr[0].Content = x.Content //返回的content是空，因为真要返回内容，会很影响速度，也没必要
+		// 	articlearr[0].Link = "/project/product/article"
+		// 	Articleslice = append(Articleslice, articlearr...)
+		// }
+		// linkarr[0].Articlecontent = Articleslice
 	}
 	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "searchers": Pdfslice}
 	c.ServeJSON()
@@ -285,6 +303,263 @@ func (c *SearchController) SearchWxDrawings() {
 	// } else {
 	// 	userid = 0
 	// }
+}
+
+// @Title get wx pdf list
+// @Description get pdf by page
+// @Param keyword query string  false "The keyword of pdf"
+// @Param projectid query string  false "The projectid of pdf"
+// @Param searchpage query string  true "The page for pdf list"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /getwxpdflist [get]
+// 小程序取得某个项目目录下的所有pdf，分页
+// 结合搜索来用
+func (c *SearchController) GetWxPdfList() {
+	// wxsite := beego.AppConfig.String("wxreqeustsite")
+	limit := "6"
+	limit1, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("searchpage")
+	page1, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	var offset int64
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	key := c.Input().Get("keyword")
+	var products []*models.Product
+
+	pid := c.Input().Get("projectid")
+	// beego.Info(pid)
+	var pidNum int64
+	if pid != "" && key == "" {
+		pidNum, err = strconv.ParseInt(pid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		products, err = models.SearchProjProductPage(pidNum, limit1, offset, "")
+		if err != nil {
+			beego.Error(err.Error)
+		}
+	} else if pid != "" && key != "" {
+		pidNum, err = strconv.ParseInt(pid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		products, err = models.SearchProjProductPage(pidNum, limit1, offset, key)
+		if err != nil {
+			beego.Error(err.Error)
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "关键字或项目为空"}
+		c.ServeJSON()
+		return
+	}
+	Pdfslice := make([]PdfLink, 0)
+	for _, w := range products {
+		Attachments, err := models.GetAttachments(w.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		//对成果进行循环
+		//赋予url
+		for _, v := range Attachments {
+			if path.Ext(v.FileName) == ".pdf" || path.Ext(v.FileName) == ".PDF" {
+				pdfarr := make([]PdfLink, 1)
+				pdfarr[0].Id = v.Id
+				pdfarr[0].Title = v.FileName
+				if pidNum == 25002 { //图
+					pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%233F51B5%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
+					pdfarr[0].ActIndex = "drawing"
+				} else { //纪
+					pdfarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%23009688%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E7%BA%AA%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
+					pdfarr[0].ActIndex = "other"
+				}
+				pdfarr[0].Created = v.Created
+				// timeformatdate, _ := time.Parse(datetime, thisdate)
+				// const lll = "2006-01-02 15:04"
+				pdfarr[0].Updated = v.Updated //.Format(lll)
+				Pdfslice = append(Pdfslice, pdfarr...)
+			}
+		}
+	}
+	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "searchers": Pdfslice}
+	c.ServeJSON()
+}
+
+type WxProduct struct {
+	Id      int64
+	Title   string
+	Type    string
+	Link    string
+	Subtext string
+	Author  string
+	Created time.Time
+	Updated time.Time
+}
+
+// @Title get wx drawings list
+// @Description get drawings by page
+// @Param keyword query string false "The keyword of drawings"
+// @Param projectid query string false "The projectid of drawings"
+// @Param searchpage query string true "The page for drawings list"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 drawings not found
+// @router /searchwxproducts [get]
+// 小程序取得所有图纸列表，分页_plus
+func (c *SearchController) SearchWxProducts() {
+	wxsite := beego.AppConfig.String("wxreqeustsite")
+	limit := "8"
+	limit1, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("searchpage")
+	page1, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	var offset int64
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	pid := c.Input().Get("projectid")
+	var pidNum int64
+	if pid != "" {
+		pidNum, err = strconv.ParseInt(pid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+
+	key := c.Input().Get("keyword")
+	var products []*models.Product
+	if key != "" {
+		if pidNum == 0 { //搜索所有成果
+			products, err = models.SearchProductPage(limit1, offset, key)
+			if err != nil {
+				beego.Error(err.Error)
+			}
+		} else {
+			products, err = models.SearchProjProductPage(pidNum, limit1, offset, key)
+			if err != nil {
+				beego.Error(err.Error)
+			}
+		}
+	} else {
+		products, err = models.SearchProjProductPage(pidNum, limit1, offset, key)
+		if err != nil {
+			beego.Error(err.Error)
+		}
+		// c.Data["json"] = map[string]interface{}{"info": "关键字为空"}
+		// c.ServeJSON()
+	}
+	productslice := make([]WxProduct, 0)
+	for _, w := range products {
+		//取到每个成果的附件（模态框打开）；pdf、文章——新窗口打开
+		//循环成果
+		//每个成果取到所有附件
+		//一个附件则直接打开/下载；2个以上则打开模态框
+		Attachments, err := models.GetAttachments(w.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		//对成果进行循环
+		//赋予url
+		for _, v := range Attachments {
+			// if path.Ext(v.FileName) == ".pdf" || path.Ext(v.FileName) == ".PDF" {
+			wxproductarr := make([]WxProduct, 1)
+			wxproductarr[0].Id = v.Id
+			wxproductarr[0].Title = v.FileName
+			// if pidNum == 25002 { //图
+			// wxproductarr[0].ActIndex = "drawing"
+			switch path.Ext(v.FileName) {
+			case ".pdf", ".PDF":
+				wxproductarr[0].Type = "pdf"
+				wxproductarr[0].Link = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCBmaWxsPSIjMDA5Njg4IiB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj48L3JlY3Q+PHRleHQgZmlsbD0iI0ZGRiIgeD0iNTAlIiB5PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNDQiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+UERGPC90ZXh0Pjwvc3ZnPg=="
+			case ".doc", ".DOC":
+				wxproductarr[0].Type = "doc"
+				wxproductarr[0].Link = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCBmaWxsPSIjRkY1NzIyIiB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj48L3JlY3Q+PHRleHQgZmlsbD0iI0ZGRiIgeD0iNTAlIiB5PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+VzwvdGV4dD48L3N2Zz4="
+			case ".docx", ".DOCX":
+				wxproductarr[0].Type = "docx"
+				wxproductarr[0].Link = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCBmaWxsPSIjRkY1NzIyIiB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj48L3JlY3Q+PHRleHQgZmlsbD0iI0ZGRiIgeD0iNTAlIiB5PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+VzwvdGV4dD48L3N2Zz4="
+			case ".xls", ".XLS":
+				wxproductarr[0].Type = "xls"
+				wxproductarr[0].Link = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCBmaWxsPSIjNzk1NTQ4IiB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj48L3JlY3Q+PHRleHQgZmlsbD0iI0ZGRiIgeD0iNTAlIiB5PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+WDwvdGV4dD48L3N2Zz4="
+			case ".xlsx", ".XLSX":
+				wxproductarr[0].Type = "xlsx"
+				wxproductarr[0].Link = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCBmaWxsPSIjNzk1NTQ4IiB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj48L3JlY3Q+PHRleHQgZmlsbD0iI0ZGRiIgeD0iNTAlIiB5PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+WDwvdGV4dD48L3N2Zz4="
+			case ".ppt", ".PPT":
+				wxproductarr[0].Type = "ppt"
+				wxproductarr[0].Link = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCBmaWxsPSIjMDA5Njg4IiB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj48L3JlY3Q+PHRleHQgZmlsbD0iI0ZGRiIgeD0iNTAlIiB5PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+UDwvdGV4dD48L3N2Zz4="
+			case ".pptx", ".PPTX":
+				wxproductarr[0].Type = "pptx"
+				wxproductarr[0].Link = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCBmaWxsPSIjMDA5Njg4IiB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj48L3JlY3Q+PHRleHQgZmlsbD0iI0ZGRiIgeD0iNTAlIiB5PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iNTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+UDwvdGV4dD48L3N2Zz4="
+			}
+			wxproductarr[0].Created = v.Created
+			// timeformatdate, _ := time.Parse(datetime, thisdate)
+			// const lll = "2006-01-02 15:04"
+			wxproductarr[0].Updated = v.Updated //.Format(lll)
+			productslice = append(productslice, wxproductarr...)
+			// }
+		}
+
+		//取得文章
+		// Articles, err := models.GetArticles(w.Id)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		Articles, err := models.GetWxArticles(w.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		for _, x := range Articles {
+			wxproductarr := make([]WxProduct, 1)
+			wxproductarr[0].Id = x.Id
+			wxproductarr[0].Title = w.Title
+			wxproductarr[0].Type = "isArticle"
+			wxproductarr[0].Created = x.Created
+			wxproductarr[0].Updated = x.Updated
+			wxproductarr[0].Subtext = x.Subtext
+			wxproductarr[0].Author = w.Principal
+			//取到文章里的图片地址
+			slice2 := make([]string, 0)
+			var r io.Reader = strings.NewReader(string(x.Content))
+			doc, err := goquery.NewDocumentFromReader(r)
+			if err != nil {
+				beego.Error(err)
+			}
+			doc.Find("img").Each(func(i int, s *goquery.Selection) {
+				sel, _ := s.Attr("src")
+				aa := make([]string, 1)
+				aa[0] = sel
+				// aa[0].Name = path.Base(sel)
+				slice2 = append(slice2, aa...)
+			})
+			if len(slice2) > 0 {
+				wxproductarr[0].Link = wxsite + slice2[0]
+			} else {
+				wxproductarr[0].Link = wxsite + "/static/img/go.jpg"
+			}
+			// wxproductarr[0].Link = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%3E%3Crect%20fill%3D%22%233F51B5%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%3C%2Frect%3E%3Ctext%20fill%3D%22%23FFF%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Verdana%2C%20Geneva%2C%20sans-serif%22%20alignment-baseline%3D%22middle%22%3E%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E" //wxsite + "/static/img/go.jpg" //当做微信里的src来用
+			productslice = append(productslice, wxproductarr...)
+		}
+	}
+	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "searchers": productslice}
+	c.ServeJSON()
 }
 
 //在某个项目里搜索成果：全文搜索，article全文，编号，名称，关键字，作者……

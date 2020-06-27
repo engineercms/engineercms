@@ -72,15 +72,15 @@ func GetDocs() (docs []*OnlyOffice, err error) {
 	return docs, err
 }
 
-type OnlyOfficeAttatch struct {
+type OnlyOfficeAttach struct {
 	OnlyOffice     `xorm:"extends"`
 	OnlyAttachment `xorm:"extends"`
 	User           `xorm:"extends"`
 }
 
 //分页取得所有项目
-func GetDocList(offset, limit int) (docs []*OnlyOfficeAttatch, err error) {
-	// docs := make([]OnlyOfficeAttatch, 0)
+func GetDocList(offset, limit int) (docs []*OnlyOfficeAttach, err error) {
+	// docs := make([]OnlyOfficeAttach, 0)
 	engine.Table("OnlyOffice").Join("INNER", "user", "user.id = onlyoffice.uid").
 		Join("INNER", "OnlyAttachment", "OnlyAttachment.id = onlyoffice.id").Limit(limit, offset).
 		Find(&docs)

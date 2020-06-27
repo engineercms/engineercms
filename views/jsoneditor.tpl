@@ -141,7 +141,11 @@
       url: "v1/admin/putwxprojectconfig?projectid="+{{.ProjectId}},
       data: JSON.stringify(json),//{ projectid: "1",projectconfig:projectconfig},
       success: function(data, status) {
-        alert("存储“"+data+"”成功！(status:"+status+".)");
+        if (data.info=='SUCCESS'){
+          alert("存储“"+data.json+"”成功！(status:"+status+".)");
+        }else{
+          alert(data.info);
+        }
       }
     });
   };

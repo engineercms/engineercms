@@ -432,19 +432,22 @@ func (c *ProdController) GetProducts() {
 		relevancies1 = make([]RelevancyProj, 0)
 
 		//这里去查flow表格里文档状态
-		proddoc, err := models.GetProductDocument(w.Id)
-		if err != nil {
-			beego.Error(err)
-		} else {
-			document, err := flow.Documents.Get(tx, flow.DocTypeID(proddoc.DocTypeId), flow.DocumentID(proddoc.DocumentId))
+		//默认关闭flow流程，不查询成果状态
+		openflow := beego.AppConfig.String("openflow")
+		if openflow == "true" {
+			proddoc, err := models.GetProductDocument(w.Id)
 			if err != nil {
 				beego.Error(err)
 			} else {
-				linkarr[0].DocState = document.State
+				document, err := flow.Documents.Get(tx, flow.DocTypeID(proddoc.DocTypeId), flow.DocumentID(proddoc.DocumentId))
+				if err != nil {
+					beego.Error(err)
+				} else {
+					linkarr[0].DocState = document.State
+				}
+				linkarr[0].ProdDoc = proddoc
 			}
-			linkarr[0].ProdDoc = proddoc
 		}
-		// }
 		link = append(link, linkarr...)
 	}
 

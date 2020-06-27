@@ -454,7 +454,7 @@ func (c *ShareController) Download() {
 	if err != nil {
 		beego.Error(err)
 	}
-	//查出attatchment id
+	//查出attachment id
 	attachments, err := models.GetAttachments(product.Id)
 	if err != nil {
 		beego.Error(err)

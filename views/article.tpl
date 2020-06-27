@@ -437,7 +437,7 @@
 <script type="text/javascript">
 // 删除文章
 $("#deletearticle").click(function() {
-  if ({{.product.Uid }} === {{.Uid }} || {{.RoleUpdate }} == "true") {
+  if ({{.product.Uid }} === {{.Uid }} || {{.RoleDelete }} == "true") {
     if (confirm("确定删除吗？一旦删除将无法恢复！")) {
       $.ajax({
         type: "post",

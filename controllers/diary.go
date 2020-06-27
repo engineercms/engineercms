@@ -98,7 +98,7 @@ func (c *DiaryController) AddWxDiary() {
 	var user models.User
 	var err error
 	openID := c.GetSession("openID")
-	beego.Info(openID)
+	// beego.Info(openID)
 	if openID != nil {
 		user, err = models.GetUserByOpenID(openID.(string))
 		if err != nil {

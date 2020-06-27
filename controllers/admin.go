@@ -1777,7 +1777,7 @@ func (c *AdminController) GetWxProjectConfig() {
 // @router /putwxprojectconfig [post]
 //更新json文件
 func (c *AdminController) PutWxProjectConfig() {
-	id := c.Input().Get("projectid")
+	_, _, _, isadmin, _ := checkprodRole(c.Ctx)
 	// beego.Info()
 	// beego.Info(c.Input().Get("projectconfig"))
 	// projectconfig := c.Ctx.Input.RequestBody
@@ -1795,20 +1795,26 @@ func (c *AdminController) PutWxProjectConfig() {
 	// 	beego.Error(err)
 	// }
 	// f, err := os.OpenFile("./attachment/onlyoffice/"+onlyattachment.FileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
-	f, err := os.Create("./conf/" + id + ".json")
-	if err != nil {
-		beego.Error(err)
+	if isadmin {
+		id := c.Input().Get("projectid")
+		f, err := os.Create("./conf/" + id + ".json")
+		if err != nil {
+			beego.Error(err)
+		}
+		defer f.Close()
+		// _, err = f.Write(body) //这里直接用resp.Body如何？
+		_, err = f.Write(c.Ctx.Input.RequestBody)
+		// _, err = f.WriteString(str)
+		// _, err = io.Copy(body, f)
+		if err != nil {
+			beego.Error(err)
+		}
+		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "json": id + ".json"}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "非admin!"}
+		c.ServeJSON()
 	}
-	defer f.Close()
-	// _, err = f.Write(body) //这里直接用resp.Body如何？
-	_, err = f.Write(c.Ctx.Input.RequestBody)
-	// _, err = f.WriteString(str)
-	// _, err = io.Copy(body, f)
-	if err != nil {
-		beego.Error(err)
-	}
-	c.Data["json"] = id + ".json"
-	c.ServeJSON()
 }
 
 //导入json数据

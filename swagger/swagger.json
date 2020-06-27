@@ -33,38 +33,6 @@
                 }
             }
         },
-        "/admin/addwxattachment": {
-            "post": {
-                "tags": [
-                    "admin"
-                ],
-                "description": "post attachment by projectid",
-                "operationId": "AttachController.post wx attachment by projectid",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "pid",
-                        "description": "The projectid of attachment",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/.AddArticle"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid page supplied"
-                    },
-                    "404": {
-                        "description": "project not found"
-                    }
-                }
-            }
-        },
         "/admin/category/addcategory": {
             "post": {
                 "tags": [
@@ -1970,45 +1938,6 @@
                         "in": "query",
                         "name": "docstate",
                         "description": "The state of document",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/.GetProductsPage"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid page supplied"
-                    },
-                    "404": {
-                        "description": "data not found"
-                    }
-                }
-            }
-        },
-        "/admin/project/product/pdf/{id}": {
-            "get": {
-                "tags": [
-                    "admin"
-                ],
-                "description": "get documentdetail",
-                "operationId": "AttachController.get wf document details",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "dtid",
-                        "description": "The id of doctype",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "docid",
-                        "description": "The id of doc",
                         "required": true,
                         "type": "string"
                     }
@@ -4039,6 +3968,38 @@
                 }
             }
         },
+        "/wx/addwxattachment": {
+            "post": {
+                "tags": [
+                    "wx"
+                ],
+                "description": "post attachment by projectid",
+                "operationId": "AttachController.post wx attachment by projectid",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "pid",
+                        "description": "The projectid of attachment",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.AddArticle"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "project not found"
+                    }
+                }
+            }
+        },
         "/wx/addwxdiary": {
             "post": {
                 "tags": [
@@ -4170,6 +4131,13 @@
                         "in": "query",
                         "name": "radio",
                         "description": "The radio of finance",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "radio2",
+                        "description": "The radio2 of finance",
                         "required": true,
                         "type": "string"
                     },
@@ -5120,7 +5088,7 @@
                     "wx"
                 ],
                 "description": "get wx pdf by id",
-                "operationId": "MainController.dowload wx pdf",
+                "operationId": "AttachController.dowload wx pdf",
                 "parameters": [
                     {
                         "in": "path",
@@ -5152,7 +5120,7 @@
                     "wx"
                 ],
                 "description": "get pdf by page",
-                "operationId": "MainController.get wx pdf list",
+                "operationId": "SearchController.get wx pdf list",
                 "parameters": [
                     {
                         "in": "query",
@@ -5371,30 +5339,90 @@
                 }
             }
         },
-        "/wx/photoswipe": {
+        "/wx/project/product/pdf/{id}": {
             "get": {
                 "tags": [
                     "wx"
                 ],
-                "description": "get photoswipe",
-                "operationId": "MainController.get photoswipe",
+                "description": "get documentdetail",
+                "operationId": "AttachController.get wf document details",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "dtid",
+                        "description": "The id of doctype",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "docid",
+                        "description": "The id of doc",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/.GetAttachbyId"
+                            "$ref": "#/definitions/.GetProductsPage"
                         }
                     },
                     "400": {
                         "description": "Invalid page supplied"
                     },
                     "404": {
-                        "description": "pdf not found"
+                        "description": "data not found"
                     }
                 }
             }
         },
         "/wx/searchwxdrawings": {
+            "get": {
+                "tags": [
+                    "wx"
+                ],
+                "description": "get drawings by page",
+                "operationId": "SearchController.get wx drawings list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "keyword",
+                        "description": "The keyword of drawings",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "projectid",
+                        "description": "The projectid of drawings",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "searchpage",
+                        "description": "The page for drawings list",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.GetProductsPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "drawings not found"
+                    }
+                }
+            }
+        },
+        "/wx/searchwxproducts": {
             "get": {
                 "tags": [
                     "wx"
@@ -5682,6 +5710,13 @@
                     },
                     {
                         "in": "query",
+                        "name": "radio2",
+                        "description": "The radio2 of finance",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
                         "name": "financedate",
                         "description": "The financedate of finance",
                         "required": true,
@@ -5888,29 +5923,6 @@
                 }
             }
         },
-        "/wx/usermanage": {
-            "get": {
-                "tags": [
-                    "wx"
-                ],
-                "description": "get usermanage",
-                "operationId": "MainController.get usermanage",
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/.GetAttachbyId"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid page supplied"
-                    },
-                    "404": {
-                        "description": "pdf not found"
-                    }
-                }
-            }
-        },
         "/wx/wxhassession": {
             "get": {
                 "tags": [
@@ -5979,7 +5991,7 @@
                     "wx"
                 ],
                 "description": "get wx pdf by id",
-                "operationId": "MainController.dowload wx pdf",
+                "operationId": "AttachController.dowload wx pdf",
                 "parameters": [
                     {
                         "in": "path",
@@ -6064,7 +6076,7 @@
                     "wx"
                 ],
                 "description": "get wx standardpdf by id",
-                "operationId": "MainController.dowload wx standardpdf",
+                "operationId": "StandardController.dowload wx standardpdf",
                 "parameters": [
                     {
                         "in": "path",
@@ -6169,6 +6181,10 @@
         }
     },
     "tags": [
+        {
+            "name": "admin",
+            "description": "VueFlow API\n"
+        },
         {
             "name": "wx",
             "description": "CMSWXDIARY API\n"

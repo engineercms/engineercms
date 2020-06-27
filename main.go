@@ -49,7 +49,7 @@ func main() {
 	os.Mkdir("attachment/carousel", os.ModePerm)
 	//自动建表
 	orm.RunSyncdb("default", false, true)
-	models.InsertUser()
+	// models.InsertUser()
 	// insertGroup()
 	// models.InsertRole()
 	// time1 := "0/" + time + " * * * * *"

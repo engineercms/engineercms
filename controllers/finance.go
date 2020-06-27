@@ -85,6 +85,7 @@ func (c *FinanceController) GetWxFinance2() {
 // @Description post finance by projectid
 // @Param amount query string true "The amount of finance"
 // @Param radio query string true "The radio of finance"
+// @Param radio2 query string true "The radio2 of finance"
 // @Param financedate query string true "The financedate of finance"
 // @Param financeactivity query string true "The financeactivity of finance"
 // @Param content query string true "The content of finance"
@@ -114,6 +115,11 @@ func (c *FinanceController) AddWxFinance() {
 			if radio == "1" {
 				amountint = 0 - amountint
 			}
+			var consider bool
+			radio2 := c.Input().Get("radio2")
+			if radio2 == "1" {
+				consider = true
+			}
 			financedate := c.Input().Get("financedate")
 			array := strings.Split(financedate, "-")
 			//当月天数
@@ -135,7 +141,7 @@ func (c *FinanceController) AddWxFinance() {
 			if err != nil {
 				beego.Error(err)
 			}
-			aid, err := models.AddFinance(amountint, content, financedate2, pidNum, user.Id)
+			aid, err := models.AddFinance(amountint, content, financedate2, pidNum, user.Id, consider)
 			if err != nil {
 				beego.Error(err)
 				c.Data["json"] = map[string]interface{}{"status": 0, "info": "ERR", "id": aid}
@@ -274,6 +280,7 @@ type WxFinance struct {
 	ProjectId   int64     `orm:"null"`
 	UserId      int64     `orm:"null"`
 	Amount      int       `json:"amount"`
+	Consider    bool      `json:"consider"`
 	IsArticleMe bool      `json:"isArticleMe"`
 	Views       int64     `orm:"default(0)"`
 	Created     time.Time `orm:"auto_now_add;type(datetime)"`
@@ -340,6 +347,7 @@ func (c *FinanceController) GetWxFinance() {
 		Financedate: Finance.Financedate,
 		Content:     content, //Finance.Content,
 		// LeassonType: 1,
+		Consider:    Finance.Consider,
 		IsArticleMe: isArticleMe,
 		Views:       Finance.Views,
 		Created:     Finance.Created,
@@ -354,6 +362,7 @@ func (c *FinanceController) GetWxFinance() {
 // @Param id query string true "The id of finance"
 // @Param amount query string true "The amount of finance"
 // @Param radio query string true "The radio of finance"
+// @Param radio2 query string true "The radio2 of finance"
 // @Param financedate query string true "The financedate of finance"
 // @Param content query string true "The content of finance"
 // @Success 200 {object} models.AddFinance
@@ -380,6 +389,11 @@ func (c *FinanceController) UpdateWxFinance() {
 	radio := c.Input().Get("radio")
 	if radio == "1" {
 		amountint = 0 - amountint
+	}
+	var consider bool
+	radio2 := c.Input().Get("radio2")
+	if radio2 == "1" {
+		consider = true
 	}
 	content := c.Input().Get("content")
 
@@ -413,7 +427,7 @@ func (c *FinanceController) UpdateWxFinance() {
 		beego.Error(err)
 	} else {
 		//更新文章
-		err = models.UpdateFinance(idNum, amountint, content, financedate2)
+		err = models.UpdateFinance(idNum, amountint, content, financedate2, consider)
 		if err != nil {
 			beego.Error(err)
 			c.Data["json"] = map[string]interface{}{"info": "ERR", "id": id}

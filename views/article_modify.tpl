@@ -215,7 +215,7 @@ $(function (){
   //编辑文章
   function updatearticle(){
     var articleid = {{.article.Id}};
-    var subtext = $('#subtext1').val();
+    var subtext = $('#subtext').val();
     var html = $('#edit').val();
       $.ajax({
         type:"post",

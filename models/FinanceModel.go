@@ -23,6 +23,7 @@ type Finance struct {
 	ProjectId   int64     `orm:"null"`
 	UserId      int64     `orm:"null"`
 	Amount      int       `json:"amount"`
+	Consider    bool      `json:"consider"`
 	Views       int64     `orm:"default(0)"`
 	Created     time.Time `orm:"auto_now_add;type(datetime)"`
 	Updated     time.Time `orm:"auto_now_add;type(datetime)"`
@@ -33,7 +34,7 @@ func init() {
 }
 
 //添加财务记录
-func AddFinance(amount int, content, financedate string, projectid, uid int64) (id int64, err error) {
+func AddFinance(amount int, content, financedate string, projectid, uid int64, consider bool) (id int64, err error) {
 	o := orm.NewOrm()
 	//查询数据库中有无打卡
 	// var finance Finance
@@ -47,6 +48,7 @@ func AddFinance(amount int, content, financedate string, projectid, uid int64) (
 		Content:     content,
 		ProjectId:   projectid,
 		UserId:      uid,
+		Consider:    consider,
 		Created:     time.Now(),
 		Updated:     time.Now(),
 	}
@@ -131,15 +133,16 @@ func GetFinance(id int64) (Finance1 *Finance, err error) {
 }
 
 //修改
-func UpdateFinance(id int64, amount int, content,financedate string) error {
+func UpdateFinance(id int64, amount int, content, financedate string, consider bool) error {
 	o := orm.NewOrm()
 	finance := &Finance{Id: id}
 	if o.Read(finance) == nil {
 		finance.Amount = amount
 		finance.Content = content
-		finance.Financedate=financedate
+		finance.Consider = consider
+		finance.Financedate = financedate
 		finance.Updated = time.Now()
-		_, err := o.Update(finance, "Amount", "Content", "Financedate","Updated")
+		_, err := o.Update(finance, "Amount", "Content", "Consider", "Financedate", "Updated")
 		if err != nil {
 			return err
 		}

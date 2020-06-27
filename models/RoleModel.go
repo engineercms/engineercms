@@ -21,7 +21,7 @@ type Role struct {
 	Id         int64
 	Rolename   string `json:"name",orm:"unique"` //这个拼音的简写
 	Rolenumber string
-	Status     string    `json:"role",orm:"default('0');size(2)"` //,form:"Status",valid:"Range('0','1','2','3','4')"`
+	Status     string    `json:"status",orm:"default('0');size(2)"` //,form:"Status",valid:"Range('0','1','2','3','4')"`
 	Createtime time.Time `orm:"type(datetime);auto_now_add" `
 	Updated    time.Time `orm:"type(datetime);auto_now_add" `
 }
@@ -34,6 +34,7 @@ type UserRole struct {
 
 func init() {
 	orm.RegisterModel(new(Role), new(UserRole))
+	// InsertRole()
 }
 
 //添加权限
@@ -160,18 +161,24 @@ func AddUserRole(uid, rid int64) error {
 	}
 
 	// 三个返回参数依次为：是否新创建的，对象 Id 值，错误
-	created, id, err := o.ReadOrCreate(&userrole, "UserId", "RoleId")
-
-	if created {
-		fmt.Println("New Insert an object. Id:", id)
-	} else {
-		fmt.Println("Get an object. Id:", id)
-	}
-
-	// _, err := o.Insert(userrole)
-	// if err != nil {
-	// 	return err
+	//这里用这个出错！！
+	// created, id, err := o.ReadOrCreate(&userrole, "UserId", "RoleId")
+	// if created {
+	// 	fmt.Println("New Insert an object. Id:", id)
+	// } else {
+	// 	fmt.Println("Get an object. Id:", id)
 	// }
+
+	//判断是否有重名
+	err := o.QueryTable("UserRole").Filter("UserId", uid).Filter("RoleId", rid).One(userrole, "Id")
+	if err == orm.ErrNoRows { //Filter("tnumber", tnumber).One(topic, "Id")==nil则无法建立
+		// 没有找到记录
+		_, err := o.Insert(userrole)
+		if err != nil {
+			return err
+		}
+	} //else {
+
 	return err
 }
 

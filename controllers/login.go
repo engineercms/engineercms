@@ -514,6 +514,7 @@ func Authorizer(ctx *context.Context) (uname, role string, uid int64) {
 			beego.Error(err)
 		} else {
 			uid = user.Id
+			//获取用户角色，用户角色也要存入token么？
 			role = user.Role
 		}
 	} else { //如果没登录

@@ -12,7 +12,10 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/validation"
 	. "github.com/beego/admin/src/lib"
+	// "github.com/casbin/casbin"
 )
+
+// var e *casbin.Enforcer
 
 //用户表
 type User struct {
@@ -31,7 +34,7 @@ type User struct {
 	Lastlogintime time.Time `orm:"type(datetime);auto_now_add" form:"-"`
 	Createtime    time.Time `orm:"type(datetime);auto_now_add" `
 	Updated       time.Time `orm:"type(datetime);auto_now_add" `
-	Role          string    `json:"role";orm:"default('4')"`
+	Role          string    `json:"role";orm:"default('4')"` //这个不是角色，这个无意义
 	// Roles         []*Role   `orm:"rel(m2m)"`
 }
 
@@ -690,6 +693,83 @@ func InsertUser() {
 	} else {
 		log.Println(err)
 	}
+
+	fmt.Println("insert role ...")
+	// r := new(Role)
+	var r Role
+	r.Rolename = "admin"
+	r.Rolenumber = "1"
+	r.Status = "0"
+
+	id, err = SaveRole(r)
+	if err == nil && id > 0 {
+		fmt.Println("insert role end")
+	} else {
+		log.Println(err)
+		//重新获取roleid
+		role, err := GetRoleByRolename("admin")
+		if err != nil {
+			log.Println(err)
+		} else {
+			id = role.Id
+		}
+	}
+	// user_admin, err := GetUserByUsername("admin")
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	//将用户admin加入到角色admin里
+
+	// e.AddGroupingPolicy(strconv.FormatInt(user_admin.Id, 10), "role_"+strconv.FormatInt(id, 10))
+	// err = AddUserRole(user.Id, id)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	//添加admin角色的权限/*
+
+	//匿名用户角色
+	r.Rolename = "anonymous"
+	r.Rolenumber = "5"
+	r.Status = "0"
+	// r.Remark = "I'm a admin role"
+	// r.Status = 2
+	// r.Title = "Admin role"
+	// o.Insert(r)
+	id, err = SaveRole(r)
+	if err == nil && id > 0 {
+		fmt.Println("insert role end")
+	} else {
+		log.Println(err)
+	}
+
+	r.Rolename = "everyone"
+	r.Rolenumber = "5"
+	r.Status = "0"
+	// r.Remark = "I'm a admin role"
+	// r.Status = 2
+	// r.Title = "Admin role"
+	// o.Insert(r)
+	id, err = SaveRole(r)
+	if err == nil && id > 0 {
+		fmt.Println("insert role end")
+	} else {
+		log.Println(err)
+	}
+
+	r.Rolename = "isme"
+	r.Rolenumber = "4"
+	r.Status = "0"
+	// r.Remark = "I'm a admin role"
+	// r.Status = 2
+	// r.Title = "Admin role"
+	// o.Insert(r)
+	id, err = SaveRole(r)
+	if err == nil && id > 0 {
+		fmt.Println("insert role end")
+	} else {
+		log.Println(err)
+	}
+	// return err
 }
 
 // func insertGroup() {

@@ -163,6 +163,14 @@
           valign:"middle"
         },
         {
+          field: 'consider',
+          title: '是否统筹',
+          formatter:setConsider,
+          halign:"center",
+          align:"right",
+          valign:"middle"
+        },
+        {
           field: 'Nickname',
           title: '登记',
           width: '100',
@@ -307,6 +315,13 @@
     return "<a href='/getwxfinance2/"+row.id+"'>" + value + "</a>";
   }
 
+  function setConsider(value,row,index){
+    if (value) {
+      return "是";
+    }else{
+      return "否";
+    }
+  }
 
   function setDocState(value,row,index){
     // if (value.Name){

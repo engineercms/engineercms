@@ -10,6 +10,7 @@ import (
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/httplib"
 	// "github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/utils/pagination"
 	"net/http"
 	"net/url"
 	"os"
@@ -1619,6 +1620,230 @@ func GetProjTitleNumber(id int64) (ProjectNumber, ProjectName, DesignStage, Sect
 			ProjectName = proj.Title
 		}
 		return ProjectNumber, ProjectName, DesignStage, Section, err
+	}
+}
+
+// 网页阅览pdf文件，并带上上一页和下一页
+func (c *AttachController) Pdf() {
+	_, _, uid, _, _ := checkprodRole(c.Ctx)
+	if uid == 0 {
+		route := c.Ctx.Request.URL.String()
+		c.Data["Url"] = route
+		c.Redirect("/roleerr?url="+route, 302)
+		return
+	}
+
+	//取得某个目录下所有pdf
+	var Url string
+	var pNum int64
+	id := c.Input().Get("id")
+	// beego.Info(id)
+	//id转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	p := c.Input().Get("p")
+	// beego.Info(p)
+
+	var prods []*models.Product
+	var projid int64
+	if p == "" { //id是附件或成果id
+		attach, err := models.GetAttachbyId(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		//由成果id（后台传过来的行id）取得成果——进行排序
+		prod, err := models.GetProd(attach.ProductId)
+		if err != nil {
+			beego.Error(err)
+		}
+		//由侧栏id取得所有成果和所有成果的附件pdf
+		prods, err = models.GetProducts(prod.ProjectId)
+		if err != nil {
+			beego.Error(err)
+		}
+
+		projid = prod.ProjectId
+	} else { //id是侧栏目录id
+		//由侧栏id取得所有成果和所有成果的附件pdf——进行排序
+		prods, err = models.GetProducts(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		//由proj id取得url
+		Url, _, err = GetUrlPath(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		//id转成64为
+		pNum, err = strconv.ParseInt(p, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+
+	Attachments := make([]*models.Attachment, 0)
+	for _, v := range prods {
+		//根据成果id取得所有附件数量
+		Attachments1, err := models.GetAttachments(v.Id) //只返回Id?没意义，全部返回
+		if err != nil {
+			beego.Error(err)
+		}
+		for _, v := range Attachments1 {
+			if path.Ext(v.FileName) == ".pdf" || path.Ext(v.FileName) == ".PDF" {
+				Attachments = append(Attachments, Attachments1...)
+			}
+		}
+	}
+
+	count := len(Attachments)
+	count1 := strconv.Itoa(count)
+	count2, err := strconv.ParseInt(count1, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	postsPerPage := 1
+	paginator := pagination.SetPaginator(c.Ctx, postsPerPage, count2)
+
+	c.Data["paginator"] = paginator
+	if p == "" {
+		var p1 string
+		for i, v := range Attachments {
+			if v.Id == idNum {
+				p1 = strconv.Itoa(i + 1)
+				// PdfLink = Url + "/" + v.FileName
+				break
+			}
+		}
+		c.Redirect("/pdf?p="+p1+"&id="+strconv.FormatInt(projid, 10), 302)
+	} else {
+		PdfLink := Url + "/" + Attachments[pNum-1].FileName
+		// beego.Info(PdfLink)
+		c.Data["PdfLink"] = PdfLink
+		c.TplName = "web/viewer.html"
+	}
+	// logs := logs.NewLogger(1000)
+	// logs.SetLogger("file", `{"filename":"log/test.log"}`)
+	// logs.EnableFuncCallDepth(true)
+	// logs.Info(c.Ctx.Input.IP() + " " + "ListAllTopic")
+	// logs.Close()
+	// count, _ := models.M("logoperation").Alias(`op`).Field(`count(op.id) as count`).Where(where).Count()
+	// if count > 0 {
+	// 	pagesize := 10
+	// 	p := tools.NewPaginator(this.Ctx.Request, pagesize, count)
+	// 	log, _ := models.M("logoperation").Alias(`op`).Where(where).Limit(strconv.Itoa(p.Offset()), strconv.Itoa(pagesize)).Order(`op.id desc`).Select()
+	// 	this.Data["data"] = log
+	// 	this.Data["paginator"] = p
+	// }
+}
+
+// @Title dowload wx pdf
+// @Description get wx pdf by id
+// @Param id path string  true "The id of pdf"
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /wxpdf/:id [get]
+// 有权限判断,必须取得文件所在路径，才能用casbin判断
+func (c *AttachController) WxPdf() {
+	// var openID string
+	// openid := c.GetSession("openID")
+	// beego.Info(openid)
+	// if openid == nil {
+
+	// } else {
+	// 	openID = openid.(string)
+	// }
+	openID := c.GetSession("openID")
+	beego.Info(openID)
+	if openID != nil {
+		user, err := models.GetUserByOpenID(openID.(string))
+		if err != nil {
+			beego.Error(err)
+		} else {
+			useridstring := strconv.FormatInt(user.Id, 10)
+			// 判断用户是否具有权限。
+			id := c.Ctx.Input.Param(":id")
+			//pid转成64为
+			idNum, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
+
+			//根据附件id取得附件的prodid，路径
+			attachment, err := models.GetAttachbyId(idNum)
+			if err != nil {
+				beego.Error(err)
+			}
+
+			product, err := models.GetProd(attachment.ProductId)
+			if err != nil {
+				beego.Error(err)
+			}
+			//根据projid取出路径
+			proj, err := models.GetProj(product.ProjectId)
+			if err != nil {
+				beego.Error(err)
+				utils.FileLogs.Error(err.Error())
+			}
+			var projurl string
+			if proj.ParentIdPath == "" || proj.ParentIdPath == "$#" {
+				projurl = "/" + strconv.FormatInt(proj.Id, 10) + "/"
+			} else {
+				projurl = "/" + strings.Replace(strings.Replace(proj.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(proj.Id, 10) + "/"
+			}
+			//由proj id取得url
+			fileurl, _, err := GetUrlPath(product.ProjectId)
+			if err != nil {
+				beego.Error(err)
+			}
+			fileext := path.Ext(attachment.FileName)
+			if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) {
+				c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
+			}
+		}
+	} else {
+		c.Data["json"] = "未查到openID"
+		c.ServeJSON()
+	}
+}
+
+// @Title dowload wx pdf
+// @Description get wx pdf by id
+// @Param id path string  true "The id of pdf"
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /getwxpdf/:id [get]
+// 查阅防腐资料，不用权限判断
+func (c *AttachController) GetWxPdf() {
+	id := c.Ctx.Input.Param(":id")
+	//pid转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	//根据附件id取得附件的prodid，路径
+	attachment, err := models.GetAttachbyId(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	product, err := models.GetProd(attachment.ProductId)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	//由proj id取得url
+	fileurl, _, err := GetUrlPath(product.ProjectId)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = "未查到openID"
+		c.ServeJSON()
+	} else {
+		c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
 	}
 }
 

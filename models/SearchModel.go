@@ -122,7 +122,9 @@ func SearchProjProductPage(pid, limit, offset int64, key string) (prod []*Produc
 		cond1 = cond1.Or("ProjectId", v.Id)
 	}
 	if key != "" {
-		cond1 = cond1.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
+		cond2 := cond.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
+		cond1 = cond1.AndCond(cond2)
+		// cond2 := cond.AndCond(cond1).OrCond(cond.And("name", "slene"))
 		//循环
 		// cond2 := cond.Or("ProjectId", pid1).Or("ProjectId", pid2)……
 		// ids := []int{1, 2, 3}

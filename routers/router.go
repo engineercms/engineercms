@@ -82,7 +82,7 @@ func init() {
 				beego.NSInclude(
 					&controllers.AdminController{},
 					&controllers.FlowController{},
-					&controllers.AttachController{},
+					// &controllers.AttachController{},20200626调整
 					// &controllers.LoginController{},
 					// &controllers.CustomerCookieCheckerController{},
 				),
@@ -96,7 +96,8 @@ func init() {
 					&controllers.LoginController{},
 					&controllers.ReplyController{},
 					&controllers.SearchController{},
-					&controllers.MainController{},
+					&controllers.AttachController{},
+					// &controllers.MainController{},
 					&controllers.StandardController{},
 					&controllers.DiaryController{},
 					&controllers.PayController{},
@@ -170,6 +171,8 @@ func init() {
 	beego.AddNamespace(ns)
 
 	beego.Router("/test", &controllers.MainController{}, "*:Test")
+	beego.Router("/autodesk", &controllers.MainController{}, "*:Autodesk")
+	// beego.Router("/usermanage", &controllers.MainController{}, "*:UserManage")
 	// beego.Router("/.well-known/pki-validation/AC9A20F9BD09F18D247337AABC67BC06.txt", &controllers.AdminController{}, "*:Testdown")
 	beego.Router("/.well-known/pki-validation/*", &controllers.AdminController{}, "*:Testdown")
 
@@ -183,6 +186,7 @@ func init() {
 	//cms中预览office回调
 	beego.Router("/officeviewcallback", &controllers.OnlyController{}, "*:OfficeViewCallback")
 
+	// 访问onlyoffice页面需要登录
 	beego.InsertFilter("/onlyoffice", beego.BeforeRouter, FilterUser)
 
 	// beego.Router("/onlyoffice/post", &controllers.OnlyController{}, "post:PostOnlyoffice")
@@ -192,6 +196,7 @@ func init() {
 	//添加一个文档
 	beego.Router("/onlyoffice/addattachment", &controllers.OnlyController{}, "post:AddOnlyAttachment")
 	//在onlyoffice中打开文档协作
+	// 协作页面下载文档需要登录
 	beego.InsertFilter("/onlyoffice/:id:string", beego.BeforeRouter, FilterUser)
 	beego.Router("/onlyoffice/:id:string", &controllers.OnlyController{}, "*:OnlyOffice")
 	//cms中预览office
@@ -230,7 +235,7 @@ func init() {
 	beego.Router("/index", &controllers.IndexController{}, "*:GetIndex")
 	//首页放到onlyoffice
 	// beego.Router("/", &controllers.OnlyController{}, "get:Get")
-	beego.Router("/pdf", &controllers.MainController{}, "*:Pdf")
+
 	//显示右侧页面框架
 	beego.Router("/index/user", &controllers.IndexController{}, "*:GetUser")
 	//这里显示用户查看主人日程
@@ -475,6 +480,7 @@ func init() {
 	beego.Router("/project/product/synchpdf", &controllers.AttachController{}, "*:GetsynchPdfs")
 	//提供同步成果中所有pdf列表
 	beego.Router("/project/product/providesynchpdf", &controllers.AttachController{}, "*:ProvidePdfs")
+	beego.Router("/pdf", &controllers.AttachController{}, "*:Pdf")
 
 	//根据文章id取得成果中的文章
 	beego.Router("/project/product/article/:id:string", &controllers.ArticleController{}, "*:GetArticle")

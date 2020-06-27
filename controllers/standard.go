@@ -304,6 +304,33 @@ func (c *StandardController) SearchWxStandards() { //search用的是post方法
 	logs.Close()
 }
 
+// @Title dowload wx standardpdf
+// @Description get wx standardpdf by id
+// @Param id path string  true "The id of standardpdf"
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /wxstandardpdf/:id [get]
+// 小程序查询规范
+func (c *StandardController) WxStandardPdf() {
+	// id := c.Input().Get("id")
+	id := c.Ctx.Input.Param(":id")
+	//pid转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据id取得规范的路径
+	standard, err := models.GetStandard(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(standard.Route)
+	fileurl := strings.Replace(standard.Route, "/attachment/", "attachment/", -1)
+	// http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, standard.Route)
+	c.Ctx.Output.Download(fileurl)
+}
+
 //显示所有有效库
 func (c *StandardController) Valid() { //search用的是post方法
 	// name := c.Input().Get("name")
