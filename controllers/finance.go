@@ -83,6 +83,7 @@ func (c *FinanceController) GetWxFinance2() {
 
 // @Title post wx finance by catalogId
 // @Description post finance by projectid
+// @Param id path string  true "The projectid of finance"
 // @Param amount query string true "The amount of finance"
 // @Param radio query string true "The radio of finance"
 // @Param radio2 query string true "The radio2 of finance"
@@ -106,6 +107,10 @@ func (c *FinanceController) AddWxFinance() {
 			beego.Error(err)
 		} else {
 			pid := c.Ctx.Input.Param(":id")
+			pidNum, err := strconv.ParseInt(pid, 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
 			amount := c.Input().Get("amount")
 			amountint, err := strconv.Atoi(amount)
 			if err != nil {
@@ -137,10 +142,7 @@ func (c *FinanceController) AddWxFinance() {
 			financeactivity := c.Input().Get("financeactivity")
 			content := c.Input().Get("content")
 			content = "<p style='font-size: 16px;'>分部：" + financeactivity + "；</p><p style='font-size: 16px;'>记录：" + user.Nickname + "；</p>" + content //<span style="font-size: 18px;">这个字体到底是多大才好看</span>
-			pidNum, err := strconv.ParseInt(pid, 10, 64)
-			if err != nil {
-				beego.Error(err)
-			}
+
 			aid, err := models.AddFinance(amountint, content, financedate2, pidNum, user.Id, consider)
 			if err != nil {
 				beego.Error(err)
@@ -160,6 +162,7 @@ func (c *FinanceController) AddWxFinance() {
 
 // @Title get wx finance list
 // @Description get finance by page
+// @Param id path string  true "The projectid of finance"
 // @Param page query string  true "The page for finance list"
 // @Param limit query string  true "The limit of page for finance list"
 // @Param skey query string  false "The skey for finance"
@@ -216,6 +219,7 @@ func (c *FinanceController) GetWxFinanceList() {
 
 // @Title get wx finance list
 // @Description get finance by page
+// @Param id path string  true "The projectid of finance"
 // @Param page query string  true "The page for finance list"
 // @Param limit query string  true "The limit of page for finance list"
 // @Param skey query string  false "The skey for finance"
@@ -498,6 +502,7 @@ type FinanceContent struct {
 	Html string
 }
 
+// 下面这个没更改
 func (c *FinanceController) HtmlToDoc() {
 	id := beego.AppConfig.String("wxfinanceprojectid") //"26159" //25002珠三角设代日记id26159
 

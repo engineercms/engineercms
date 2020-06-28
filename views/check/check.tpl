@@ -127,8 +127,8 @@
 
     $.ajax({
       type:"post",//这里是否一定要用post？？？
-      url:"/v1/checkin/activity/getall",
-      // data: {},
+      url:"/v1/checkin/activity/getall?projectid="+{{.ProjectId}},
+      
       dataType:'json',//dataType:JSON,这种是jquerylatest版本的表达方法。不支持新版jquery。
       success:function(data,status){
         // console.log(data)

@@ -83,6 +83,7 @@ func (c *DiaryController) GetWxDiary2() {
 
 // @Title post wx diary by catalogId
 // @Description post diary by projectid
+// @Param projectid query string true "The projectid of diary"
 // @Param title query string  true "The title of diary"
 // @Param diarydate query string  true "The diarydate of diary"
 // @Param diaryactivity query string  true "The diaryactivity of diary"
@@ -105,7 +106,8 @@ func (c *DiaryController) AddWxDiary() {
 			beego.Error(err)
 		} else {
 			// beego.Info(user)
-			pid := beego.AppConfig.String("wxdiaryprojectid") //"26159"
+			// pid := beego.AppConfig.String("wxdiaryprojectid") //"26159"
+			pid := c.Input().Get("projectid")
 			title := c.Input().Get("title")
 			diarydate := c.Input().Get("diarydate")
 
@@ -177,6 +179,7 @@ func (c *DiaryController) AddWxDiary() {
 
 // @Title get wx diaries list
 // @Description get diaries by page
+// @Param projectid query string true "The projectid of diary"
 // @Param page query string  true "The page for diaries list"
 // @Param limit query string  true "The limit of page for diaries list"
 // @Param skey query string  false "The skey for diary"
@@ -187,8 +190,17 @@ func (c *DiaryController) AddWxDiary() {
 //小程序取得日志列表，分页_珠三角设代用
 func (c *DiaryController) GetWxdiaries() {
 	// id := c.Ctx.Input.Param(":id")
-	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+	// id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
 	// wxsite := beego.AppConfig.String("wxreqeustsite")
+	var ProjectId int64
+	var err error
+	projectid := c.Input().Get("projectid")
+	if projectid != "" {
+		ProjectId, err = strconv.ParseInt(projectid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
 	limit := c.Input().Get("limit")
 	if limit == "" {
 		limit = "12"
@@ -205,12 +217,12 @@ func (c *DiaryController) GetWxdiaries() {
 		beego.Error(err)
 	}
 
-	var idNum int64
-	//id转成64为
-	idNum, err = strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		beego.Error(err)
-	}
+	// var idNum int64
+	// //id转成64为
+	// idNum, err = strconv.ParseInt(id, 10, 64)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
 	// var offset int64
 	var offset int
 	if page1 <= 1 {
@@ -220,7 +232,7 @@ func (c *DiaryController) GetWxdiaries() {
 	}
 
 	// diaries, err := models.GetWxDiaries(idNum, limit1, offset)
-	diaries, err := models.GetWxDiaries2(idNum, limit1, offset)
+	diaries, err := models.GetWxDiaries2(ProjectId, limit1, offset)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -232,17 +244,18 @@ func (c *DiaryController) GetWxdiaries() {
 
 // @Title get wx diaries list
 // @Description get diaries by page
+// @Param id path string  true "The id of diaries"
 // @Param page query string  true "The page for diaries list"
 // @Param limit query string  true "The limit of page for diaries list"
 // @Param skey query string  false "The skey for diary"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
-// @router /getwxdiaries2 [get]
+// @router /getwxdiaries2/:id [get]
 //网页页面取得日志列表，返回page rows total
 func (c *DiaryController) GetWxdiaries2() {
-	// id := c.Ctx.Input.Param(":id")
-	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+	id := c.Ctx.Input.Param(":id")
+	// id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
 	// wxsite := beego.AppConfig.String("wxreqeustsite")
 	// limit := "10"
 	limit := c.Input().Get("limit")
@@ -281,9 +294,7 @@ func (c *DiaryController) GetWxdiaries2() {
 	if err != nil {
 		beego.Error(err)
 	}
-
 	// beego.Info(diaries)
-
 	c.Data["json"] = map[string]interface{}{"page": page, "rows": diaries, "total": count}
 	c.ServeJSON()
 }
@@ -448,9 +459,27 @@ type DiaryContent struct {
 	Html string
 }
 
+// @Title get wx diaries to doc
+// @Description get diaries to doc
+// @Param projectid query string true "The projectid of diary"
+// @Param page query string  true "The page for diaries list"
+// @Param limit query string  true "The limit of page for diaries list"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articls not found
+// @router /getwxdiaries [get]
+// 将日志导出到word
 func (c *DiaryController) HtmlToDoc() {
-	id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
-
+	// id := beego.AppConfig.String("wxdiaryprojectid") //"26159" //25002珠三角设代日记id26159
+	var ProjectId int64
+	var err error
+	projectid := c.Input().Get("projectid")
+	if projectid != "" {
+		ProjectId, err = strconv.ParseInt(projectid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
 	// limit := "10"
 	limit := c.Input().Get("limit")
 	limit1, err := strconv.Atoi(limit)
@@ -464,13 +493,6 @@ func (c *DiaryController) HtmlToDoc() {
 		beego.Error(err)
 	}
 
-	var idNum int64
-	//id转成64为
-	idNum, err = strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		beego.Error(err)
-	}
-
 	var offset int
 	if page1 <= 1 {
 		offset = 0
@@ -479,7 +501,7 @@ func (c *DiaryController) HtmlToDoc() {
 	}
 
 	// diaries, err := models.GetWxDiaries(idNum, limit1, offset)
-	diaries, err := models.GetWxDiaries2(idNum, limit1, offset)
+	diaries, err := models.GetWxDiaries2(ProjectId, limit1, offset)
 	if err != nil {
 		beego.Error(err)
 	}

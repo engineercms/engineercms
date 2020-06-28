@@ -1,5 +1,14 @@
 # API v1.0.3
 
+## Jun, 2020
+
++ 小程序显示文章、文件等混排
++ 增加成果flow开关
++ jsoneditor的update增加admin权限控制
++ 初始化数据库增加admin角色，anonymous角色等
+* 接口调整：maincontrollers下的pdf，wxpdf，getwxpdf等调整到attachmentcontrollers里
+* attatch拼写错误，改成attach
+
 ## Nov, 2019
 
 + 采用bootstrap fileinput来实现上传excel到服务端，解析后和规范标准库进行比对，将规范号填入excel，供用户下载。

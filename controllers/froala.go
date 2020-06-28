@@ -467,21 +467,31 @@ func (c *FroalaController) UploadWxImg() {
 
 // @Title post wx artile img by catalogId
 // @Description post article img by catalogid
+// @Param projectid query string true "The projectid of wxeditor"
 // @Success 200 {object} SUCCESS
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /uploadwxeditorimg [post]
 //微信wx添加文章里的图片上传_小程序富文本里的上传图片
 func (c *FroalaController) UploadWxEditorImg() {
-	//解析表单
-	pid := beego.AppConfig.String("wxcatalogid") //"26159" //c.Input().Get("pid")
-	//pid转成64为
-	pidNum, err := strconv.ParseInt(pid, 10, 64)
-	if err != nil {
-		beego.Error(err)
+	var ProjectId int64
+	var err error
+	projectid := c.Input().Get("projectid")
+	if projectid != "" {
+		ProjectId, err = strconv.ParseInt(projectid, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
 	}
+	//解析表单
+	// pid := beego.AppConfig.String("wxcatalogid") //"26159" //c.Input().Get("pid")
+	// //pid转成64为
+	// pidNum, err := strconv.ParseInt(pid, 10, 64)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
 	//根据proj的parentIdpath
-	Url, DiskDirectory, err := GetUrlPath(pidNum)
+	Url, DiskDirectory, err := GetUrlPath(ProjectId)
 	if err != nil {
 		beego.Error(err)
 	}
