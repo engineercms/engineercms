@@ -7,9 +7,9 @@
   <meta name="viewport" content="initial-scale=1,user-scalable=no" />
   <title>知识管理系统</title>
   <!-- 收藏用logo图标 -->
-  <link rel="bookmark"  type="image/x-icon"  href="/static/img/only.ico"/>
+  <link rel="bookmark"  type="image/x-icon"  href="/static/img/only1.ico"/>
   <!-- 网站显示页logo图标 -->
-  <link rel="shortcut icon" href="/static/img/only.ico">
+  <link rel="shortcut icon" href="/static/img/only1.ico">
   <link rel="stylesheet" href="/static/css/sso/login.css" />
   <script src="/static/js/sso/jquery-1.7.min.js"></script>
   <script src="/static/js/sso/placeholder.js"></script>
@@ -21,7 +21,7 @@
   </header>
   <section>
     <div class="logo">
-      <img src="/static/images/logo.png" alt="EngineerCMS logo" />
+      <img src="/static/images/ecmslogo.png" alt="EngineerCMS logo" />
     </div>
     <div class="content">
       <div class="title">

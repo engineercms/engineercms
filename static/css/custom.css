@@ -269,7 +269,7 @@
 /*--------------------------side-footer------------------------------*/
 
 .sidebar-footer {
-  position: absolute;
+  /*position: absolute;*/
   width: 100%;
   bottom: 0;
   display: flex;

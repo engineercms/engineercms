@@ -15,6 +15,7 @@ a.navbar-brand {
   }
 }
 </style>
+<link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css"/>
 <nav class="navbar navbar-default navbar-static-top" style="margin-bottom: 5px;" role="navigation">
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#target-menu">
@@ -140,7 +141,7 @@ a.navbar-brand {
       <li {{if .IsOnlyOffice}} class="active" {{end}}>
         <a href="/onlyoffice">OnlyOffice</a>
       </li>
-      <li {{if or .IsDesignGant .IsConstructGant}}class="dropdown active"{{end}}>
+      <!-- <li {{if or .IsDesignGant .IsConstructGant}}class="dropdown active"{{end}}>
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
           进度 <b class="caret"></b>
         </a>
@@ -152,7 +153,7 @@ a.navbar-brand {
             <a href="/projectgant">施工进度</a>
           </li>
         </ul>
-      </li>
+      </li> -->
       <!-- <form class="navbar-form navbar-left" role="search" method="get" action="/search">
         <div class="form-group">
           <input type="text" class="form-control" class="search-query span2" placeholder="Search Products" name="keyword" id="keyword"></div>
@@ -178,12 +179,12 @@ a.navbar-brand {
           </li>
         </ul>
       </li>
-      <li {{if .IsMonthCheck}}class="active"{{end}}>
+      <!-- <li {{if .IsMonthCheck}}class="active"{{end}}>
         <a href="/v1/checkin/monthchecksum">考勤</a>
       </li>
       <li>
         <a href="/diary">日志</a>
-      </li>
+      </li> -->
       <!-- <li {{if or .IsMeetingroomCalendar .IsCarCalendar .IsOrderCalendar .IsAttendanceCalendar}} class="dropdown active" {{end}}>
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
           预订 <b class="caret"></b>
@@ -212,42 +213,47 @@ a.navbar-brand {
       <li {{if .IsPhotoWipe}} class="active" {{end}}>
         <a href="/v1/wx/photoswipe" title="相册" target="_blank">相册</a>
       </li>
+      <li {{if .IsPhotoWipe}} class="active" {{end}}>
+        <a href="http://192.168.100.37:8080/merit" title="价值" target="_blank">价值</a>
+      </li>
     </ul>
     <div class="pull-right">
       <ul class="nav navbar-nav navbar-right">
-        {{if .IsLogin}}
-        {{if .IsAdmin}}
+        {{if eq true .IsLogin .IsAdmin}}
+        
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{.Username}} <b class="caret"></b></a>
           <ul class="dropdown-menu">
             <li><a href="/admin" title="管理">进入后台</a></li>
-            <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱">邮箱</a></li>
+            <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱"><i class="fa fa-envelope">&nbsp; 邮箱</i></a></li>
+            <li><a href="/v1/cart/getcart" title="购物车"><i class="fa fa-shopping-cart">&nbsp; 购物车</i></a></li>
             <li><a href="javascript:void(0)" id="login">重新登录</a></li>
             <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
             <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
-            <li><a href="/project/25001/getcalendar" title="项目日历">项目日历</a></li>
-            <li><a href="/calendar" title="日程安排">日程安排</a></li>
+            <li><a href="/project/25001/getcalendar" title="项目日历"><i class="fa fa-calendar">&nbsp; 项目日历</i></a></li>
+            <li><a href="/calendar" title="日程安排"><i class="fa fa-calendar-plus-o">&nbsp; 日程安排</i></a></li>
             <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
           </ul>
         </li>
-        {{else}}
+        {{else if eq true .IsLogin}}
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{.Username}} <b class="caret"></b></a>
           <ul class="dropdown-menu">
-            <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱">邮箱</a></li>
+            <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱"><i class="fa fa-envelope">&nbsp; 邮箱</i></a></li>
+            <li><a href="/v1/cart/getcart" title="购物车"><i class="fa fa-shopping-cart">&nbsp; 购物车</i></a></li>
             <li><a href="/user" title="用户资料">用户资料</a></li>
             <li><a href="javascript:void(0)" id="login">重新登录</a></li>
             <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
             <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
-            <li><a href="/project/25001/getcalendar" title="项目日历">项目日历</a></li>
-            <li><a href="/calendar" title="日程安排">日程安排</a></li>
+            <li><a href="/project/25001/getcalendar" title="项目日历"><i class="fa fa-calendar">&nbsp; 项目日历</i></a></li>
+            <li><a href="/calendar" title="日程安排"><i class="fa fa-calendar-plus-o">&nbsp; 日程安排</i></a></li>
             <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
           </ul>
         </li>
-        {{end}}
+        
         {{else}}
-        {{if .IsAdmin}}
-        <li class="dropdown">
+        
+        <!-- <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{.Username}} <b class="caret"></b></a>
           <ul class="dropdown-menu">
             <li><a href="/admin" title="管理">进入后台</a></li>
@@ -259,8 +265,8 @@ a.navbar-brand {
             <li><a href="/calendar" title="日程安排">日程安排</a></li>
             <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
           </ul>
-        </li>
-        {{else}}
+        </li> -->
+        
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{.Username}} <b class="caret"></b></a>
           <ul class="dropdown-menu">
@@ -268,7 +274,7 @@ a.navbar-brand {
             <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
           </ul>
         </li>
-        {{end}}
+        
         {{end}}
         <li {{if .IsWiki}} class="active" {{end}}>
           <a href="/wiki">Wiki</a>

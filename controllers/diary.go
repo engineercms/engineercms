@@ -307,7 +307,7 @@ func (c *DiaryController) GetWxdiaries2() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /getwxdiary/:id [get]
-//根据id查看一篇微信文章
+// 根据id查看一篇微信文章
 func (c *DiaryController) GetWxDiary() {
 	var err error
 	id := c.Ctx.Input.Param(":id")
@@ -361,7 +361,7 @@ func (c *DiaryController) GetWxDiary() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /updatewxdiary [post]
-//编辑设代日记id下微信小程序文章_珠三角设代plus用_editor方式
+// 编辑设代日记id下微信小程序文章_珠三角设代plus用_editor方式
 func (c *DiaryController) UpdateWxDiary() {
 	// pid := beego.AppConfig.String("wxcatalogid") //"26159"
 	//hotqinsessionid携带过来后，用下面的方法获取用户登录存储在服务端的session
@@ -407,7 +407,7 @@ func (c *DiaryController) UpdateWxDiary() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /deletewxdiary [post]
-//根据id删除_没删除文章中的图片
+// 根据id删除_没删除文章中的图片
 func (c *DiaryController) DeleteWxDiary() {
 	var openID string
 	openid := c.GetSession("openID")

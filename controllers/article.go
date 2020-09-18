@@ -398,7 +398,8 @@ type prodWxTableserver struct {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
 // @router /getwxarticles [get]
-//小程序取得所有文章列表，分页_珠三角设代用
+// 小程序取得所有文章列表，分页_珠三角设代用
+// 作废
 func (c *ArticleController) GetWxArticles() {
 	// id := c.Ctx.Input.Param(":id")
 	id := beego.AppConfig.String("wxcatalogid") //"26159" //25002珠三角设代日记id26159
@@ -691,12 +692,6 @@ func (c *ArticleController) GetWxArticleType() {
 		beego.Error(err)
 	}
 
-	// var idNum int64
-	//id转成64为
-	// idNum, err = strconv.ParseInt(id, 10, 64)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
 	var offset int64
 	if page1 <= 1 {
 		offset = 0
@@ -1537,7 +1532,8 @@ func (c *ArticleController) GetWxArticleFlow() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
 // @router /getlistarticles [get]
-//小程序取得所有文章列表，分页_首页用
+// 小程序取得所有文章列表，分页_首页用
+// 这个应该要作废，用在哪里？
 func (c *ArticleController) GetListArticles() {
 	// id := c.Ctx.Input.Param(":id")
 	id := beego.AppConfig.String("wxcatalogid") //"26159" //25002珠三角设代日记id26159
@@ -1880,7 +1876,8 @@ func (c *ArticleController) AddWxArticle() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /addwxeditorarticle [post]
-//向设代日记id下添加微信小程序文章_珠三角设代plus用_editor方式
+// 向设代日记id下添加微信小程序文章_珠三角设代plus用_editor方式
+// 作废
 func (c *ArticleController) AddWxEditorArticle() {
 	var user models.User
 	var err error
@@ -1959,7 +1956,7 @@ func (c *ArticleController) AddWxEditorArticle() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /updatewxeditorarticle [post]
-//编辑设代日记id下微信小程序文章_珠三角设代plus用_editor方式
+// 编辑设代日记id下微信小程序文章_珠三角设代plus用_editor方式
 func (c *ArticleController) UpdateWxEditorArticle() {
 	// pid := beego.AppConfig.String("wxcatalogid") //"26159"
 	//hotqinsessionid携带过来后，用下面的方法获取用户登录存储在服务端的session
@@ -2012,7 +2009,7 @@ func (c *ArticleController) UpdateWxEditorArticle() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /addwxarticles/:id [post]
-//向设代日记id下添加微信小程序文章——通用：包括青少儿书画用
+// 向设代日记id下添加微信小程序文章——通用：包括青少儿书画用
 func (c *ArticleController) AddWxArticles() {
 	var user models.User
 	var err error
@@ -2078,7 +2075,7 @@ func (c *ArticleController) AddWxArticles() {
 
 // @Title post wx artile by catalogId
 // @Description post article by catalogid
-// @Param id query string  true "The id of project"
+// @Param id path string  true "The id of project"
 // @Param title query string  true "The title of article"
 // @Param content query string  true "The content of article"
 // @Param content query string  true "The content of article"
@@ -2089,7 +2086,7 @@ func (c *ArticleController) AddWxArticles() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /addwxarticleflow/:id [post]
-//添加微信文章并执初始化一个流程
+// 添加微信文章并执初始化一个流程
 func (c *ArticleController) AddWxArticleFlow() {
 	var user models.User
 	var err error
@@ -2179,7 +2176,7 @@ func (c *ArticleController) AddWxArticleFlow() {
 	}
 }
 
-//提供给上面addwxarticleflow里用的初始化一个流程
+// 提供给上面addwxarticleflow里用的初始化一个流程
 func wxFlowDoc(dtID, acID, gID, prodID int64, articletitle string) (docid int64, err error) {
 	// c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 	var tx *sql.Tx
@@ -2241,7 +2238,7 @@ func wxFlowDoc(dtID, acID, gID, prodID int64, articletitle string) (docid int64,
 	}
 }
 
-//下面这个作废，用上面那个flowdoc添加一个初始文档流程
+// 下面这个作废，用上面那个flowdoc添加一个初始文档流程
 func wxFlowNext(dtID, daID, docID, messageID int64, groupIds []flow.GroupID, user models.User) error {
 	// c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", c.Ctx.Request.Header.Get("Origin"))
 	var tx *sql.Tx //用这个nil，后面就不用commit了吧，都在flow里commit了。
@@ -2364,7 +2361,7 @@ func wxFlowNext(dtID, daID, docID, messageID int64, groupIds []flow.GroupID, use
 	// }
 }
 
-//向成果id下添加文章——这个没用，上面那个已经包含了
+// 向成果id下添加文章——这个没用，上面那个已经包含了
 func (c *ArticleController) AddProdArticle() {
 	_, _, _, _, islogin := checkprodRole(c.Ctx)
 	if !islogin {
@@ -2399,7 +2396,7 @@ func (c *ArticleController) AddProdArticle() {
 	// }
 }
 
-//修改文章页面
+// 修改文章页面
 func (c *ArticleController) ModifyArticle() {
 	// _, _, uid, isadmin, _ := checkprodRole(c.Ctx)
 	// if !isadmin {
@@ -2434,7 +2431,7 @@ func (c *ArticleController) ModifyArticle() {
 	c.TplName = "article_modify.tpl"
 }
 
-//编辑 成果id
+// 编辑 成果id
 func (c *ArticleController) UpdateArticle() {
 	pid := c.Input().Get("aid")
 	// beego.Info(aid)
@@ -2467,7 +2464,7 @@ func (c *ArticleController) UpdateArticle() {
 	// }
 }
 
-//根据文章id删除文章_没删除文章中的图片
+// 根据文章id删除文章_没删除文章中的图片
 func (c *ArticleController) DeleteArticle() {
 	// _, role := checkprodRole(c.Ctx)
 	_, role, _, _, _ := checkprodRole(c.Ctx)
@@ -2502,7 +2499,7 @@ func (c *ArticleController) DeleteArticle() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /deletewxarticle [post]
-//根据文章id删除文章_没删除文章中的图片
+// 根据文章id删除文章_没删除文章中的图片
 func (c *ArticleController) DeleteWxArticle() {
 	var openID string
 	openid := c.GetSession("openID")
@@ -2546,4 +2543,50 @@ func (c *ArticleController) DeleteWxArticle() {
 			}
 		}
 	}
+}
+
+// @Title get wx userarticles count
+// @Description get userarticles by projid
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articles not found
+// @router /getuserarticle [get]
+//小程序取得我的文章列表，分页_plus_通用_含文章状态
+func (c *ArticleController) GetUserArticle() {
+	c.TplName = "article_pie.tpl"
+}
+
+// @Title get wx userarticles count
+// @Description get userarticles by projid
+// @Param id path string  true "The id of project"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 articles not found
+// @router /getwxuserarticles/:id [get]
+//小程序取得我的文章列表，分页_plus_通用_含文章状态
+func (c *ArticleController) GetWxUserArticles() {
+	id := c.Ctx.Input.Param(":id")
+	// var idNum int64
+	//id转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	// var userid int64
+	// openID := c.GetSession("openID")
+	// if openID == nil {
+	// 	userid = 0
+	// } else {
+	// 	user, err := models.GetUserByOpenID(openID.(string))
+	// 	if err != nil {
+	// 		beego.Error(err)
+	// 	}
+	// 	userid = user.Id
+	// }
+	userarticles, err := models.GetWxUserArticles(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "data": userarticles}
+	c.ServeJSON()
 }

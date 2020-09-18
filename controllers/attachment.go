@@ -390,205 +390,254 @@ func (c *AttachController) ProvidePdfs() {
 
 //向某个侧栏id下添加成果——用于第一种批量添加一对一模式
 func (c *AttachController) AddAttachment() {
-	_, _, uid, _, _ := checkprodRole(c.Ctx)
-
-	meritbasic, err := models.GetMeritBasic()
-	if err != nil {
-		beego.Error(err)
+	_, _, uid, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
 	}
-	var news string
-	var cid, topprojectid int64
-	var parentidpath, parentidpath1 string
-	var filepath, DiskDirectory, Url string
-	var catalog models.PostMerit
-	// if role == 1 {
-	//解析表单
+	useridstring := strconv.FormatInt(uid, 10)
 	pid := c.Input().Get("pid")
-	//pid转成64为
-	pidNum, err := strconv.ParseInt(pid, 10, 64)
+	//id转成64位
+	idNum, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
 		beego.Error(err)
 	}
-	prodlabel := c.Input().Get("prodlabel")
-	prodprincipal := c.Input().Get("prodprincipal")
-	size := c.Input().Get("size")
-	filesize, err := strconv.ParseInt(size, 10, 64)
+	//取项目本身
+	category, err := models.GetProj(idNum)
 	if err != nil {
 		beego.Error(err)
 	}
-	filesize = filesize / 1000.0
-	//根据pid查出项目id
-	proj, err := models.GetProj(pidNum)
-	if err != nil {
-		beego.Error(err)
-	}
-	//根据proj的parentIdpath——这个已经有了专门函数，下列可以简化！
-	//由proj id取得url
-	// Url, DiskDirectory, err = GetUrlPath(proj.Id)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	if proj.ParentIdPath != "" { //如果不是根目录
-		parentidpath = strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
-		parentidpath1 = strings.Replace(parentidpath, "#", "", -1)
+
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
 		patharray := strings.Split(parentidpath1, "-")
 		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
 		if err != nil {
 			beego.Error(err)
 		}
-		// patharray := strings.Split(proj.ParentIdPath1, "-")
-		//pid转成64位
-		meritNum, err := strconv.ParseInt(patharray[0], 10, 64)
-		if err != nil {
-			beego.Error(err)
-		}
-		meritproj, err := models.GetProj(meritNum)
-		if err != nil {
-			beego.Error(err)
-		}
-		catalog.ProjectNumber = meritproj.Code
-		catalog.ProjectName = meritproj.Title
-
-		if len(patharray) > 1 {
-			//pid转成64位
-			meritNum1, err := strconv.ParseInt(patharray[1], 10, 64)
-			if err != nil {
-				beego.Error(err)
-			}
-			meritproj1, err := models.GetProj(meritNum1)
-			if err != nil {
-				beego.Error(err)
-			}
-			catalog.DesignStage = meritproj1.Title
-		}
-
-		if len(patharray) > 2 {
-			//pid转成64位
-			meritNum2, err := strconv.ParseInt(patharray[2], 10, 64)
-			if err != nil {
-				beego.Error(err)
-			}
-			meritproj2, err := models.GetProj(meritNum2)
-			if err != nil {
-				beego.Error(err)
-			}
-			catalog.Section = meritproj2.Title
-		}
-
-		for _, v := range patharray {
-			//pid转成64位
-			idNum, err := strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				beego.Error(err)
-			}
-			proj1, err := models.GetProj(idNum)
-			if err != nil {
-				beego.Error(err)
-			}
-			if proj1.ParentId == 0 { //如果是项目名称，则加上项目编号
-				DiskDirectory = "./attachment/" + proj1.Code + proj1.Title
-				Url = "/attachment/" + proj1.Code + proj1.Title
-			} else {
-				filepath = proj1.Title
-				DiskDirectory = DiskDirectory + "/" + filepath
-				Url = Url + "/" + filepath
-			}
-		}
-		DiskDirectory = DiskDirectory + "/" + proj.Title //加上自身
-		Url = Url + "/" + proj.Title
-	} else { //如果是根目录
-		DiskDirectory = "./attachment/" + proj.Code + proj.Title //加上自身
-		Url = "/attachment/" + proj.Title
-		catalog.ProjectNumber = proj.Code
-		catalog.ProjectName = proj.Title
-		topprojectid = proj.Id
+	} else {
+		topprojectid = category.Id
 	}
-	//获取上传的文件
-	_, h, err := c.GetFile("file")
+
+	projectuser, err := models.GetProjectUser(topprojectid)
 	if err != nil {
 		beego.Error(err)
 	}
-	if h != nil {
-		//保存附件
-		// attachment = h.Filename
-		// filepath = DiskDirectory + "/" + h.Filename
-		// f.Close() // 关闭上传的文件，不然的话会出现临时文件不能清除的情况
-		//将附件的编号和名称写入数据库
-		_, filename1, filename2, _, _, _, _ := Record(h.Filename)
-		// filename1, filename2 := SubStrings(attachment)
-		//当2个文件都取不到filename1的时候，数据库里的tnumber的唯一性检查出错。
-		if filename1 == "" {
-			filename1 = filename2 //如果编号为空，则用文件名代替，否则多个编号为空导致存入数据库唯一性检查错误
-		}
-		//20190728改名，替换文件名中的#和斜杠
-		filename2 = strings.Replace(filename2, "#", "号", -1)
-		filename2 = strings.Replace(filename2, "/", "-", -1)
-		FileSuffix := path.Ext(h.Filename)
-		attachmentname := filename1 + filename2 + FileSuffix
-		// code := filename1
-		// title := filename2
-		//存入成果数据库
-		//如果编号重复，则不写入，只返回Id值。
-		//根据id添加成果code, title, label, principal, content string, projectid int64
-		prodId, err := models.AddProduct(filename1, filename2, prodlabel, prodprincipal, uid, pidNum, topprojectid)
+	var PostPermission bool
+	if projectuser.Id == uid || isadmin {
+		PostPermission = true
+	} else {
+		//2.取得侧栏目录路径——路由id
+		//2.1 根据id取得路由
+		var projurls string
+		proj, err := models.GetProj(idNum)
 		if err != nil {
 			beego.Error(err)
 		}
-
-		//成果写入postmerit表，准备提交merit*********
-		catalog.Tnumber = filename1
-		catalog.Name = filename2
-		catalog.Count = 1
-		catalog.Drawn = meritbasic.Nickname
-		catalog.Designd = meritbasic.Nickname
-		catalog.Author = meritbasic.Username
-		catalog.Drawnratio = 0.4
-		catalog.Designdratio = 0.4
-
-		const lll = "2006-01-02"
-		convdate := time.Now().Format(lll)
-		t1, err := time.Parse(lll, convdate) //这里t1要是用t1:=就不是前面那个t1了
-		if err != nil {
-			beego.Error(err)
-		}
-		catalog.Datestring = convdate
-		catalog.Date = t1
-
-		catalog.Created = time.Now() //.Add(+time.Duration(hours) * time.Hour)
-		catalog.Updated = time.Now() //.Add(+time.Duration(hours) * time.Hour)
-
-		catalog.Complex = 1
-		catalog.State = 0
-		cid, err, news = models.AddPostMerit(catalog)
-		if err != nil {
-			beego.Error(err)
+		if proj.ParentId == 0 { //如果是项目根目录
+			projurls = "/" + strconv.FormatInt(proj.Id, 10)
 		} else {
-			link1 := Url + "/" + attachmentname             // + FileSuffix //附件链接地址
+			// projurls = "/" + strings.Replace(proj.ParentIdPath, "-", "/", -1) + "/" + strconv.FormatInt(proj.Id, 10)
+			projurls = "/" + strings.Replace(strings.Replace(proj.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(proj.Id, 10)
+		}
+
+		if e.Enforce(useridstring, projurls+"/", "POST", ".1") {
+			PostPermission = true
+		}
+	}
+	if PostPermission {
+		// meritbasic, err := models.GetMeritBasic()
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// var news string
+		// var cid int64
+		// var parentidpath string
+		var filepath, DiskDirectory, Url string
+		// var catalog models.PostMerit
+
+		prodlabel := c.Input().Get("prodlabel")
+		prodprincipal := c.Input().Get("prodprincipal")
+		size := c.Input().Get("size")
+		filesize, err := strconv.ParseInt(size, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		filesize = filesize / 1000.0
+		//根据pid查出项目id
+		proj, err := models.GetProj(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		//根据proj的parentIdpath——这个已经有了专门函数，下列可以简化！
+		//由proj id取得url
+		Url, DiskDirectory, err = GetUrlPath(proj.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		// 20200918注释掉以下部分
+		// if proj.ParentIdPath != "" {
+		// 	parentidpath = strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		// 	parentidpath1 = strings.Replace(parentidpath, "#", "", -1)
+		// 	patharray := strings.Split(parentidpath1, "-")
+		// 	topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		// 	if err != nil {
+		// 		beego.Error(err)
+		// 	}
+		// 	meritNum, err := strconv.ParseInt(patharray[0], 10, 64)
+		// 	if err != nil {
+		// 		beego.Error(err)
+		// 	}
+		// 	meritproj, err := models.GetProj(meritNum)
+		// 	if err != nil {
+		// 		beego.Error(err)
+		// 	}
+		// 	catalog.ProjectNumber = meritproj.Code
+		// 	catalog.ProjectName = meritproj.Title
+		// 	if len(patharray) > 1 {
+		// 		meritNum1, err := strconv.ParseInt(patharray[1], 10, 64)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		meritproj1, err := models.GetProj(meritNum1)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		catalog.DesignStage = meritproj1.Title
+		// 	}
+		// 	if len(patharray) > 2 {
+		// 		meritNum2, err := strconv.ParseInt(patharray[2], 10, 64)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		meritproj2, err := models.GetProj(meritNum2)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		catalog.Section = meritproj2.Title
+		// 	}
+		// 	for _, v := range patharray {
+		// 		idNum, err := strconv.ParseInt(v, 10, 64)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		proj1, err := models.GetProj(idNum)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		if proj1.ParentId == 0 {
+		// 			DiskDirectory = "./attachment/" + proj1.Code + proj1.Title
+		// 			Url = "/attachment/" + proj1.Code + proj1.Title
+		// 		} else {
+		// 			filepath = proj1.Title
+		// 			DiskDirectory = DiskDirectory + "/" + filepath
+		// 			Url = Url + "/" + filepath
+		// 		}
+		// 	}
+		// 	DiskDirectory = DiskDirectory + "/" + proj.Title //加上自身
+		// 	Url = Url + "/" + proj.Title
+		// } else {
+		// 	DiskDirectory = "./attachment/" + proj.Code + proj.Title //加上自身
+		// 	Url = "/attachment/" + proj.Title
+		// 	catalog.ProjectNumber = proj.Code
+		// 	catalog.ProjectName = proj.Title
+		// 	topprojectid = proj.Id
+		// }
+
+		//获取上传的文件
+		_, h, err := c.GetFile("file")
+		if err != nil {
+			beego.Error(err)
+		}
+		if h != nil {
+			//保存附件
+			// attachment = h.Filename
+			// filepath = DiskDirectory + "/" + h.Filename
+			// f.Close() // 关闭上传的文件，不然的话会出现临时文件不能清除的情况
+			//将附件的编号和名称写入数据库
+			_, filename1, filename2, _, _, _, _ := Record(h.Filename)
+			// filename1, filename2 := SubStrings(attachment)
+			//当2个文件都取不到filename1的时候，数据库里的tnumber的唯一性检查出错。
+			if filename1 == "" {
+				filename1 = filename2 //如果编号为空，则用文件名代替，否则多个编号为空导致存入数据库唯一性检查错误
+			}
+			//20190728改名，替换文件名中的#和斜杠
+			filename2 = strings.Replace(filename2, "#", "号", -1)
+			filename2 = strings.Replace(filename2, "/", "-", -1)
+			FileSuffix := path.Ext(h.Filename)
+			attachmentname := filename1 + filename2 + FileSuffix
+			// code := filename1
+			// title := filename2
+			//存入成果数据库
+			//如果编号重复，则不写入，只返回Id值。
+			//根据id添加成果code, title, label, principal, content string, projectid int64
+			prodId, err := models.AddProduct(filename1, filename2, prodlabel, prodprincipal, uid, idNum, topprojectid)
+			if err != nil {
+				beego.Error(err)
+			}
+
+			//20200918注释掉以下部分。成果写入postmerit表，准备提交merit*********
+			// catalog.Tnumber = filename1
+			// catalog.Name = filename2
+			// catalog.Count = 1
+			// catalog.Drawn = meritbasic.Nickname
+			// catalog.Designd = meritbasic.Nickname
+			// catalog.Author = meritbasic.Username
+			// catalog.Drawnratio = 0.4
+			// catalog.Designdratio = 0.4
+			// const lll = "2006-01-02"
+			// convdate := time.Now().Format(lll)
+			// t1, err := time.Parse(lll, convdate) //这里t1要是用t1:=就不是前面那个t1了
+			// if err != nil {
+			// 	beego.Error(err)
+			// }
+			// catalog.Datestring = convdate
+			// catalog.Date = t1
+			// catalog.Created = time.Now() //.Add(+time.Duration(hours) * time.Hour)
+			// catalog.Updated = time.Now() //.Add(+time.Duration(hours) * time.Hour)
+			// catalog.Complex = 1
+			// catalog.State = 0
+			// cid, err, news = models.AddPostMerit(catalog)
+			// if err != nil {
+			// 	beego.Error(err)
+			// } else {
+			// 	link1 := Url + "/" + attachmentname             // + FileSuffix //附件链接地址
 			filepath = DiskDirectory + "/" + attachmentname // + FileSuffix
-			_, err = models.AddCatalogLink(cid, link1)
+			// 	_, err = models.AddCatalogLink(cid, link1)
+			// 	if err != nil {
+			// 		beego.Error(err)
+			// 	}
+			// 	data := news
+			// 	c.Ctx.WriteString(data)
+			// }
+			//生成提交merit的清单结束*******************
+
+			//把成果id作为附件的parentid，把附件的名称等信息存入附件数据库
+			//如果附件名称相同，则覆盖上传，但数据库不追加
+			_, err = models.AddAttachment(attachmentname, filesize, 0, prodId)
 			if err != nil {
 				beego.Error(err)
+				c.Data["json"] = map[string]interface{}{"state": "写入附件数据库错误"}
+				c.ServeJSON()
+			} else {
+				//存入文件夹
+				err = c.SaveToFile("file", filepath) //.Join("attachment", attachment)) //存文件    WaterMark(filepath)    //给文件加水印
+				if err != nil {
+					beego.Error(err)
+				}
+				c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "title": attachmentname, "original": attachmentname, "url": Url + "/" + attachmentname}
+				c.ServeJSON()
 			}
-			data := news
-			c.Ctx.WriteString(data)
 		}
-		//生成提交merit的清单结束*******************
-
-		//把成果id作为附件的parentid，把附件的名称等信息存入附件数据库
-		//如果附件名称相同，则覆盖上传，但数据库不追加
-
-		_, err = models.AddAttachment(attachmentname, filesize, 0, prodId)
-		if err != nil {
-			beego.Error(err)
-		} else {
-			//存入文件夹
-			err = c.SaveToFile("file", filepath) //.Join("attachment", attachment)) //存文件    WaterMark(filepath)    //给文件加水印
-			if err != nil {
-				beego.Error(err)
-			}
-			c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "title": attachmentname, "original": attachmentname, "url": Url + "/" + attachmentname}
-			c.ServeJSON()
-		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"state": "ERROR"}
+		c.ServeJSON()
 	}
 	// } else {
 	// route := c.Ctx.Request.URL.String()
@@ -611,7 +660,7 @@ func (c *AttachController) AddAttachment() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 project not found
 // @router /addwxattachment [post]
-//向某个侧栏id下添加成果——用于第一种批量添加一对一模式
+// wx向某个侧栏id下添加成果——用于第一种批量添加一对一模式
 func (c *AttachController) AddWxAttachment() {
 	var user models.User
 	var err error
@@ -621,7 +670,17 @@ func (c *AttachController) AddWxAttachment() {
 		if err != nil {
 			beego.Error(err)
 		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "未登陆用户"}
+		c.ServeJSON()
+		return
 	}
+	//  else {
+	// 	user, err = models.GetUserByUsername("admin")
+	// 	if err != nil {
+	// 		beego.Error(err)
+	// 	}
+	// }
 	var parentidpath, parentidpath1 string
 	var filepath, DiskDirectory, Url string
 
@@ -883,32 +942,31 @@ func (c *AttachController) NewDwg() {
 
 //向某个侧栏id下添加成果——用于第二种添加，多附件模式
 func (c *AttachController) AddAttachment2() {
-	_, _, uid, _, _ := checkprodRole(c.Ctx)
-
-	meritbasic, err := models.GetMeritBasic()
-	if err != nil {
-		beego.Error(err)
+	_, _, uid, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
 	}
-	var catalog models.PostMerit
-	var news string
-	var cid int64
-
-	//解析表单
+	useridstring := strconv.FormatInt(uid, 10)
 	pid := c.Input().Get("pid")
-	// beego.Info(pid)
-	//pid转成64为
-	pidNum, err := strconv.ParseInt(pid, 10, 64)
+	//id转成64位
+	idNum, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
 		beego.Error(err)
 	}
-	//根据pid查出项目id
-	proj, err := models.GetProj(pidNum)
+	//取项目本身
+	category, err := models.GetProj(idNum)
 	if err != nil {
 		beego.Error(err)
 	}
+
 	var topprojectid int64
-	if proj.ParentIdPath != "" {
-		parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
 		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
 		patharray := strings.Split(parentidpath1, "-")
 		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
@@ -916,134 +974,197 @@ func (c *AttachController) AddAttachment2() {
 			beego.Error(err)
 		}
 	} else {
-		topprojectid = proj.Id
+		topprojectid = category.Id
 	}
-	prodcode := c.Input().Get("prodcode") //和上面那个区别仅仅在此处而已
-	prodname := c.Input().Get("prodname")
-	prodlabel := c.Input().Get("prodlabel")
-	prodprincipal := c.Input().Get("prodprincipal")
-	relevancy := c.Input().Get("relevancy")
-	size := c.Input().Get("size")
-	filesize, err := strconv.ParseInt(size, 10, 64)
-	if err != nil {
-		beego.Error(err)
-	}
-	filesize = filesize / 1000.0
-	// proj, err := models.GetProj(pidNum)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	//根据proj的Id
-	Url, DiskDirectory, err := GetUrlPath(pidNum)
-	if err != nil {
-		beego.Error(err)
-	}
-	Number, Name, DesignStage, Section, err := GetProjTitleNumber(pidNum)
-	if err != nil {
-		beego.Error(err)
-	}
-	catalog.ProjectNumber = Number
-	catalog.ProjectName = Name
-	catalog.DesignStage = DesignStage
-	catalog.Section = Section
 
-	//获取上传的文件
-	_, h, err := c.GetFile("file")
+	projectuser, err := models.GetProjectUser(topprojectid)
 	if err != nil {
 		beego.Error(err)
 	}
-	var filepath string
-	// var filesize int64
-	if h != nil {
-		//保存附件
-		// attachment = h.Filename
-		// f.Close()// 关闭上传的文件，不然的话会出现临时文件不能清除的情况
-		//存入成果数据库
-		//如果编号重复，则不写入，值返回Id值。
-		//根据id添加成果code, title, label, principal, content string, projectid int64
-		prodId, err := models.AddProduct(prodcode, prodname, prodlabel, prodprincipal, uid, pidNum, topprojectid)
+	var PostPermission bool
+	if projectuser.Id == uid || isadmin {
+		PostPermission = true
+	} else {
+		//2.取得侧栏目录路径——路由id
+		//2.1 根据id取得路由
+		var projurls string
+		proj, err := models.GetProj(idNum)
 		if err != nil {
 			beego.Error(err)
 		}
-		//20190728改名，替换文件名中的#和斜杠
-		filename2 := strings.Replace(h.Filename, "#", "号", -1)
-		filename2 = strings.Replace(filename2, "/", "-", -1)
-		// FileSuffix := path.Ext(h.Filename)
-		// attachmentname := filename2 + FileSuffix
-		filepath = DiskDirectory + "/" + filename2
-		//*****添加成果关联信息
-		if relevancy != "" {
-			array := strings.Split(relevancy, ",")
-			for _, v := range array {
-				_, err = models.AddRelevancy(prodId, v)
+		if proj.ParentId == 0 { //如果是项目根目录
+			projurls = "/" + strconv.FormatInt(proj.Id, 10)
+		} else {
+			// projurls = "/" + strings.Replace(proj.ParentIdPath, "-", "/", -1) + "/" + strconv.FormatInt(proj.Id, 10)
+			projurls = "/" + strings.Replace(strings.Replace(proj.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(proj.Id, 10)
+		}
+
+		if e.Enforce(useridstring, projurls+"/", "POST", ".1") {
+			PostPermission = true
+		}
+	}
+	if PostPermission {
+
+		// meritbasic, err := models.GetMeritBasic()
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// var catalog models.PostMerit
+		// var news string
+		// var cid int64
+
+		//解析表单
+		// pid := c.Input().Get("pid")
+		// beego.Info(pid)
+		//pid转成64为
+		// pidNum, err := strconv.ParseInt(pid, 10, 64)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		//根据pid查出项目id
+		// proj, err := models.GetProj(pidNum)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// var topprojectid int64
+		// if proj.ParentIdPath != "" {
+		// 	parentidpath := strings.Replace(strings.Replace(proj.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		// 	parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		// 	patharray := strings.Split(parentidpath1, "-")
+		// 	topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		// 	if err != nil {
+		// 		beego.Error(err)
+		// 	}
+		// } else {
+		// 	topprojectid = proj.Id
+		// }
+		prodcode := c.Input().Get("prodcode") //和上面那个区别仅仅在此处而已
+		prodname := c.Input().Get("prodname")
+		prodlabel := c.Input().Get("prodlabel")
+		prodprincipal := c.Input().Get("prodprincipal")
+		relevancy := c.Input().Get("relevancy")
+		size := c.Input().Get("size")
+		filesize, err := strconv.ParseInt(size, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		filesize = filesize / 1000.0
+		// proj, err := models.GetProj(pidNum)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		//根据proj的Id
+		Url, DiskDirectory, err := GetUrlPath(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		// Number, Name, DesignStage, Section, err := GetProjTitleNumber(idNum)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// catalog.ProjectNumber = Number
+		// catalog.ProjectName = Name
+		// catalog.DesignStage = DesignStage
+		// catalog.Section = Section
+
+		//获取上传的文件
+		_, h, err := c.GetFile("file")
+		if err != nil {
+			beego.Error(err)
+		}
+		var filepath string
+		// var filesize int64
+		if h != nil {
+			//保存附件
+			// attachment = h.Filename
+			// f.Close()// 关闭上传的文件，不然的话会出现临时文件不能清除的情况
+			//存入成果数据库
+			//如果编号重复，则不写入，值返回Id值。
+			//根据id添加成果code, title, label, principal, content string, projectid int64
+			prodId, err := models.AddProduct(prodcode, prodname, prodlabel, prodprincipal, uid, idNum, topprojectid)
+			if err != nil {
+				beego.Error(err)
+			}
+			//20190728改名，替换文件名中的#和斜杠
+			filename2 := strings.Replace(h.Filename, "#", "号", -1)
+			filename2 = strings.Replace(filename2, "/", "-", -1)
+			// FileSuffix := path.Ext(h.Filename)
+			// attachmentname := filename2 + FileSuffix
+			filepath = DiskDirectory + "/" + filename2
+			//*****添加成果关联信息
+			if relevancy != "" {
+				array := strings.Split(relevancy, ",")
+				for _, v := range array {
+					_, err = models.AddRelevancy(prodId, v)
+					if err != nil {
+						beego.Error(err)
+					}
+				}
+			}
+			//*****添加成果关联信息结束
+
+			//20200918注释掉以下部分。成果写入postmerit表，准备提交merit*********
+			// catalog.Tnumber = prodcode
+			// catalog.Name = prodname
+			// catalog.Count = 1
+			// catalog.Drawn = meritbasic.Nickname
+			// catalog.Designd = meritbasic.Nickname
+			// catalog.Author = meritbasic.Username
+			// catalog.Drawnratio = 0.4
+			// catalog.Designdratio = 0.4
+			// const lll = "2006-01-02"
+			// convdate := time.Now().Format(lll)
+			// t1, err := time.Parse(lll, convdate) //这里t1要是用t1:=就不是前面那个t1了
+			// if err != nil {
+			// 	beego.Error(err)
+			// }
+			// catalog.Datestring = convdate
+			// catalog.Date = t1
+			// catalog.Created = time.Now() //.Add(+time.Duration(hours) * time.Hour)
+			// catalog.Updated = time.Now() //.Add(+time.Duration(hours) * time.Hour)
+			// catalog.Complex = 1
+			// catalog.State = 0
+			// cid, err, news = models.AddPostMerit(catalog)
+			// if err != nil {
+			// 	beego.Error(err)
+			// } else {
+			// 	link1 := Url + "/" + filename2 //附件链接地址
+			// 	_, err = models.AddCatalogLink(cid, link1)
+			// 	if err != nil {
+			// 		beego.Error(err)
+			// 	}
+			// 	data := news
+			// 	c.Ctx.WriteString(data)
+			// }
+			//生成提交merit的清单结束*******************
+
+			//把成果id作为附件的parentid，把附件的名称等信息存入附件数据库
+			//如果附件名称相同，则覆盖上传，但数据库不追加
+			_, err = models.AddAttachment(filename2, filesize, 0, prodId)
+			if err != nil {
+				beego.Error(err)
+				c.Data["json"] = map[string]interface{}{"state": "WRONG存入数据库出错", "title": err, "original": "", "url": ""}
+				c.ServeJSON()
+			} else {
+				//建立目录，并返回作为父级目录
+				err = os.MkdirAll(DiskDirectory+"/", 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
 				if err != nil {
 					beego.Error(err)
 				}
+				err = c.SaveToFile("file", filepath) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+				if err != nil {
+					beego.Error(err)
+					c.Data["json"] = map[string]interface{}{"state": "WRONG保存文件出错", "title": err, "original": "", "url": ""}
+					c.ServeJSON()
+				} else {
+					c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "title": filename2, "original": filename2, "url": Url + "/" + filename2}
+					c.ServeJSON()
+				}
 			}
 		}
-		//*****添加成果关联信息结束
-
-		//成果写入postmerit表，准备提交merit*********
-		catalog.Tnumber = prodcode
-		catalog.Name = prodname
-		catalog.Count = 1
-		catalog.Drawn = meritbasic.Nickname
-		catalog.Designd = meritbasic.Nickname
-		catalog.Author = meritbasic.Username
-		catalog.Drawnratio = 0.4
-		catalog.Designdratio = 0.4
-
-		const lll = "2006-01-02"
-		convdate := time.Now().Format(lll)
-		t1, err := time.Parse(lll, convdate) //这里t1要是用t1:=就不是前面那个t1了
-		if err != nil {
-			beego.Error(err)
-		}
-		catalog.Datestring = convdate
-		catalog.Date = t1
-
-		catalog.Created = time.Now() //.Add(+time.Duration(hours) * time.Hour)
-		catalog.Updated = time.Now() //.Add(+time.Duration(hours) * time.Hour)
-
-		catalog.Complex = 1
-		catalog.State = 0
-		cid, err, news = models.AddPostMerit(catalog)
-		if err != nil {
-			beego.Error(err)
-		} else {
-			link1 := Url + "/" + filename2 //附件链接地址
-			_, err = models.AddCatalogLink(cid, link1)
-			if err != nil {
-				beego.Error(err)
-			}
-			data := news
-			c.Ctx.WriteString(data)
-		}
-		//生成提交merit的清单结束*******************
-
-		//把成果id作为附件的parentid，把附件的名称等信息存入附件数据库
-		//如果附件名称相同，则覆盖上传，但数据库不追加
-		_, err = models.AddAttachment(filename2, filesize, 0, prodId)
-		if err != nil {
-			beego.Error(err)
-			c.Data["json"] = map[string]interface{}{"state": "WRONG存入数据库出错", "title": err, "original": "", "url": ""}
-			c.ServeJSON()
-		} else {
-			//建立目录，并返回作为父级目录
-			err = os.MkdirAll(DiskDirectory+"/", 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
-			if err != nil {
-				beego.Error(err)
-			}
-			err = c.SaveToFile("file", filepath) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
-			if err != nil {
-				beego.Error(err)
-				c.Data["json"] = map[string]interface{}{"state": "WRONG保存文件出错", "title": err, "original": "", "url": ""}
-				c.ServeJSON()
-			} else {
-				c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "title": filename2, "original": filename2, "url": Url + "/" + filename2}
-				c.ServeJSON()
-			}
-		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"state": "ERROR", "title": "非管理员、非本人、未赋予添加权限"}
+		c.ServeJSON()
 	}
 }
 
@@ -1113,45 +1234,109 @@ func (c *AttachController) UpdateAttachment() {
 
 //删除附件——这个用于针对删除一个附件
 func (c *AttachController) DeleteAttachment() {
-	// _, role := checkprodRole(c.Ctx)
-	// if role == 1 {
-	//解析表单
+	_, _, uid, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	}
+	useridstring := strconv.FormatInt(uid, 10)
+	// pid := c.Input().Get("pid")
 	ids := c.GetString("ids")
 	array := strings.Split(ids, ",")
-	for _, v := range array {
-		// pid = strconv.FormatInt(v1, 10)
-		//id转成64位
-		idNum, err := strconv.ParseInt(v, 10, 64)
+	//id转成64位
+	idNum, err := strconv.ParseInt(array[0], 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//取项目本身
+	category, err := models.GetProj(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
 		if err != nil {
 			beego.Error(err)
 		}
-		//取得附件的成果id——再取得成果的项目目录id——再取得路径
-		attach, err := models.GetAttachbyId(idNum)
+	} else {
+		topprojectid = category.Id
+	}
+
+	projectuser, err := models.GetProjectUser(topprojectid)
+	if err != nil {
+		beego.Error(err)
+	}
+	var DeletePermission bool
+	if projectuser.Id == uid || isadmin {
+		DeletePermission = true
+	} else {
+		//2.取得侧栏目录路径——路由id
+		//2.1 根据id取得路由
+		var projurls string
+		proj, err := models.GetProj(idNum)
 		if err != nil {
 			beego.Error(err)
 		}
-		prod, err := models.GetProd(attach.ProductId)
-		if err != nil {
-			beego.Error(err)
+		if proj.ParentId == 0 { //如果是项目根目录
+			projurls = "/" + strconv.FormatInt(proj.Id, 10)
+		} else {
+			// projurls = "/" + strings.Replace(proj.ParentIdPath, "-", "/", -1) + "/" + strconv.FormatInt(proj.Id, 10)
+			projurls = "/" + strings.Replace(strings.Replace(proj.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(proj.Id, 10)
 		}
-		//根据proj的id
-		_, DiskDirectory, err := GetUrlPath(prod.ProjectId)
-		if err != nil {
-			beego.Error(err)
-		} else if DiskDirectory != "" {
-			path := DiskDirectory + "/" + attach.FileName
-			err = os.Remove(path)
-			if err != nil {
-				beego.Error(err)
-			}
-			err = models.DeleteAttachment(idNum)
-			if err != nil {
-				beego.Error(err)
-			}
+
+		if e.Enforce(useridstring, projurls+"/", "DELETE", ".1") {
+			DeletePermission = true
 		}
 	}
-	c.Data["json"] = "ok"
-	c.ServeJSON()
+	if DeletePermission {
+
+		for _, v := range array {
+			// pid = strconv.FormatInt(v1, 10)
+			//id转成64位
+			idNum, err := strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
+			//取得附件的成果id——再取得成果的项目目录id——再取得路径
+			attach, err := models.GetAttachbyId(idNum)
+			if err != nil {
+				beego.Error(err)
+			}
+			prod, err := models.GetProd(attach.ProductId)
+			if err != nil {
+				beego.Error(err)
+			}
+			//根据proj的id
+			_, DiskDirectory, err := GetUrlPath(prod.ProjectId)
+			if err != nil {
+				beego.Error(err)
+			} else if DiskDirectory != "" {
+				path := DiskDirectory + "/" + attach.FileName
+				err = os.Remove(path)
+				if err != nil {
+					beego.Error(err)
+				}
+				err = models.DeleteAttachment(idNum)
+				if err != nil {
+					beego.Error(err)
+				}
+			}
+		}
+		c.Data["json"] = "ok"
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = "非管理员、非本人、未赋予删除权限"
+		c.ServeJSON()
+	}
 	// } else {
 	// 	route := c.Ctx.Request.URL.String()
 	// 	c.Data["Url"] = route
@@ -1165,7 +1350,6 @@ func (c *AttachController) DeleteAttachment() {
 // func (c *AttachController) ImageFilter() {
 func ImageFilter(ctx *context.Context) {
 	// token := path.Base(ctx.Request.RequestURI)
-
 	// split token and file ext
 	// var filePath string
 	// if i := strings.IndexRune(token, '.'); i == -1 {
@@ -1174,14 +1358,12 @@ func ImageFilter(ctx *context.Context) {
 	// 	filePath = token[i+1:]
 	// 	token = token[:i]
 	// }
-
 	// decode token to file path
 	// var image models.Image
 	// if err := image.DecodeToken(token); err != nil {
 	// 	beego.Info(err)
 	// 	return
 	// }
-
 	// file real path
 	// filePath = GetUrlPath(&image) + filePath
 	//1.url处理中文字符路径，[1:]截掉路径前面的/斜杠
@@ -1206,34 +1388,30 @@ func ImageFilter(ctx *context.Context) {
 
 //根据权限查看附件/downloadattachment?id=
 func (c *AttachController) DownloadAttachment() {
-	// logs := logs.NewLogger()
-	// logs.EnableFuncCallDepth(true)
-	// logs.SetLogger("multifile", `{"filename":"log/engineercms.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10,"separate":["emergency", "alert", "critical", "error", "warning", "notice", "info"]}`)
-	// v := c.GetSession("pwd")
-	// beego.Info("v.(string)")
-	c.Data["IsLogin"] = checkAccount(c.Ctx)
+	username, _, uid, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	}
+	useridstring := strconv.FormatInt(uid, 10)
+
+	// c.Data["IsLogin"] = checkAccount(c.Ctx)
 	//4.取得客户端用户名
 	var projurl string
-	// v := c.GetSession("uname")
-	// if v != nil {
-	// 	uname = v.(string)
-	// 	c.Data["Uname"] = v.(string)
-	// 	user, err := models.GetUserByUsername(uname)
-	// 	if err != nil {
-	// 		beego.Error(err)
-	// 	}
-	// 	useridstring = strconv.FormatInt(user.Id, 10)
-	// }
-	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
-	c.Data["Username"] = username
-	c.Data["Ip"] = c.Ctx.Input.IP()
-	c.Data["role"] = role
-	c.Data["IsAdmin"] = isadmin
-	c.Data["IsLogin"] = islogin
-	c.Data["Uid"] = uid
-	useridstring := strconv.FormatInt(uid, 10)
+	// username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
+	// c.Data["Username"] = username
+	// c.Data["Ip"] = c.Ctx.Input.IP()
+	// c.Data["role"] = role
+	// c.Data["IsAdmin"] = isadmin
+	// c.Data["IsLogin"] = islogin
+	// c.Data["Uid"] = uid
+	// useridstring := strconv.FormatInt(uid, 10)
 	var usersessionid string //客户端sesssionid
-	if islogin {
+	if isLogin {
 		usersessionid = c.Ctx.Input.Cookie("hotqinsessionid")
 		//服务端sessionid怎么取出
 		// v := c.GetSession("uname")
@@ -1260,17 +1438,45 @@ func (c *AttachController) DownloadAttachment() {
 		utils.FileLogs.Error(c.Ctx.Input.IP() + " 用附件查询成果 " + err.Error())
 	}
 
-	//根据projid取出路径
-	proj, err := models.GetProj(product.ProjectId)
+	//取项目本身
+	category, err := models.GetProj(product.ProjectId)
 	if err != nil {
 		beego.Error(err)
-		utils.FileLogs.Error(err.Error())
 	}
-	if proj.ParentIdPath == "" || proj.ParentIdPath == "$#" {
-		projurl = "/" + strconv.FormatInt(proj.Id, 10) + "/"
+
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = category.Id
+	}
+
+	projectuser, err := models.GetProjectUser(topprojectid)
+	if err != nil {
+		beego.Error(err)
+	}
+	var isme bool
+	if projectuser.Id == uid {
+		isme = true
+	}
+
+	//根据projid取出路径
+	// proj, err := models.GetProj(product.ProjectId)
+	// if err != nil {
+	// 	beego.Error(err)
+	// 	utils.FileLogs.Error(err.Error())
+	// }
+	if category.ParentIdPath == "" || category.ParentIdPath == "$#" {
+		projurl = "/" + strconv.FormatInt(category.Id, 10) + "/"
 	} else {
 		// projurl = "/" + strings.Replace(proj.ParentIdPath, "-", "/", -1) + "/" + strconv.FormatInt(proj.Id, 10) + "/"
-		projurl = "/" + strings.Replace(strings.Replace(proj.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(proj.Id, 10) + "/"
+		projurl = "/" + strings.Replace(strings.Replace(category.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(category.Id, 10) + "/"
 	}
 	//由proj id取得url
 	fileurl, _, err := GetUrlPath(product.ProjectId)
@@ -1285,7 +1491,7 @@ func (c *AttachController) DownloadAttachment() {
 		beego.Info("下载……" + fileurl + "/" + attachment.FileName)
 	case ".dwg", ".DWG":
 		//beego.Info(c.Ctx.Input.Site())
-		if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) || isadmin { //+ strconv.Itoa(c.Ctx.Input.Port())
+		if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) || isadmin || isme { //+ strconv.Itoa(c.Ctx.Input.Port())
 			// dwglink, err := url.ParseRequestURI(c.Ctx.Input.Site() + ":" + "/" + fileurl + "/" + attachment.FileName)
 			dwglink, err := url.ParseRequestURI(c.Ctx.Input.Scheme() + "://" + c.Ctx.Input.IP() + ":" + strconv.Itoa(c.Ctx.Input.Port()) + "/" + fileurl + "/" + attachment.FileName)
 			if err != nil {
@@ -1312,7 +1518,7 @@ func (c *AttachController) DownloadAttachment() {
 		// beego.Info(useridstring)
 		// beego.Info(isadmin)
 	default:
-		if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) || isadmin {
+		if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) || isadmin || isme {
 			// http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)//这样写下载的文件名称不对
 			// c.Redirect(url+"/"+attachment.FileName, 302)
 			c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
@@ -1365,42 +1571,10 @@ func (c *AttachController) DownloadAttachment() {
 // }
 //attachment/路径/附件名称
 func (c *AttachController) Attachment() {
-	// beego.Info("v111.(string)")
-	// c.Ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", "*")
-	// http.ResponseWriter.Header().Set("Access-Control-Allow-Origin", "*")
-	// var sess Session
-	// json.Unmarshal(c.Ctx.Input.RequestBody, &sess)
-	//beego.Info(c.Ctx.Input.RequestBody)
-	// var ob models.Object
-	//    json.Unmarshal(c.Ctx.Input.RequestBody, &ob)
-	// beego.Info(sess.Session)
 	//如果url带了sessionid,就能取到uid等信息
 	var useridstring string
 	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
-	// if uid != 0 {
 	useridstring = strconv.FormatInt(uid, 10)
-	// beego.Info(useridstring)
-	// beego.Info(isadmin)
-	// } else {
-	// 	//根据url携带的sessionid
-	// 	v := c.GetSession("uname")
-	// 	if v != nil {
-	// 		user, err := models.GetUserByUsername(v.(string))
-	// 		if err != nil {
-	// 			beego.Error(err)
-	// 		} else {
-	// 			useridstring = strconv.FormatInt(user.Id, 10)
-	// 			if user.Role == "1" {
-	// 				isadmin = true
-	// 			} else {
-	// 				isadmin = false
-	// 			}
-	// 		}
-	// 	}
-	// 	beego.Info(useridstring)
-	// 	beego.Info(isadmin)
-	// }
-	// }
 	//1.url处理中文字符路径，[1:]截掉路径前面的/斜杠
 	// filePath := path.Base(c.Ctx.Request.RequestURI)
 	filePath, err := url.QueryUnescape(c.Ctx.Request.RequestURI[1:]) //attachment/SL2016测试添加成果/A/FB/1/Your First Meteor Application.pdf
@@ -1410,13 +1584,10 @@ func (c *AttachController) Attachment() {
 	if strings.Contains(filePath, "?") { //hotqinsessionid=
 		filePathtemp := strings.Split(filePath, "?")
 		filePath = filePathtemp[0]
-		// beego.Info(filePath)
 	}
-	// beego.Info(filePath)
 	fileext := path.Ext(filePath)
 	filepath1 := path.Dir(filePath)
 	array := strings.Split(filepath1, "/")
-	// beego.Info(strings.Split(filepath1, "/"))
 	//查出所有项目
 	var pid int64
 	proj, err := models.GetProjects()
@@ -1428,14 +1599,39 @@ func (c *AttachController) Attachment() {
 		}
 	}
 
+	//取项目本身
+	category, err := models.GetProj(pid)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = category.Id
+	}
+
+	projectuser, err := models.GetProjectUser(topprojectid)
+	if err != nil {
+		beego.Error(err)
+	}
+	var isme bool
+	if projectuser.Id == uid {
+		isme = true
+	}
+
 	var projurl models.Project
 	projurls := "/" + strconv.FormatInt(pid, 10)
 	//id作为parentid+array[2]
 	if len(array) > 1 {
 		for i := 2; i < len(array); i++ {
-			// beego.Info(i)
-			// beego.Info(array[i])
-			// beego.Info(projurl.Id)
 			if i == 2 {
 				// beego.Info(pid)
 				projurl, err = models.GetProjbyParentidTitle(pid, array[i])
@@ -1464,7 +1660,7 @@ func (c *AttachController) Attachment() {
 	// beego.Info(useridstring)
 	//这里缺少权限设置！！！！！！！！！！！
 	default:
-		if e.Enforce(useridstring, projurls+"/", c.Ctx.Request.Method, fileext) || isadmin {
+		if e.Enforce(useridstring, projurls+"/", c.Ctx.Request.Method, fileext) || isadmin || isme {
 			http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath) //这样写下载的文件名称不对
 			// c.Redirect(url+"/"+attachment.FileName, 302)
 			// c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
@@ -1840,7 +2036,7 @@ func (c *AttachController) GetWxPdf() {
 	fileurl, _, err := GetUrlPath(product.ProjectId)
 	if err != nil {
 		beego.Error(err)
-		c.Data["json"] = "未查到openID"
+		c.Data["json"] = "文件路径不存在！"
 		c.ServeJSON()
 	} else {
 		c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)

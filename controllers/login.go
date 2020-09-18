@@ -527,8 +527,8 @@ func Authorizer(ctx *context.Context) (uname, role string, uid int64) {
 //ip区段，casbin中表示，比如9楼ip区段作为用户，赋予了角色，这个角色具有访问项目目录权限
 func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin, islogin bool) {
 	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的数据??。
-	// beego.Info(v)                          //qin.xc
-	var userrole string
+
+	var userid, roleid, userrole string
 	var user models.User
 	var err error
 	var iprole int
@@ -539,15 +539,25 @@ func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 		if err != nil {
 			beego.Error(err)
 		} else {
+			//查询admin角色的id
+			//重新获取roleid
+			role, err := models.GetRoleByRolename("admin")
+			if err != nil {
+				beego.Error(err)
+			}
+			userid = strconv.FormatInt(user.Id, 10)
+			roleid = strconv.FormatInt(role.Id, 10)
+			isadmin = e.HasRoleForUser(userid, "role_"+roleid)
+
 			uid = user.Id
 			if user.Role == "0" {
-				isadmin = false
+				// isadmin = false
 				userrole = "4"
-			} else if user.Role == "1" {
-				isadmin = true
-				userrole = user.Role
+				// } else if user.Role == "1" {
+				// isadmin = true
+				// userrole = user.Role
 			} else {
-				isadmin = false
+				// isadmin = false
 				userrole = user.Role
 			}
 		}
@@ -563,9 +573,19 @@ func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 			iprole = Getiprole(ctx.Input.IP()) //查不到，则是5——这个应该取消，采用casbin里的ip区段
 			userrole = strconv.Itoa(iprole)
 		} else { //如果查到，则role和用户名
-			if user.Role == "1" {
-				isadmin = true
+			//查询admin角色的id
+			//重新获取roleid
+			role, err := models.GetRoleByRolename("admin")
+			if err != nil {
+				beego.Error(err)
 			}
+			userid = strconv.FormatInt(user.Id, 10)
+			roleid = strconv.FormatInt(role.Id, 10)
+			isadmin = e.HasRoleForUser(userid, "role_"+roleid)
+
+			// if user.Role == "1" {
+			// 	isadmin = true
+			// }
 			uid = user.Id
 			userrole = user.Role
 			uname = user.Username

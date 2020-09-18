@@ -23,6 +23,18 @@ type Project struct {
 	Updated         time.Time `orm:"null","auto_now_add;type(datetime)"`
 }
 
+type ProjectUser struct {
+	Id        int64
+	ProjectId int64
+	UserId    int64
+}
+
+type ProjectLabel struct {
+	Id        int64
+	ProjectId int64
+	Label     string
+}
+
 type Pidstruct struct {
 	ParentId        int64
 	ParentTitle     string
@@ -85,7 +97,7 @@ type FileNode struct {
 // }
 
 func init() {
-	orm.RegisterModel(new(Project), new(ProjCalendar)) //, new(Article)
+	orm.RegisterModel(new(Project), new(ProjCalendar), new(ProjectUser), new(ProjectLabel)) //, new(Article)
 	// orm.RegisterDriver("sqlite", orm.DRSqlite)
 	// orm.RegisterDataBase("default", "sqlite3", "database/engineer.db", 10)
 }
@@ -117,6 +129,30 @@ func AddProject(code, title, label, principal string, parentid int64, parentidpa
 
 	// }
 	return id, nil
+}
+
+func AddProjectUser(pid, uid int64) (id int64, err error) {
+	db := GetDB()
+	projectuser := ProjectUser{ProjectId: pid, UserId: uid}
+
+	result := db.Create(&projectuser) // 通过数据的指针来创建
+
+	// user.ID             // 返回插入数据的主键
+	// result.Error        // 返回 error
+	// result.RowsAffected // 返回插入记录的条数
+	return projectuser.Id, result.Error
+}
+
+func AddProjectLabel(pid int64, label string) (id int64, err error) {
+	db := GetDB()
+	projectlabel := ProjectLabel{ProjectId: pid, Label: label}
+
+	result := db.Create(&projectlabel) // 通过数据的指针来创建
+
+	// user.ID             // 返回插入数据的主键
+	// result.Error        // 返回 error
+	// result.RowsAffected // 返回插入记录的条数
+	return projectlabel.Id, result.Error
 }
 
 //修改——还没改，有问题，不能用
@@ -178,20 +214,55 @@ func GetProjects() (proj []*Project, err error) {
 	return proj, err
 }
 
-//分页取得项目列表
-func GetProjectsPage(limit, offset int64, searchText string) (proj []*Project, err error) {
-	o := orm.NewOrm()
-	qs := o.QueryTable("Project")
+//分页取得项目列表——作废，用下面那个
+// func GetProjectsPage(limit, offset int64, searchText string) (proj []*Project, err error) {
+// 	o := orm.NewOrm()
+// 	qs := o.QueryTable("Project")
+// 	if searchText != "" {
+// 		cond := orm.NewCondition()
+// 		cond1 := cond.Or("Code__contains", searchText).Or("Title__contains", searchText).Or("Label__contains", searchText).Or("Principal__contains", searchText)
+// 		cond2 := cond.AndCond(cond1).And("parent_id", 0)
+// 		qs = qs.SetCond(cond2)
+// 		_, err = qs.Limit(limit, offset).OrderBy("-created").All(&proj)
+// 	} else {
+// 		_, err = qs.Filter("parent_id", 0).Limit(limit, offset).OrderBy("-created").All(&proj)
+// 	}
+// 	return proj, err
+// }
+type UserProject struct {
+	Id        int64     `json:"id"`
+	Code      string    `json:"code"`
+	Title     string    `json:"title"`
+	Label     string    `json:"label"`
+	Principal string    `json:"principal"`
+	Created   time.Time `json:"created"`
+	Updated   time.Time `json:"updated"`
+}
+
+func GetProjectsPage(limit, offset int64, searchText string) (project []*UserProject, err error) {
+	db := GetDB()
 	if searchText != "" {
-		cond := orm.NewCondition()
-		cond1 := cond.Or("Code__contains", searchText).Or("Title__contains", searchText).Or("Label__contains", searchText).Or("Principal__contains", searchText)
-		cond2 := cond.AndCond(cond1).And("parentid", 0)
-		qs = qs.SetCond(cond2)
-		_, err = qs.Limit(limit, offset).OrderBy("-created").All(&proj)
+
 	} else {
-		_, err = qs.Filter("parentid", 0).Limit(limit, offset).OrderBy("-created").All(&proj)
+		err = db.Order("project.created desc").Table("project").
+			Select("project.id as id,project.code as code,project.title as title,project.created as created,user.nickname as principal,project_label.label as label").
+			Where("project.parent_id=?", 0).
+			Joins("left JOIN project_user on project.id = project_user.project_id").
+			Joins("left join project_label on project.id = project_label.project_id").
+			Joins("left join user on user.id=project_user.user_id").
+			Limit(limit).Offset(offset).Scan(&project).Error
 	}
-	return proj, err
+	return project, err
+}
+
+func GetProjectUser(pid int64) (user User, err error) {
+	db := GetDB()
+	err = db.Table("project").Select("project_user.user_id as id").
+		Where("project.id=?", pid).
+		Joins("left JOIN project_user on project.id = project_user.project_id").
+		// Joins("left join user on user.id=project_user.user_id").
+		Scan(&user).Error
+	return user, err
 }
 
 //取得项目总数

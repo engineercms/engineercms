@@ -3,8 +3,14 @@
 <!DOCTYPE html>
 
 <head>
-  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
+  <!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"> -->
   <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
   <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
   <!-- <script src="/static/js/bootstrap-treeview.js"></script> -->
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-table.min.css" />
@@ -39,6 +45,8 @@
   <link rel="stylesheet" href="/static/froala/css/plugins/special_characters.css">
   <link rel="stylesheet" href="/static/froala/js/codemirror.min.css">
   <link rel="stylesheet" href="/static/froala/css/themes/red.css">
+  <!-- <script src="/static/toast/toast.min.js"></script> -->
+  <!-- <link rel="stylesheet" href="/static/toast/toast.min.css"> -->
   <style type="text/css">
   #modalDialog .modal-header {
     cursor: move;
@@ -91,8 +99,8 @@
   /*#modalNewDwg .modal-header {cursor: move;}*/
   /*#modalFlow .modal-header {cursor: move;}*/
   /*body {
-          text-align: center;
-      }*/
+    text-align: center;
+  }*/
   div#editor {
     width: 81%;
     margin: auto;
@@ -109,12 +117,12 @@
   }
 
   /*.form-horizontal .control-label{
-        padding-left:10px; 
-      }
-      .form-horizontal .form-group{
-        float: left;
-        width: 50%;
-      }*/
+    padding-left:10px; 
+  }
+  .form-horizontal .form-group{
+    float: left;
+    width: 50%;
+  }*/
   h3 .share-icon {
     width: 30px;
     height: 30px
@@ -124,34 +132,58 @@
 
 <body>
   <div class="col-lg-12">
-    <!-- <h3>成果列表</h3> -->
-    <div id="toolbar1" class="btn-group">
-      <!-- 多文件批量上传  {{if not .RoleAdd}}style="display:none"{{end}}-->
-      <button {{if ne "true" .RoleAdd}} style="display:none" {{end}} type="button" data-name="addButton" id="addButton" class="btn btn-default" title="批量上传模式"> <i class="fa fa-plus">添加</i>
-      </button>
-      <!-- 多附件上传 -->
-      <button {{if ne "true" .RoleAdd}} style="display:none" {{end}} type="button" data-name="addButton1" id="addButton1" class="btn btn-default"> <i class="fa fa-plus-square-o" title="多附件模式">添加</i>
-      </button>
-      <!-- 添加文章 -->
-      <button {{if ne "true" .RoleAdd}} style="display:none" {{end}} type="button" data-name="addButton2" id="addButton2" class="btn btn-default"> <i class="fa fa-plus-square" title="文章模式">添加</i>
-      </button>
-      <button {{if ne "true" .RoleUpdate}} style="display:none" {{end}} type="button" data-name="editorProdButton" id="editorProdButton" class="btn btn-default"> <i class="fa fa-edit" title="修改成果信息">编辑</i>
-      </button>
-      <button {{if ne "true" .RoleUpdate}} style="display:none" {{end}} type="button" data-name="editorAttachButton" id="editorAttachButton" class="btn btn-default"> <i class="fa fa-edit" title="修改成果附件">编辑</i>
-      </button>
-      <button {{if ne "true" .RoleDelete}} style="display:none" {{end}} type="button" data-name="deleteButton" id="deleteButton" class="btn btn-default">
-        <i class="fa fa-trash">删除</i>
-      </button>
-      <button {{if ne "true" .RoleFlow}} style="display:none" {{end}} type="button" data-name="flowButton" id="flowButton" class="btn btn-default">
-        <i class="fa fa-share-alt">Flow</i>
-      </button>
-      <button {{if ne "true" .RoleGet}} style="display:none" {{end}} type="button" data-name="shareButton" id="shareButton" class="btn btn-default">
-        <i class="fa fa-share">分享</i>
-      </button>
-      <!-- <button {{if ne "true" .RoleNewDwg}} style="display:none" {{end}} type="button" data-name="newdwgButton" id="newdwgButton" class="btn btn-default">
+    <div id="toolbar1" class="btn-toolbar" role="toolbar" aria-label="...">
+      <div class="btn-group">
+        <button {{if ne "true" .RoleAdd}} style="display:none" {{end}} type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="添加资料">
+          <i class="fa fa-plus">&nbsp;&nbsp;添加</i>
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="">
+          <li>
+            <a href="#" onclick="addButton()"><i class="fa fa-plus">&nbsp;&nbsp;单附件模式</i></a>
+          </li>
+          <li>
+            <a href="#" onclick="addButton1()"><i class="fa fa-plus-square-o">&nbsp;&nbsp;多附件模式</i></a>
+          </li>
+          <li>
+            <a href="#" onclick="addButton2()"><i class="fa fa-plus-square">&nbsp;&nbsp;文章模式</i></a>
+          </li>
+        </ul>
+      </div>
+      <div class="btn-group">
+        <button {{if ne "true" .RoleUpdate}} style="display:none" {{end}} type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="编辑">
+          <i class="fa fa-edit">&nbsp;&nbsp;编辑</i>
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="">
+          <li>
+            <a href="#" onclick="editorProdButton()"><i class="fa fa-pencil">&nbsp;&nbsp;编辑成果信息</i></a>
+          </li>
+          <li>
+            <a href="#" onclick="editorAttachButton()"><i class="fa fa-edit">&nbsp;&nbsp;编辑成果附件</i></a>
+          </li>
+        </ul>
+      </div>
+      <div class="btn-group">
+        <button {{if ne "true" .RoleDelete}} style="display:none" {{end}} type="button" data-name="deleteButton" id="deleteButton" class="btn btn-default" title="删除">
+          <i class="fa fa-trash">&nbsp;&nbsp;删除</i>
+        </button>
+        <button {{if ne "true" .RoleGet}} style="display:none" {{end}} type="button" data-name="shareButton" id="shareButton" class="btn btn-default" title="分享文件">
+          <i class="fa fa-share">&nbsp;&nbsp;分享</i>
+        </button>
+        <button {{if ne "true" .RoleFlow}} style="display:none" {{end}} type="button" data-name="flowButton" id="flowButton" class="btn btn-default" title="流程、状态">
+          <i class="fa fa-share-alt">&nbsp;&nbsp;Flow</i>
+        </button>
+      </div>
+      <div class="btn-group">
+        <button type="button" data-name="cartButton" id="cartButton" class="btn btn-default" title="购物车">
+          <i class="fa fa-shopping-cart">&nbsp;&nbsp;Cart</i>
+        </button>
+      </div>
+      <!-- 保留<button {{if ne "true" .RoleNewDwg}} style="display:none" {{end}} type="button" data-name="newdwgButton" id="newdwgButton" class="btn btn-default">
         <i class="fa fa-trash">NEWdwg</i>
         </button> -->
-      <!-- <button type="button" data-name="synchIP" id="synchIP" class="btn btn-default">
+      <!-- 保留<button type="button" data-name="synchIP" id="synchIP" class="btn btn-default">
         <i class="fa fa-refresh">同步</i>
         </button> -->
     </div>
@@ -165,7 +197,6 @@
         method: 'get',
         search: 'true',
         showRefresh: 'true',
-
         showColumns: 'true',
         toolbar: '#toolbar1',
         pagination: 'true',
@@ -559,7 +590,8 @@
     }
 
     // 批量上传
-    $("#addButton").click(function() {
+    // $("#addButton").click(function() {
+    function addButton() {
       // if ({{.role}}!=1){
       //   alert("权限不够！"+{{.role}});
       //   return;
@@ -576,7 +608,7 @@
         show: true,
         backdrop: 'static'
       });
-    })
+    }
 
     $(document).ready(function() {
       $list1 = $('#thelist');
@@ -664,7 +696,7 @@
 
       uploader.on('uploadComplete', function(file) {
         $('#' + file.id).find('.progress').fadeOut();
-        $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }}});
+        $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }} });
       });
 
       uploader.on('all', function(type) {
@@ -702,7 +734,8 @@
     })
 
     // 多附件模式
-    $("#addButton1").click(function() {
+    // $("#addButton1").click(function() {
+    function addButton1() {
       // if ({{.role}}!=1){
       //   alert("权限不够！");
       //   return;
@@ -718,7 +751,7 @@
         show: true,
         backdrop: 'static'
       });
-    })
+    }
 
     $(document).ready(function() {
       $list = $('#thelist1');
@@ -792,7 +825,7 @@
 
         uploader.on('uploadComplete', function(file) {
           $('#' + file.id).find('.progress').fadeOut();
-          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }}});
+          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }} });
         });
 
         uploader.on('all', function(type) {
@@ -832,7 +865,8 @@
     })
 
     //****添加文章
-    $("#addButton2").click(function() {
+    // $("#addButton2").click(function() {
+    function addButton2() {
       // if ({{.role}}!=1){
       //   alert("权限不够！");
       //   return;
@@ -849,10 +883,11 @@
         show: true,
         backdrop: 'static'
       });
-    })
+    }
 
     // 编辑成果信息
-    $("#editorProdButton").click(function() {
+    // $("#editorProdButton").click(function() {
+    function editorProdButton() {
       var selectRow = $('#table0').bootstrapTable('getSelections');
       if (selectRow.length < 1) {
         alert("请先勾选成果！");
@@ -911,11 +946,12 @@
         alert("权限不够！" + selectRow[0].Uid);
         return;
       }
-    })
+    }
 
     // 编辑成果附件——删除附件、文章或追加附件
     var selectrowid;
-    $("#editorAttachButton").click(function() {
+    // $("#editorAttachButton").click(function() {
+    function editorAttachButton() {
       // if ({{.role}}!=1){
       //   alert("权限不够！");
       //   return;
@@ -936,7 +972,6 @@
       }
 
       if (selectRow[0].Uid === {{.Uid }} || {{.RoleDelete }} == "true") {
-
         if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
           var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
         }
@@ -959,12 +994,11 @@
           show: true,
           backdrop: 'static'
         });
-
       } else {
         alert("权限不够！" + selectRow[0].Uid);
         return;
       }
-    })
+    }
 
     $(document).ready(function() {
       var uploader;
@@ -1027,7 +1061,7 @@
         uploader.on('uploadComplete', function(file) {
           $('#' + file.id).find('.progress').fadeOut();
           $('#attachments').bootstrapTable('refresh', { url: '/project/product/allattachments/' + selectrowid });
-          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }}});
+          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }} });
         });
 
         uploader.on('all', function(type) {
@@ -1087,9 +1121,9 @@
           return;
         }
         if (confirm("确定删除成果吗？一旦删除将无法恢复！")) {
-          var title = $.map(selectRow, function(row) {
-            return row.Title;
-          })
+          // var title = $.map(selectRow, function(row) {
+          //   return row.Title;
+          // })
           var ids = "";
           for (var i = 0; i < selectRow.length; i++) {
             if (i == 0) {
@@ -1098,6 +1132,11 @@
               ids = ids + "," + selectRow[i].Id;
             }
           }
+          //删除前端表格用的
+          var ids2 = $.map($('#table0').bootstrapTable('getSelections'), function(row) {
+            return row.Id;
+          });
+
           $.ajax({
             type: "post",
             url: "/project/product/deleteproduct",
@@ -1106,13 +1145,12 @@
               alert("删除“" + data + "”成功！(status:" + status + ".)");
               //删除已选数据
               $('#table0').bootstrapTable('remove', {
-                field: 'Title',
-                values: title
+                field: 'Id',
+                values: ids2
               });
             }
           });
         }
-
       } else {
         alert("权限不够！" + selectRow[0].Uid);
         return;
@@ -1291,7 +1329,7 @@
           document.getElementById("username").innerText = data.data.username;
           // document.getElementById("uuid").innerText='https://zsj.itdos.com/share/detail/'+data.data.uuid;
           // document.getElementById("uuid").append('<a title="复制链接" class="mr15"><i class="fa fa-copy"></i></a>');
-          document.getElementById("uuid").innerHTML = '<span id="copyuuid">https://zsj.itdos.com/v1/share/detail/' + data.data.uuid + '</span><a title="复制链接" class="mr15" data-clipboard-target="#copyuuid"><i class="fa fa-copy"></i></a>'
+          document.getElementById("uuid").innerHTML = '<span id="copyuuid">' + {{.Site }} + '/v1/share/detail/' + data.data.uuid + '</span><a title="复制链接" class="mr15" data-clipboard-target="#copyuuid"><i class="fa fa-copy"></i></a>'
           document.getElementById("code").innerHTML = '<span id="copycode">' + data.data.code + '</span><a title="复制提取码" class="mr15" data-clipboard-target="#copycode"><i class="fa fa-copy"></i></a>';
 
           document.getElementById("expireTime").innerText = moment(data.data.expireTime).format('YYYY-MM-DD HH:mm:ss')
@@ -1342,7 +1380,7 @@
     //     console.log(e);
     // });
 
-
+    // 没有用到
     function getdate() {
       var nowdate = new Date();
       //用yyyy-MM-dd HH:mm:ss的格式输出
@@ -1358,6 +1396,75 @@
       return mydate;
     }
     </script>
+    <script>
+      // const TYPES = ['info', 'warning', 'success', 'error'],
+  //   TITLES = {
+  //     'info': 'Notice!',
+  //     'success': 'Awesome!',
+  //     'warning': 'Watch Out!',
+  //     'error': 'Doh!'
+  //   },
+  //   CONTENT = {
+  //     'info': 'Hello, world! This is a toast message.',
+  //     'success': 'The action has been completed.',
+  //     'warning': 'It\'s all about to go wrong',
+  //     'error': 'It all went wrong.'
+  //   },
+  //   POSITION = ['top-right', 'top-left', 'top-center', 'bottom-right', 'bottom-left', 'bottom-center'];
+
+  // $.toastDefaults.position = 'top-center';
+  // $.toastDefaults.dismissible = true;
+  // $.toastDefaults.stackable = true;
+  // $.toastDefaults.pauseDelayOnHover = true;
+
+    // 成果添加到购物车
+    $("#cartButton").click(function() {
+      var selectRow = $('#table0').bootstrapTable('getSelections');
+      if (selectRow.length <= 0) {
+        alert("请先勾选成果！");
+        return false;
+      }
+        if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+        }
+        if (selectRow[0].Articlecontent[0]) {
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+        }
+        if (selectRow[0].Pdflink[0]) {
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+        }
+        if (site) {
+          alert("同步成果不允许！");
+          return;
+        }
+          var title = $.map(selectRow, function(row) {
+            return row.Title;
+          })
+          var ids = "";
+          for (var i = 0; i < selectRow.length; i++) {
+            if (i == 0) {
+              ids = selectRow[i].Id;
+            } else {
+              ids = ids + "," + selectRow[i].Id;
+            }
+          }
+          $.ajax({
+            type: "post",
+            url: "/v1/cart/createproductcart",
+            data: { ids: ids },
+            success: function(data, status) {
+              alert("添加“" + data.data[0].Title + "”购物车成功！(status:" + status + "！)");
+              // $.toast({
+              //   type: TYPES[1],
+              //   title: TITLES['info'],
+              //   subtitle: '11 mins ago',
+              //   content: CONTENT['info'],
+              //   delay: 5000
+              // });
+            }
+          });
+    })
+  </script>
     <!-- 批量上传 -->
     <div class="form-horizontal">
       <div class="modal fade" id="modalTable">
@@ -2058,7 +2165,7 @@
         success: function(data, status) {
           alert("添加“" + data + "”成功！(status:" + status + ".)");
           $('#modalTable2').modal('hide');
-          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }}});
+          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }} });
         },
       });
     } else {
@@ -2107,7 +2214,7 @@
         success: function(data, status) {
           alert("添加“" + data + "”成功！(status:" + status + ".)");
           $('#modalNewDwg').modal('hide');
-          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }}});
+          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }} });
           //打开新的dwg页面
           // window.open("/downloadattachment?id="+data.Id); 
         },
@@ -2135,7 +2242,7 @@
         success: function(data, status) {
           alert("添加“" + data + "”成功！(status:" + status + ".)");
           $('#modalProdEditor').modal('hide');
-          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }}});
+          $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }} });
         },
       });
     } else {
@@ -2165,8 +2272,8 @@
     }
 
     if (confirm("确定删除吗？一旦删除将无法恢复！")) {
-      var title = $.map(selectRow, function(row) {
-        return row.Title;
+      var ids2 = $.map(selectRow, function(row) {
+        return row.Id;
       })
       var ids = "";
       for (var i = 0; i < selectRow.length; i++) {
@@ -2184,8 +2291,8 @@
           alert("删除“" + data + "”成功！(status:" + status + ".)");
           //删除已选数据
           $('#attachments').bootstrapTable('remove', {
-            field: 'Title',
-            values: title
+            field: 'id',
+            values: ids2
           });
         }
       });

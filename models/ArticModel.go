@@ -121,3 +121,25 @@ func GetArticle(id int64) (Artic *Article, err error) {
 
 	return article, err
 }
+
+//取出用户文章数目
+type Result struct {
+	Usernickname string `json:"name"`
+	Productid    int64
+	Total        int64 `json:"value"`
+}
+
+func GetWxUserArticles(pid int64) (results []*Result, err error) {
+	db := GetDB()
+	// 这个可行db.Table("article").Select("product_id as productid, count(*) as total").Group("product_id").Scan(&results)
+	// db.Table("article").Select("product_id as productid, count(*) as total,user.nickname as usernickname").Group("product_id").
+	// 	Joins("left JOIN product on product.id = article.product_id").
+	// 	Joins("left JOIN user on user.id = product.uid").
+	// 	Scan(&results)
+	err = db.Order("total desc").Table("article").Select("product_id as productid, count(*) as total,user.nickname as usernickname").
+		Joins("left JOIN product on product.id = article.product_id").
+		Joins("left JOIN user on user.id = product.uid").Group("product.uid").
+		Joins("left JOIN project on project.id = product.project_id").Where("project.id=?", pid).
+		Scan(&results).Error
+	return results, err
+}

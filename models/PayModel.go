@@ -18,7 +18,7 @@ type Pay struct {
 	User2ID   int64   `gorm:"column:user2_id;foreignkey:User2Id;"`
 	ArticleID int64   `gorm:"column:article_id;foreignkey:ArticleId;"`
 	Amount    int     `gorm:"column:amount"`
-	User      User    `gorm:"foreignkey:UserId"`
+	User      User    `gorm:"foreignkey:UserId"` //这个外键难道不是错的么？应该是UserID?没错，因为column:user_id
 	Article   Article `gorm:"foreignkey:ArticleId"`
 }
 
@@ -55,6 +55,7 @@ func init() {
 
 	dns = fmt.Sprintf("%s%s.db", db_path, db_name)
 	_db, err = gorm.Open(db_type, dns)
+	// defer _db.Close()//20200803这个不能打开。
 	// _db.LogMode(true)
 	if err != nil {
 		panic("连接数据库失败, error=" + err.Error())

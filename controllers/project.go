@@ -105,10 +105,7 @@ func (c *ProjController) Get() {
 func (c *ProjController) GetProjects() {
 	// id := c.Ctx.Input.Param(":id")
 	id := c.Input().Get("projectid")
-	idNum, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		beego.Error(err)
-	}
+	var err error
 	var offset, limit1, page1 int64
 	// var err error
 	limit := c.Input().Get("limit")
@@ -137,16 +134,6 @@ func (c *ProjController) GetProjects() {
 		offset = (page1 - 1) * limit1
 	}
 
-	// limit := c.Input().Get("limit")
-	// limit1, err := strconv.ParseInt(limit, 10, 64)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// page := c.Input().Get("pageNo")
-	// page1, err := strconv.ParseInt(page, 10, 64)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
 	searchText := c.Input().Get("searchText")
 	projects1 := make([]Project1, 0)
 	if id == "" {
@@ -161,16 +148,7 @@ func (c *ProjController) GetProjects() {
 		if err != nil {
 			beego.Error(err)
 		}
-		//取出所有目录
-		// categories, err := models.GetAllProjects()
-		// if err != nil {
-		// 	beego.Error(err)
-		// }
-		// beego.Info(categories)
-		// products, err := models.GetAllProducts()
-		// if err != nil {
-		// 	beego.Error(err)
-		// }
+
 		//记录开始时间
 		// start := time.Now()
 
@@ -226,6 +204,10 @@ func (c *ProjController) GetProjects() {
 		// elapsed := time.Since(start)
 		// beego.Info(elapsed)
 	} else {
+		idNum, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
 		//根据id查询下级
 		projects, err := models.GetProjSonbyId(idNum)
 		if err != nil {
@@ -684,20 +666,6 @@ func (c *ProjController) GetProjCate() {
 //点击项目名称，根据id查看项目下所有成果
 //这个只是页面。表格内的数据填充用product controllers里的getprojproducts方法
 func (c *ProjController) GetProjProducts() {
-	// username, userrole := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(userrole)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if userrole == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
 	c.Data["IsProject"] = true
 	// c.Data["Ip"] = c.Ctx.Input.IP()
 	// c.Data["role"] = userrole
@@ -725,6 +693,43 @@ func (c *ProjController) GetProjProducts() {
 
 	c.Data["Category"] = category
 	c.TplName = "project_allproducts.tpl"
+}
+
+// @Title get user project editor tree
+// @Description get user project editor tree
+// @Param pid query string true "The id of project"
+// @Success 200 {object} models.GetProjectPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 project not found
+// @router /userprojecteditortree [get]
+//用户跳转到自己编辑项目目录页面
+func (c *ProjController) UserpProjectEditorTree() {
+	_, _, uid, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	}
+	pid := c.Input().Get("pid")
+	//id转成64位
+	idNum, err := strconv.ParseInt(pid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	projectuser, err := models.GetProjectUser(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	if projectuser.Id == uid || isadmin {
+		c.Data["Id"] = pid
+		c.TplName = "user_projecteditortree.tpl"
+	} else {
+		c.Data["json"] = "非管理员，也非本人"
+		c.ServeJSON()
+	}
 }
 
 //后台根据id查出项目目录，以便进行编辑
@@ -760,241 +765,154 @@ func (c *ProjController) GetProjectCate() {
 
 //后台添加项目id的子节点
 func (c *ProjController) AddProjectCate() {
-	// username, role := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(role)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if role == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
-	c.Data["IsProjects"] = true
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
-	c.Data["Username"] = username
-	c.Data["Ip"] = c.Ctx.Input.IP()
-	c.Data["role"] = role
-	c.Data["IsAdmin"] = isadmin
-	c.Data["IsLogin"] = islogin
-	c.Data["Uid"] = uid
-
-	if role != "1" {
-		route := c.Ctx.Request.URL.String()
-		c.Data["Url"] = route
-		c.Redirect("/roleerr?url="+route, 302)
-		// c.Redirect("/roleerr", 302)
-		return
-	}
-	// id := c.Ctx.Input.Param(":id")
-	// pid := c.Input().Get("pid")//项目id
-	nodeid := c.Input().Get("id") //节点nodeid
-	// beego.Info(nodeid)
-	//id转成64为
-	idNum, err := strconv.ParseInt(nodeid, 10, 64)
-	if err != nil {
-		beego.Error(err)
-	}
-	//取节点id——
-	category, err := models.GetProj(idNum)
-	if err != nil {
-		beego.Error(err)
-	}
-	//直接添加子节点
-	title := c.Input().Get("name")
-	code := c.Input().Get("code")
-	parentid := category.Id
-	var parentidpath, parenttitlepath string
-	// if category.ParentIdPath != "" {
-	// 	parentidpath = category.ParentIdPath + "-" + strconv.FormatInt(category.Id, 10)
-	// 	parenttitlepath = category.ParentTitlePath + "-" + category.Title
-
-	// } else {
-	// 	parentidpath = strconv.FormatInt(category.Id, 10)
-	// 	parenttitlepath = category.Title
-	// }
-	if category.ParentIdPath != "" {
-		parentidpath = category.ParentIdPath + "$" + strconv.FormatInt(category.Id, 10) + "#"
-		// parenttitlepath = category.ParentTitlePath + "#$" + category.Title + "#"
-		parenttitlepath = category.ParentTitlePath + "-" + category.Title
-	} else {
-		parentidpath = "$" + strconv.FormatInt(category.Id, 10) + "#"
-		// parenttitlepath = "$" + category.Title + "#"
-		parenttitlepath = category.Title
-	}
-	grade := category.Grade + 1
-	Id, err := models.AddProject(code, title, "", "", parentid, parentidpath, parenttitlepath, grade)
-	if err != nil {
-		beego.Error(err)
-	}
-	//添加文件夹
-	//根据proj的id——这个放deleteproject前面，否则项目数据表删除了就取不到路径了
-	_, DiskDirectory, err := GetUrlPath(idNum)
-	if err != nil {
-		beego.Error(err)
-	}
-	// beego.Info(DiskDirectory)
-	parentpath := DiskDirectory
-	// beego.Info(newpath)
-	//建立目录，并返回作为父级目录
-	err = os.MkdirAll(parentpath+"/"+title, 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
-	if err != nil {
-		beego.Error(err)
-	}
-
-	c.Data["json"] = Id
-	c.ServeJSON()
-}
-
-//后台修改项目目录节点名称
-func (c *ProjController) UpdateProjectCate() {
-	// username, role := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(role)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if role == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
-	c.Data["IsProjects"] = true
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
-	c.Data["Username"] = username
-	c.Data["Ip"] = c.Ctx.Input.IP()
-	c.Data["role"] = role
-	c.Data["IsAdmin"] = isadmin
-	c.Data["IsLogin"] = islogin
-	c.Data["Uid"] = uid
-	if role != "1" {
-		route := c.Ctx.Request.URL.String()
-		c.Data["Url"] = route
-		c.Redirect("/roleerr?url="+route, 302)
-		// c.Redirect("/roleerr", 302)
-		return
-	}
-	// id := c.Ctx.Input.Param(":id")
+	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
 	id := c.Input().Get("id")
-	code := c.Input().Get("code")
-	title := c.Input().Get("name")
-	//id转成64为
+	//id转成64位
 	idNum, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		beego.Error(err)
 	}
-	//根据proj的id——这个放deleteproject前面，否则项目数据表删除了就取不到路径了
-	_, DiskDirectory, err := GetUrlPath(idNum)
-	if err != nil {
-		beego.Error(err)
-	}
-	// beego.Info(DiskDirectory)
-	path1 := DiskDirectory
-	newpath1 := filepath.Dir(DiskDirectory)
-	// beego.Info(newpath1)
-	newpath := newpath1 + "/" + title
-	// beego.Info(newpath)
-	err = os.Rename(path1, newpath)
-	if err != nil {
-		beego.Error(err)
-	}
-	err = models.UpdateProject(idNum, code, title, "", "")
-	if err != nil {
-		beego.Error(err)
-	}
-	c.Data["json"] = id //data
-	c.ServeJSON()
-}
 
-//后台删除项目目录节点——这个用删除项目代替了。
-//删除多节点
-//删除多节点的子节点
-func (c *ProjController) DeleteProjectCate() {
-	// username, role := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(role)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if role == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
-	c.Data["IsProjects"] = true
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
-	c.Data["Username"] = username
-	c.Data["Ip"] = c.Ctx.Input.IP()
-	c.Data["role"] = role
-	c.Data["IsAdmin"] = isadmin
-	c.Data["IsLogin"] = islogin
-	c.Data["Uid"] = uid
-	if role != "1" {
-		route := c.Ctx.Request.URL.String()
-		c.Data["Url"] = route
-		c.Redirect("/roleerr?url="+route, 302)
-		// c.Redirect("/roleerr", 302)
-		return
+	//取项目本身
+	category, err := models.GetProj(idNum)
+	if err != nil {
+		beego.Error(err)
 	}
-	// id := c.Ctx.Input.Param(":id")
-	// id := c.Input().Get("id")
-	ids := c.GetString("ids")
-	array := strings.Split(ids, ",")
-	// beego.Info(array)
-	for _, v2 := range array {
-		//id转成64为
-		idNum, err := strconv.ParseInt(v2, 10, 64)
+	//根据项目顶级id取得项目下所有成果
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
 		if err != nil {
 			beego.Error(err)
 		}
-		//取出所有下级
-		cates, err := models.GetProjectsbyPid(idNum)
+	} else {
+		topprojectid = category.Id
+	}
+
+	projectuser, err := models.GetProjectUser(topprojectid)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	if projectuser.Id == uid || isadmin {
+		//取节点id——
+		category, err := models.GetProj(idNum)
 		if err != nil {
 			beego.Error(err)
 		}
-		for _, v1 := range cates { //删除下级目录
-			err = models.DeleteProject(v1.Id)
-			if err != nil {
-				beego.Error(err)
-			}
+		//直接添加子节点
+		title := c.Input().Get("name")
+		code := c.Input().Get("code")
+		parentid := category.Id
+		var parentidpath, parenttitlepath string
+		// if category.ParentIdPath != "" {
+		// 	parentidpath = category.ParentIdPath + "-" + strconv.FormatInt(category.Id, 10)
+		// 	parenttitlepath = category.ParentTitlePath + "-" + category.Title
+
+		// } else {
+		// 	parentidpath = strconv.FormatInt(category.Id, 10)
+		// 	parenttitlepath = category.Title
+		// }
+		if category.ParentIdPath != "" {
+			parentidpath = category.ParentIdPath + "$" + strconv.FormatInt(category.Id, 10) + "#"
+			// parenttitlepath = category.ParentTitlePath + "#$" + category.Title + "#"
+			parenttitlepath = category.ParentTitlePath + "-" + category.Title
+		} else {
+			parentidpath = "$" + strconv.FormatInt(category.Id, 10) + "#"
+			// parenttitlepath = "$" + category.Title + "#"
+			parenttitlepath = category.Title
 		}
+		grade := category.Grade + 1
+		Id, err := models.AddProject(code, title, "", "", parentid, parentidpath, parenttitlepath, grade)
+		if err != nil {
+			beego.Error(err)
+		}
+		//添加文件夹
 		//根据proj的id——这个放deleteproject前面，否则项目数据表删除了就取不到路径了
 		_, DiskDirectory, err := GetUrlPath(idNum)
 		if err != nil {
 			beego.Error(err)
-		} else if DiskDirectory != "" {
-			// beego.Info(DiskDirectory)
-			// path := DiskDirectory
-			// //直接删除这个文件夹，remove删除文件
-			// err = os.RemoveAll(path)
-			// if err != nil {
-			// 	beego.Error(err)
-			// }
-			//删除目录本身
-			err = models.DeleteProject(idNum)
-			if err != nil {
-				beego.Error(err)
-			}
 		}
+		// beego.Info(DiskDirectory)
+		parentpath := DiskDirectory
+		// beego.Info(newpath)
+		//建立目录，并返回作为父级目录
+		err = os.MkdirAll(parentpath+"/"+title, 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
+		if err != nil {
+			beego.Error(err)
+		}
+		c.Data["json"] = map[string]interface{}{"data": "ok", "id": Id}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"data": "非管理员、非本人"}
+		c.ServeJSON()
 	}
-	c.Data["json"] = "ok" //data
-	c.ServeJSON()
+}
+
+//后台修改项目目录节点名称
+func (c *ProjController) UpdateProjectCate() {
+	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
+	id := c.Input().Get("id")
+	//id转成64位
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//取项目本身
+	category, err := models.GetProj(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据项目顶级id取得项目下所有成果
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = category.Id
+	}
+
+	projectuser, err := models.GetProjectUser(topprojectid)
+	if err != nil {
+		beego.Error(err)
+	}
+	if projectuser.Id == uid || isadmin {
+		code := c.Input().Get("code")
+		title := c.Input().Get("name")
+		//根据proj的id——这个放deleteproject前面，否则项目数据表删除了就取不到路径了
+		_, DiskDirectory, err := GetUrlPath(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		// beego.Info(DiskDirectory)
+		path1 := DiskDirectory
+		newpath1 := filepath.Dir(DiskDirectory)
+		// beego.Info(newpath1)
+		newpath := newpath1 + "/" + title
+		// beego.Info(newpath)
+		err = os.Rename(path1, newpath)
+		if err != nil {
+			beego.Error(err)
+		}
+		err = models.UpdateProject(idNum, code, title, "", "")
+		if err != nil {
+			beego.Error(err)
+		}
+		c.Data["json"] = map[string]interface{}{"data": "ok", "id": id} //id //data
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"data": "非管理员，非本人"}
+		c.ServeJSON()
+	}
+	// c.Data["IsProjects"] = true
 }
 
 //根据项目侧栏id查看这个id下的成果，不含子目录中的成果
@@ -1087,35 +1005,12 @@ func (c *ProjController) GetProjNav() {
 
 //添加项目和项目目录、文件夹
 func (c *ProjController) AddProject() {
-	// username, role := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(role)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if role == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
 	c.Data["IsProjects"] = true
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	_, _, _, isadmin, _ := checkprodRole(c.Ctx)
-	// c.Data["Username"] = username
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	// c.Data["IsAdmin"] = isadmin
-	// c.Data["IsLogin"] = islogin
-	// c.Data["Uid"] = uid
-	if !isadmin {
+	_, _, uid, _, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
 		route := c.Ctx.Request.URL.String()
 		c.Data["Url"] = route
 		c.Redirect("/roleerr?url="+route, 302)
-		// c.Redirect("/roleerr", 302)
 		return
 	}
 	// rows := c.Input().Get("rows2[0][0]")
@@ -1131,27 +1026,22 @@ func (c *ProjController) AddProject() {
 	if err != nil {
 		beego.Error(err)
 	}
+	_, err = models.AddProjectUser(Id, uid)
+	if err != nil {
+		beego.Error(err)
+	}
+	_, err = models.AddProjectLabel(Id, projlabel)
+	if err != nil {
+		beego.Error(err)
+	}
 	//根据id查出分级目录的名称、代码和层数
 	//如果不建立下级怎样？页面中允许不选择任何
 	ids := c.GetString("ids")
 	array := strings.Split(ids, ",")
-	// nodes := make([]models.AdminCategory, 0)
 
-	// for i1, v1 := range array {
-	// 	category, err := models.GetAdminCategorybyId(v1)
-	// 	if err != nil {
-	// 		beego.Error(err)
-	// 	}
-	// 	aa := make([]models.AdminCategory, 1)
-	// 	aa[0].Title = category.Title
-	// 	aa[0].Code = category.Code
-	// 	aa[0].Grade = category.Grade
-	// 	nodes = append(nodes, aa...)
-	// }
 	nodes := make([]*models.AdminCategory, 0) //这样完美解决像上面那样借助aa[0]那样
 	grade := make([]int, 0)
 	for _, v2 := range array {
-		// pid = strconv.FormatInt(v1, 10)
 		//id转成64位
 		idNum, err := strconv.ParseInt(v2, 10, 64)
 		if err != nil {
@@ -1187,14 +1077,8 @@ func (c *ProjController) AddProject() {
 
 //根据项目模板添加项目
 func (c *ProjController) AddProjTemplet() {
-	_, _, _, isadmin, _ := checkprodRole(c.Ctx)
-	// c.Data["Username"] = username
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	// c.Data["IsAdmin"] = isadmin
-	// c.Data["IsLogin"] = islogin
-	// c.Data["Uid"] = uid
-	if !isadmin {
+	_, _, uid, _, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
 		route := c.Ctx.Request.URL.String()
 		c.Data["Url"] = route
 		c.Redirect("/roleerr?url="+route, 302)
@@ -1237,6 +1121,14 @@ func (c *ProjController) AddProjTemplet() {
 	maketreejsontemplet(cates, categories, &root)
 	//先建立第一层项目编号和名称
 	Id, err := models.AddProject(projcode, projname, projlabel, principal, 0, "", "", 1)
+	if err != nil {
+		beego.Error(err)
+	}
+	_, err = models.AddProjectUser(Id, uid)
+	if err != nil {
+		beego.Error(err)
+	}
+	_, err = models.AddProjectLabel(Id, projlabel)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -1309,198 +1201,306 @@ func (c *ProjController) AddProjTemplet() {
 	c.ServeJSON()
 }
 
-//修改项目名称、负责人等，
+// @Title get project user permission
+// @Description get project user permission
+// @Param pid query string true "The id of project"
+// @Success 200 {object} models.GetProjectPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 project not found
+// @router /projectuserrole [get]
+//判断登录用户是管理员还是isme
+func (c *ProjController) ProjectUserRole() {
+	_, _, uid, _, _ := checkprodRole(c.Ctx)
+	pid := c.Input().Get("pid")
+	//id转成64位
+	idNum, err := strconv.ParseInt(pid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	projectuser, err := models.GetProjectUser(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	if projectuser.Id == uid {
+		beego.Info(projectuser.Id)
+		c.Data["json"] = map[string]interface{}{"userrole": "isme"}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"userrole": "isnotme"}
+		c.ServeJSON()
+	}
+}
+
+//管理员或本人修改项目名称、负责人等，
 func (c *ProjController) UpdateProject() {
-	// username, role := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(role)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if role == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
-	c.Data["IsProjects"] = true
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	_, _, _, isadmin, _ := checkprodRole(c.Ctx)
-	// c.Data["Username"] = username
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	// c.Data["IsAdmin"] = isadmin
-	// c.Data["IsLogin"] = islogin
-	// c.Data["Uid"] = uid
-	if !isadmin {
+	_, _, uid, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
 		route := c.Ctx.Request.URL.String()
 		c.Data["Url"] = route
 		c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
 		return
 	}
-
-	projcode := c.Input().Get("code")
-	projname := c.Input().Get("name")
-	projlabe := c.Input().Get("label")
-	principal := c.Input().Get("principal")
 	pid := c.GetString("pid")
 	//id转成64位
 	idNum, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
 		beego.Error(err)
 	}
+	projectuser, err := models.GetProjectUser(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	if projectuser.Id != uid && !isadmin {
+		beego.Info(projectuser.Id)
+		c.Data["json"] = "非管理员，也非本人"
+		c.ServeJSON()
+		return
+	}
+	c.Data["IsProjects"] = true
+
+	projcode := c.Input().Get("code")
+	projname := c.Input().Get("name")
+	projlabe := c.Input().Get("label")
+	principal := c.Input().Get("principal")
+
 	err = models.UpdateProject(idNum, projcode, projname, projlabe, principal)
 	if err != nil {
 		beego.Error(err)
 	}
 
 	if err != nil {
-		c.Data["json"] = "no"
+		c.Data["json"] = "修改出错-写入数据库出错！"
 		c.ServeJSON()
 	} else {
-		c.Data["json"] = "ok"
+		c.Data["json"] = "修改成功！"
 		c.ServeJSON()
 	}
-	// c.Data["json"] = "ok"
-	// c.ServeJSON()
+}
+
+//后台删除项目目录节点——这个用删除项目代替了。
+//删除多节点
+//删除多节点的子节点
+// 作废了，用DeleteProject代替了！！！！
+func (c *ProjController) DeleteProjectCate() {
+	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
+	id := c.Input().Get("id")
+	beego.Info(id)
+	//id转成64位
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//取项目本身
+	category, err := models.GetProj(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据项目顶级id取得项目下所有成果
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = category.Id
+	}
+
+	projectuser, err := models.GetProjectUser(topprojectid)
+	if err != nil {
+		beego.Error(err)
+	}
+	if projectuser.Id == uid || isadmin {
+		ids := c.GetString("ids")
+		array := strings.Split(ids, ",")
+		beego.Info(array)
+		for _, v2 := range array {
+			//id转成64为
+			idNum, err := strconv.ParseInt(v2, 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
+			//取出所有下级
+			cates, err := models.GetProjectsbyPid(idNum)
+			if err != nil {
+				beego.Error(err)
+			}
+			for _, v1 := range cates { //删除下级目录
+				err = models.DeleteProject(v1.Id)
+				if err != nil {
+					beego.Error(err)
+				}
+			}
+			//根据proj的id——这个放deleteproject前面，否则项目数据表删除了就取不到路径了
+			_, DiskDirectory, err := GetUrlPath(idNum)
+			if err != nil {
+				beego.Error(err)
+			} else if DiskDirectory != "" {
+				// beego.Info(DiskDirectory)
+				// path := DiskDirectory
+				// //直接删除这个文件夹，remove删除文件
+				// err = os.RemoveAll(path)
+				// if err != nil {
+				// 	beego.Error(err)
+				// }
+				//删除目录本身
+				err = models.DeleteProject(idNum)
+				if err != nil {
+					beego.Error(err)
+				}
+			}
+		}
+		c.Data["json"] = map[string]interface{}{"data": "ok"}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"data": "非管理员、非本人"}
+		c.ServeJSON()
+	}
 }
 
 //根据id删除proj
-//后台删除目录，
+//后台删除目录，代替DeleteProjectCate
 func (c *ProjController) DeleteProject() {
-	// username, role := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(role)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if role == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
-	c.Data["IsProjects"] = true
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	_, _, _, isadmin, _ := checkprodRole(c.Ctx)
-	// c.Data["Username"] = username
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	// c.Data["IsAdmin"] = isadmin
-	// c.Data["IsLogin"] = islogin
-	// c.Data["Uid"] = uid
-	if !isadmin {
-		route := c.Ctx.Request.URL.String()
-		c.Data["Url"] = route
-		c.Redirect("/roleerr?url="+route, 302)
-		// c.Redirect("/roleerr", 302)
-		return
-	}
-	// var err error
-	//查所有子孙项目，循环删除
-	ids := c.GetString("ids")
-	// beego.Info(ids)
+	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
+	ids := c.Input().Get("ids")
+	beego.Info(ids)
 	array := strings.Split(ids, ",")
-	//循环项目id
-	for _, v := range array {
-		//id转成64位
-		projid, err := strconv.ParseInt(v, 10, 64)
-		if err != nil {
-			beego.Error(err)
-		}
-		//根据项目id取得所有子孙id
-		projs, err := models.GetProjectsbyPid(projid)
-		if err != nil {
-			beego.Error(err)
-		}
-		//循环子孙项目
-		for _, w := range projs {
-			//取得子孙项目的成果列表
-			//根据项目id取得所有成果
-			products, err := models.GetProducts(w.Id)
-			if err != nil {
-				beego.Error(err)
-			}
-			for _, x := range products {
-				//删除子孙成果表
-				//循环删除成果
-				//根据成果id取得所有附件
-				attachments, err := models.GetAttachments(x.Id)
-				if err != nil {
-					beego.Error(err)
-				}
-				//删除附件表
-				for _, y := range attachments {
-					//删除附件数据表
-					err = models.DeleteAttachment(y.Id)
-					if err != nil {
-						beego.Error(err)
-					}
-				}
-
-				//删除子孙文章表
-				//取得成果id下所有文章
-				articles, err := models.GetArticles(x.Id)
-				if err != nil {
-					beego.Error(err)
-				}
-				//删除文章表
-				for _, z := range articles {
-					//删除文章数据表
-					err = models.DeleteArticle(z.Id)
-					if err != nil {
-						beego.Error(err)
-					}
-				}
-				//删除成果表自身
-				err = models.DeleteProduct(x.Id) //删除成果数据表
-				if err != nil {
-					beego.Error(err)
-				}
-			}
-			//删除子孙proj数据表
-			err = models.DeleteProject(w.Id)
-			if err != nil {
-				beego.Error(err)
-			}
-			//删除子孙文章图片文件夹（下面已经全部删除了）
-		}
-		//根据proj的id——这个放deleteproject前面，否则项目数据表删除了就取不到路径了
-		_, DiskDirectory, err := GetUrlPath(projid)
-		if err != nil {
-			beego.Error(err)
-		} else if DiskDirectory != "" {
-			// beego.Info(DiskDirectory)
-			// path := DiskDirectory
-			// //直接删除这个文件夹，remove删除文件
-			// err = os.RemoveAll(path)
-			// if err != nil {
-			// 	beego.Error(err)
-			// }
-			//20181008删除一个“空”项目，导致attachment文件夹下所有附件都删除的悲惨事件
-			//所以，不再提供删除文件夹功能
-			//只修改文件夹名称??
-
-			//删除项目自身数据表
-			err = models.DeleteProject(projid)
-			if err != nil {
-				beego.Error(err)
-			}
-		}
+	//id转成64位
+	idNum, err := strconv.ParseInt(array[0], 10, 64)
+	if err != nil {
+		beego.Error(err)
 	}
-	// if err != nil {
-	// 	c.Data["json"] = "no"
-	// 	c.ServeJSON()
-	// } else {
-	c.Data["json"] = "ok"
-	c.ServeJSON()
-	// }
+	//取项目本身
+	category, err := models.GetProj(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据项目顶级id取得项目下所有成果
+	var topprojectid int64
+	if category.ParentId != 0 { //如果不是根目录
+		parentidpath := strings.Replace(strings.Replace(category.ParentIdPath, "#$", "-", -1), "$", "", -1)
+		parentidpath1 := strings.Replace(parentidpath, "#", "", -1)
+		patharray := strings.Split(parentidpath1, "-")
+		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		topprojectid = category.Id
+	}
+
+	projectuser, err := models.GetProjectUser(topprojectid)
+	if err != nil {
+		beego.Error(err)
+	}
+	if projectuser.Id == uid || isadmin {
+		//查所有子孙项目，循环删除
+		// ids := c.GetString("ids")
+		// beego.Info(ids)
+		// array := strings.Split(ids, ",")
+		//循环项目id
+		for _, v := range array {
+			//id转成64位
+			projid, err := strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
+			//根据项目id取得所有子孙id
+			projs, err := models.GetProjectsbyPid(projid)
+			if err != nil {
+				beego.Error(err)
+			}
+			//循环子孙项目
+			for _, w := range projs {
+				//取得子孙项目的成果列表
+				//根据项目id取得所有成果
+				products, err := models.GetProducts(w.Id)
+				if err != nil {
+					beego.Error(err)
+				}
+				for _, x := range products {
+					//删除子孙成果表
+					//循环删除成果
+					//根据成果id取得所有附件
+					attachments, err := models.GetAttachments(x.Id)
+					if err != nil {
+						beego.Error(err)
+					}
+					//删除附件表
+					for _, y := range attachments {
+						//删除附件数据表
+						err = models.DeleteAttachment(y.Id)
+						if err != nil {
+							beego.Error(err)
+						}
+					}
+
+					//删除子孙文章表
+					//取得成果id下所有文章
+					articles, err := models.GetArticles(x.Id)
+					if err != nil {
+						beego.Error(err)
+					}
+					//删除文章表
+					for _, z := range articles {
+						//删除文章数据表
+						err = models.DeleteArticle(z.Id)
+						if err != nil {
+							beego.Error(err)
+						}
+					}
+					//删除成果表自身
+					err = models.DeleteProduct(x.Id) //删除成果数据表
+					if err != nil {
+						beego.Error(err)
+					}
+				}
+				//删除子孙proj数据表
+				err = models.DeleteProject(w.Id)
+				if err != nil {
+					beego.Error(err)
+				}
+				//删除子孙文章图片文件夹（下面已经全部删除了）
+			}
+			//根据proj的id——这个放deleteproject前面，否则项目数据表删除了就取不到路径了
+			_, DiskDirectory, err := GetUrlPath(projid)
+			if err != nil {
+				beego.Error(err)
+			} else if DiskDirectory != "" {
+				// beego.Info(DiskDirectory)
+				// path := DiskDirectory
+				// //直接删除这个文件夹，remove删除文件
+				// err = os.RemoveAll(path)
+				// if err != nil {
+				// 	beego.Error(err)
+				// }
+				//20181008删除一个“空”项目，导致attachment文件夹下所有附件都删除的悲惨事件
+				//所以，不再提供删除文件夹功能
+				//只修改文件夹名称??
+
+				//删除项目自身数据表
+				err = models.DeleteProject(projid)
+				if err != nil {
+					beego.Error(err)
+				}
+			}
+		}
+		// if err != nil {
+		// 	c.Data["json"] = "no"
+		// 	c.ServeJSON()
+		// } else {
+		c.Data["json"] = map[string]interface{}{"data": "ok"}
+		c.ServeJSON()
+	} else {
+		c.Data["json"] = map[string]interface{}{"data": "非管理员、非本人"}
+		c.ServeJSON()
+	}
 }
 
 //*******项目日历*****

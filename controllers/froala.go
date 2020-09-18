@@ -592,7 +592,7 @@ func (c *FroalaController) UploadWxEditorImg() {
 
 // @Title post wx artile img by catalogId
 // @Description post article img by catalogid
-// @Param id query string  true "The id of project"
+// @Param id path string  true "The id of project"
 // @Success 200 {object} SUCCESS
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
@@ -713,7 +713,7 @@ func (c *FroalaController) UploadWxImgs() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /uploadwxavatar [post]
-//微信wx添加用户头像上传
+// 微信wx添加用户头像上传
 func (c *FroalaController) UploadWxAvatar() {
 	var user models.User
 	var err error
@@ -771,7 +771,7 @@ func (c *FroalaController) UploadWxAvatar() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /uploadappreciationphoto [post]
-//小程序wx添加用户赞赏码上传
+// 小程序wx添加用户赞赏码上传
 func (c *FroalaController) UploadAppreciationPhoto() {
 	var user models.User
 	var err error
@@ -823,6 +823,160 @@ func (c *FroalaController) UploadAppreciationPhoto() {
 	}
 }
 
+// @Title post wx video by catalogId
+// @Description post video by catalogid
+// @Param id path string true "The id of project"
+// @Param desc query string true "The descript of video"
+// @Success 200 {object} SUCCESS
+// @Failure 400 Invalid page supplied
+// @Failure 404 article not found
+// @router /uploadwxvideo/:id [post]
+// 微信wx添加视频
+func (c *FroalaController) UploadWxVideo() {
+	var user models.User
+	var err error
+	openID := c.GetSession("openID")
+	if openID != nil {
+		user, err = models.GetUserByOpenID(openID.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+	} else {
+		// c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		// c.ServeJSON()
+		// return //本地调试的时候，由于小程序无法登陆服务器，所以这里要注释掉。
+	}
+	c.Ctx.Request.Body = http.MaxBytesReader(c.Ctx.ResponseWriter, c.Ctx.Request.Body, MAX_UPLOAD_SIZE)
+	if err := c.Ctx.Request.ParseMultipartForm(MAX_UPLOAD_SIZE); err != nil {
+		// sendErrorResponse(w, http.StatusBadRequest, "File is too big")
+		return
+	}
+	//解析表单
+	content := c.Input().Get("desc")
+
+	pid := c.Ctx.Input.Param(":id")
+	// pid := beego.AppConfig.String("wxcatalogid") //"26159" //c.Input().Get("pid")
+	//pid转成64为
+	pidNum, err := strconv.ParseInt(pid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据proj的parentIdpath
+	Url, DiskDirectory, err := GetUrlPath(pidNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	//获取上传的文件
+	_, h, err := c.GetFile("file")
+	if err != nil {
+		beego.Error(err)
+	}
+	fileSuffix := path.Ext(h.Filename)
+	// random_name
+	newname := strconv.FormatInt(time.Now().UnixNano(), 10) + fileSuffix // + "_" + filename
+	year, month, _ := time.Now().Date()
+	err = os.MkdirAll(DiskDirectory+"/"+strconv.Itoa(year)+month.String()+"/", 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
+	if err != nil {
+		beego.Error(err)
+	}
+	var path string
+	// var filesize int64
+	if h != nil {
+		//保存附件
+		path = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + newname
+		Url = "/" + Url + "/" + strconv.Itoa(year) + month.String() + "/"
+		err = c.SaveToFile("file", path) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+		if err != nil {
+			beego.Error(err)
+			return
+		}
+		//根据pid查出项目id
+		proj, err := models.GetProj(pidNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		//写入数据表
+		vid, err := models.CreateVideo(proj.Id, user.Id, content, newname, Url+newname)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"state": "ERROR", "info": "ERR", "id": vid}
+			c.ServeJSON()
+		} else {
+			c.Data["json"] = vid
+			// c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "info": "SUCCESS", "link": Url + newname, "id": vid}
+			c.ServeJSON()
+		}
+		// filesize, _ = FileSize(path)
+		// filesize = filesize / 1000.0
+	}
+}
+
+// @Title post wx videoCover by videoid
+// @Description post videoCover by videoid
+// @Param id query string true "The id of video"
+// @Success 200 {object} SUCCESS
+// @Failure 400 Invalid page supplied
+// @Failure 404 article not found
+// @router /uploadwxvideocover/:id [post]
+//微信wx添加视频
+func (c *FroalaController) UploadWxVideoCover() {
+	//解析表单
+	vid := c.Ctx.Input.Param(":id")
+	// pidNum, err := strconv.ParseInt(id, 10, 64)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	//根据proj的parentIdpath
+	// Url, DiskDirectory, err := GetUrlPath(pidNum)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+
+	// vid := c.Input().Get("id")
+	//pid转成64为
+	vidNum, err := strconv.ParseInt(vid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	video, err := models.GetVideobyId(vidNum)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	fileSuffix := path.Ext(video.Name)
+	// var filenameOnly string
+	filenameOnly := strings.TrimSuffix(video.Name, fileSuffix)
+	viedeocoverpath := "." + path.Dir(video.Url) + "/"
+
+	//获取上传的文件
+	_, h, err := c.GetFile("file")
+	if err != nil {
+		beego.Error(err)
+	}
+	if h != nil {
+		//保存附件
+		// path = DiskDirectory + "/" + strconv.Itoa(year) + month.String() + "/" + newname
+		// Url = "/" + Url + "/" + strconv.Itoa(year) + month.String() + "/"
+		err = c.SaveToFile("file", viedeocoverpath+filenameOnly+".jpg") //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+		if err != nil {
+			beego.Error(err)
+			return
+		}
+		//更新数据表
+		err := models.UpdateVideo(video.Id, path.Dir(video.Url)+"/"+filenameOnly+".jpg")
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"state": "ERROR", "info": "ERR", "id": vid}
+			c.ServeJSON()
+		} else {
+			c.Data["json"] = "SUCCESS"
+			// c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "info": "SUCCESS", "link": Url + newname, "id": vid}
+			c.ServeJSON()
+		}
+	}
+}
+
 //添加wiki里的图片上传
 func (c *FroalaController) UploadWikiImg() {
 	//保存上传的图片
@@ -830,7 +984,7 @@ func (c *FroalaController) UploadWikiImg() {
 	if err != nil {
 		beego.Error(err)
 	}
-	var filesize int64
+	// var filesize int64
 	fileSuffix := path.Ext(h.Filename)
 	newname := strconv.FormatInt(time.Now().UnixNano(), 10) + fileSuffix // + "_" + filename
 	year, month, _ := time.Now().Date()
@@ -844,8 +998,8 @@ func (c *FroalaController) UploadWikiImg() {
 	if err != nil {
 		beego.Error(err)
 	}
-	filesize, _ = FileSize(path1)
-	filesize = filesize / 1000.0
+	// filesize, _ = FileSize(path1)
+	// filesize = filesize / 1000.0
 	c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "link": Url + newname, "title": "111", "original": "demo.jpg"}
 	c.ServeJSON()
 }

@@ -97,11 +97,12 @@ func init() {
 					&controllers.ReplyController{},
 					&controllers.SearchController{},
 					&controllers.AttachController{},
-					// &controllers.MainController{},
+					&controllers.MainController{},
 					&controllers.StandardController{},
 					&controllers.DiaryController{},
 					&controllers.PayController{},
 					&controllers.FinanceController{},
+					&controllers.VideoController{},
 				),
 			),
 			beego.NSNamespace("/share",
@@ -152,9 +153,15 @@ func init() {
 				),
 			),
 			beego.NSNamespace("/flv",
-				beego.NSBefore(FilterUser),
+				// beego.NSBefore(FilterUser),
 				beego.NSInclude(
 					&controllers.FlvController{},
+				),
+			),
+			beego.NSNamespace("/cart",
+				// beego.NSBefore(FilterUser),
+				beego.NSInclude(
+					&controllers.CartController{},
 				),
 			),
 			// beego.NSNamespace("/cms",
@@ -169,6 +176,9 @@ func init() {
 			// ),
 		)
 	beego.AddNamespace(ns)
+
+	beego.Router("/debug/pprof", &controllers.ProfController{})
+	beego.Router("/debug/pprof/:app([\\w]+)", &controllers.ProfController{})
 
 	beego.Router("/test", &controllers.MainController{}, "*:Test")
 	beego.Router("/autodesk", &controllers.MainController{}, "*:Autodesk")
@@ -187,7 +197,7 @@ func init() {
 	beego.Router("/officeviewcallback", &controllers.OnlyController{}, "*:OfficeViewCallback")
 
 	// 访问onlyoffice页面需要登录
-	beego.InsertFilter("/onlyoffice", beego.BeforeRouter, FilterUser)
+	// beego.InsertFilter("/onlyoffice", beego.BeforeRouter, FilterUser)
 
 	// beego.Router("/onlyoffice/post", &controllers.OnlyController{}, "post:PostOnlyoffice")
 	beego.Router("/onlyoffice", &controllers.OnlyController{}, "get:Get")
@@ -197,7 +207,7 @@ func init() {
 	beego.Router("/onlyoffice/addattachment", &controllers.OnlyController{}, "post:AddOnlyAttachment")
 	//在onlyoffice中打开文档协作
 	// 协作页面下载文档需要登录
-	beego.InsertFilter("/onlyoffice/:id:string", beego.BeforeRouter, FilterUser)
+	// beego.InsertFilter("/onlyoffice/:id:string", beego.BeforeRouter, FilterUser)
 	beego.Router("/onlyoffice/:id:string", &controllers.OnlyController{}, "*:OnlyOffice")
 	//cms中预览office
 	beego.Router("/officeview/:id:string", &controllers.OnlyController{}, "*:OfficeView")

@@ -723,15 +723,15 @@ func (c *ShareController) DownloadZip() {
 	// c.Data["json"] = map[string]interface{}{"code": "OK", "msg": ""}
 	// c.ServeJSON()
 	//delete the temp zip file.
-	// err = os.Remove("./temp/" + prod.Title + ".tar.gz")
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// err = RemoveContents("./temp/engineercms/")
-	// if err != nil {
-	// 	beego.Error(err)
-	// 	os.Exit(1)
-	// }
+	err = os.Remove("./temp/" + prod.Title + ".zip")
+	if err != nil {
+		beego.Error(err)
+	}
+	err = RemoveContents("./temp/engineercms/")
+	if err != nil {
+		beego.Error(err)
+		os.Exit(1)
+	}
 }
 
 //删除文件夹下所有文件

@@ -350,27 +350,12 @@ func DeleteAdminCategory(cid int64) error {
 func GetAdminCategory(pid int64) (categories []*AdminCategory, err error) {
 	o := orm.NewOrm()
 	categories = make([]*AdminCategory, 0)
-
 	qs := o.QueryTable("AdminCategory") //这个表名AchievementTopic需要用驼峰式，
-	// if pid != "" {                      //如果给定父id则进行过滤
-	//pid转成64为
-	// pidNum, err := strconv.ParseInt(pid, 10, 64)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	_, err = qs.Filter("parentid", pid).All(&categories) //而这个字段parentid为何又不用呢
+	_, err = qs.Filter("parent_id", pid).All(&categories) //而这个字段parentid为何又不用呢
 	if err != nil {
 		return nil, err
 	}
-
 	return categories, err
-	// } else { //如果不给定父id（PID=0），则取所有一级
-	// _, err = qs.Filter("parentid", 0).All(&categories)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return categories, err
-	// }
 }
 
 //根据类别名字title查询所有下级分级category

@@ -1,11 +1,13 @@
-<!-- 视频列表 -->
+<!-- 视频列表 视频主页-->
 <!DOCTYPE html>
 
 <head>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script> -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <script src="/static/toast/toast.min.js"></script>
+  <link rel="stylesheet" href="/static/toast/toast.min.css">
   <style>
     .jumbotron {
     background: url(/static/images/5ww.jpg);no-repeat;
@@ -49,7 +51,7 @@
     <div class="collapse navbar-collapse" id="navbarText">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="javascript:show_random_toast();">视频<span class="sr-only">(current)</span></a>
+          <a class="nav-link video">视频<span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/v1/flv/flvlist">直播</a>
@@ -281,14 +283,67 @@
       </div>
     </div>
   </div> -->
-  <script type="text/javascript">
-  function show_random_toast() {
-    $('.toast').toast({
-      delay: 5000,
-    });
-    $('#showtoasts').toast('show')
-  }
+  <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script> -->
+  <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
+  
+  <script>
+  const TYPES = ['info', 'warning', 'success', 'error'],
+    TITLES = {
+      'info': 'Notice!',
+      'success': 'Awesome!',
+      'warning': 'Watch Out!',
+      'error': 'Doh!'
+    },
+    CONTENT = {
+      'info': 'Hello, world! This is a toast message.',
+      'success': 'The action has been completed.',
+      'warning': 'It\'s all about to go wrong',
+      'error': 'It all went wrong.'
+    },
+    POSITION = ['top-right', 'top-left', 'top-center', 'bottom-right', 'bottom-left', 'bottom-center'];
 
+  $.toastDefaults.position = 'top-center';
+  $.toastDefaults.dismissible = true;
+  $.toastDefaults.stackable = true;
+  $.toastDefaults.pauseDelayOnHover = true;
+
+  $('.snack').click(function() {
+    var type = TYPES[Math.floor(Math.random() * TYPES.length)],
+      content = CONTENT[type];
+    $.snack(type, content);
+  });
+
+  $('.video').click(function() {
+    var rng = Math.floor(Math.random() * 2) + 1,
+      type = TYPES[Math.floor(Math.random() * TYPES.length)],
+      title = TITLES[type],
+      content = CONTENT[type];
+
+    if (rng === 1) {
+      $.toast({
+        type: type,
+        title: title,
+        subtitle: '11 mins ago',
+        content: content,
+        delay: 5000
+      });
+    } else {
+      $.toast({
+        type: type,
+        title: title,
+        subtitle: '11 mins ago',
+        content: content,
+        delay: 5000,
+        img: {
+          src: 'https://via.placeholder.com/20',
+          alt: 'Image'
+        }
+      });
+    }
+  });
+  </script>
+  <script type="text/javascript">
   // var offset = 60;
   // $('div a').click(function(event) {
   //   event.preventDefault();
