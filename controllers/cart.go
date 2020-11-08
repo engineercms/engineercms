@@ -126,6 +126,13 @@ func (c *CartController) GetCart() {
 	}
 	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
 	c.Data["IsAdmin"] = isadmin
+	site := c.Ctx.Input.Site()
+	port := strconv.Itoa(c.Ctx.Input.Port())
+	if port == "80" {
+		c.Data["Site"] = site
+	} else {
+		c.Data["Site"] = site + ":" + port
+	}
 }
 
 // @Title get usercartlist
@@ -137,9 +144,9 @@ func (c *CartController) GetCart() {
 // @Success 200 {object} models.Create
 // @Failure 400 Invalid page supplied
 // @Failure 404 cart not found
-// @router /getusercart [get]
+// @router /getapprovalcart [get]
 //根据用户id获得借阅记录，如果是admin角色，则查询全部
-func (c *CartController) GetUserCart() {
+func (c *CartController) GetApprovalCart() {
 	v := c.GetSession("uname")
 	var user models.User
 	var userid, roleid string
@@ -190,11 +197,165 @@ func (c *CartController) GetUserCart() {
 	}
 	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
 	beego.Info(isadmin)
-	carts, err := models.GetUserCart(user.Id, limit1, offset, status1, searchText, isadmin)
+	carts, err := models.GetApprovalCart(user.Id, limit1, offset, status1, searchText, isadmin)
 	if err != nil {
 		beego.Error(err)
 	}
-	count, err := models.GetUserCartCount(user.Id, status1, searchText, isadmin)
+	count, err := models.GetApprovalCartCount(user.Id, status1, searchText, isadmin)
+	if err != nil {
+		beego.Error(err)
+	}
+	// c.Data["json"] = carts
+	c.Data["json"] = map[string]interface{}{"page": page1, "total": count, "rows": carts}
+
+	// c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "mycarts": carts}
+	c.ServeJSON()
+}
+
+// @Title get usercartlist
+// @Description get usercartlist
+// @Param status query string true "The status for usercart list"
+// @Param searchText query string false "The searchText of usercart"
+// @Param pageNo query string true "The page for usercart list"
+// @Param limit query string true "The limit of page for usercart list"
+// @Success 200 {object} models.Create
+// @Failure 400 Invalid page supplied
+// @Failure 404 cart not found
+// @router /getapplycart [get]
+//根据用户id获得借阅记录，如果是admin角色，则查询全部
+func (c *CartController) GetApplyCart() {
+	v := c.GetSession("uname")
+	var user models.User
+	var userid, roleid string
+	var err error
+	if v != nil { //如果登录了
+		user, err = models.GetUserByUsername(v.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+		//查询admin角色的id
+		//重新获取roleid
+		role, err := models.GetRoleByRolename("admin")
+		if err != nil {
+			beego.Error(err)
+		}
+		userid = strconv.FormatInt(user.Id, 10)
+		roleid = strconv.FormatInt(role.Id, 10)
+
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+	}
+	status := c.Input().Get("status")
+	status1, err := strconv.Atoi(status)
+	if err != nil {
+		beego.Error(err)
+	}
+	searchText := c.Input().Get("searchText")
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit = "15"
+	}
+	limit1, err := strconv.Atoi(limit)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("pageNo")
+	page1, err := strconv.Atoi(page)
+	if err != nil {
+		beego.Error(err)
+	}
+	var offset int
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
+	beego.Info(isadmin)
+	carts, err := models.GetApplyCart(user.Id, limit1, offset, status1, searchText, isadmin)
+	if err != nil {
+		beego.Error(err)
+	}
+	count, err := models.GetApplyCartCount(user.Id, status1, searchText, isadmin)
+	if err != nil {
+		beego.Error(err)
+	}
+	// c.Data["json"] = carts
+	c.Data["json"] = map[string]interface{}{"page": page1, "total": count, "rows": carts}
+
+	// c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "mycarts": carts}
+	c.ServeJSON()
+}
+
+// @Title get usercartlist
+// @Description get usercartlist
+// @Param status query string true "The status for usercart list"
+// @Param searchText query string false "The searchText of usercart"
+// @Param pageNo query string true "The page for usercart list"
+// @Param limit query string true "The limit of page for usercart list"
+// @Success 200 {object} models.Create
+// @Failure 400 Invalid page supplied
+// @Failure 404 cart not found
+// @router /gethistorycart [get]
+//根据用户id获得借阅记录，如果是admin角色，则查询全部
+func (c *CartController) GetHistoryCart() {
+	v := c.GetSession("uname")
+	var user models.User
+	var userid, roleid string
+	var err error
+	if v != nil { //如果登录了
+		user, err = models.GetUserByUsername(v.(string))
+		if err != nil {
+			beego.Error(err)
+		}
+		//查询admin角色的id
+		//重新获取roleid
+		role, err := models.GetRoleByRolename("admin")
+		if err != nil {
+			beego.Error(err)
+		}
+		userid = strconv.FormatInt(user.Id, 10)
+		roleid = strconv.FormatInt(role.Id, 10)
+
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+	}
+	status := c.Input().Get("status")
+	status1, err := strconv.Atoi(status)
+	if err != nil {
+		beego.Error(err)
+	}
+	searchText := c.Input().Get("searchText")
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit = "15"
+	}
+	limit1, err := strconv.Atoi(limit)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("pageNo")
+	page1, err := strconv.Atoi(page)
+	if err != nil {
+		beego.Error(err)
+	}
+	var offset int
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
+	beego.Info(isadmin)
+	carts, err := models.GetHistoryCart(user.Id, limit1, offset, status1, searchText, isadmin)
+	if err != nil {
+		beego.Error(err)
+	}
+	count, err := models.GetHistoryCartCount(user.Id, status1, searchText, isadmin)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -270,9 +431,36 @@ func (c *CartController) DeleteUserCart() {
 	c.ServeJSON()
 }
 
-// @Title get a cart
-// @Description post create a new cart
-// @Success 200 {object} models.Create
+// @Title post update carts
+// @Description post update carts
+// @Param ids query string true "The ids of approvalcats"
+// @Success 200 {object} models.Update
 // @Failure 400 Invalid page supplied
 // @Failure 404 cart not found
-// @router /getadminproductcart [get]
+// @router /updateapprovalcart [post]
+func (c *CartController) UpdateApprovalCart() {
+	ids := c.Input().Get("ids")
+	if ids == "" {
+		beego.Error("matterUuids cannot be null")
+	}
+
+	Array := strings.Split(ids, ",")
+	// var ob []models.PostMerit传结构体json格式
+	// json.Unmarshal(c.Ctx.Input.RequestBody, &ob)
+
+	if len(Array) == 0 {
+		beego.Error("share at least one file")
+	}
+	for _, id := range Array {
+		idNum, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		err = models.UpdateApprovalCart(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	c.Data["json"] = map[string]interface{}{"code": "OK", "info": "OK", "msg": "OK", "data": ids}
+	c.ServeJSON()
+}

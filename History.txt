@@ -1,6 +1,10 @@
                        EngineerCMS revision history
 		       
-21,engineercms 1.15 (Apr 11, 2020)
+23,engineercms 1.16 (Aug 9, 2020)
+	+) Add cart,user gorm join
+	+) Add article_pie.tpl user gorm group count
+
+22,engineercms 1.15 (Apr 11, 2020)
 	+) Add flv
 	+) Add photoswipe
 	+) Add mindoc

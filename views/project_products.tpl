@@ -45,6 +45,8 @@
   <link rel="stylesheet" href="/static/froala/css/plugins/special_characters.css">
   <link rel="stylesheet" href="/static/froala/js/codemirror.min.css">
   <link rel="stylesheet" href="/static/froala/css/themes/red.css">
+  <link rel="stylesheet" href="/static/css/magnific-popup.css" />
+  <script type="text/javascript" src="/static/js/jquery.magnific-popup.min.js"></script>
   <!-- <script src="/static/toast/toast.min.js"></script> -->
   <!-- <link rel="stylesheet" href="/static/toast/toast.min.css"> -->
   <style type="text/css">
@@ -189,7 +191,51 @@
     </div>
     <!--data-click-to-select="true" -->
     <table id="table0"></table>
+    <!-- <div class="modal fade" id="imgModal"tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" style="display: inline-block; width: auto;">
+        <div class="modal-content">
+         <img id="imgInModalID" src="" >
+        </div>
+      </div>
+    </div> -->
+    <div class="modal fade" id="imgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" style="display: inline-block; width: auto;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+          &times;
+            </button>
+            <h4 class="modal-title" id="myModalLabel"> 图片预览</h4>
+          </div>
+          <div class="modal-body text-center">
+            <!-- -text-cente  bootstrap子元素居中--->
+            <span id="myImg">
+              <!--预览图片位置，默认图片-->
+              <!-- <img src="./img/notlogin.jpg" class="img-circle"> -->
+              <img id="imgInModalID" src="">
+            </span>
+          </div>
+          <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="text/javascript">
+    // 图片预览 
+    function savepic(o) {
+      // pic=window.open(o.src,"demo")
+      // setTimeout('pic.document.execCommand("saveas")',0);
+      // window.open(o.src, null, "dialogHeight:500px; dialogWidth:600px; resizable:yes");
+      // var img = new Image();// 创建对象 
+      // img.src =url;// 改变图片的src
+      alert(o.src)
+      $("#imgInModalID").attr("src",o.src);
+      $('#imgModal').modal({
+        show: true,
+        backdrop: 'static'
+      });
+    }
+
     $(function() {
       // 初始化【未接受】工作流表格showToggle:'true',
       $("#table0").bootstrapTable({
@@ -208,7 +254,7 @@
         // 返回false将会终止请求。
         pageSize: 15,
         pageNumber: 1,
-        pageList: [15, 50, 100],
+        pageList: [15, 50, 100, 'All'],
         uniqueId: "id",
         // singleSelect:"true",
         clickToSelect: "true",
@@ -464,6 +510,10 @@
           // alert(ext);
           if (ext == ".dwg") {
             attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-codepen fa-lg" style="color:Black;"></i></a>';
+          } else if (ext == ".JPG"||ext ==".jpg"||ext ==".png"||ext ==".PNG"||ext ==".bmp"||ext ==".BMP") {
+            attachUrl = '<a class = "view" href="javascript:void(0)"><img style="width:70;height:30px;" src="/downloadattachment?id=' + value[0].Id + '" title="预览" onclick="savepic(this)"/></a>'
+          } else if (ext == ".mp4"||ext ==".MP4") {
+            attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-video-o fa-lg text-info"></i></a>'
           } else if (ext == ".doc" || ext == ".docx") {
             attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
           } else if (ext == ".xls" || ext == ".xlsx") {
@@ -507,7 +557,7 @@
     function setPdf(value, row, index) {
       if (value) {
         if (value.length == 1) {
-          pdfUrl = '<a href="/pdf?id=' + value[0].Id + '" title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o"></i></a>';
+          pdfUrl = '<a href="/pdf?id=' + value[0].Id + '" title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o fa-lg text-danger"></i></a>';
           return pdfUrl;
         } else if (value.length == 0) {
 
@@ -619,7 +669,7 @@
       var uploader = WebUploader.create({
         // 不压缩image
         resize: false,
-        fileSingleSizeLimit: 20 * 1024 * 1024, //限制大小20M，单文件
+        fileSingleSizeLimit: 50 * 1024 * 1024, //限制大小50M，单文件
         fileSizeLimit: allMaxSize * 1024 * 1024, //限制大小500M，所有被选文件，超出选择不上
         // swf文件路径fex-team-webuploader/dist
         swf: '/static/js/Uploader.swf',
@@ -646,7 +696,7 @@
         } else if (type == "Q_TYPE_DENIED") {
           alert("请上传图片、视频、文档、图纸、压缩等格式文件");
         } else if (type == "F_EXCEED_SIZE") {
-          alert("单个文件大小不能超过10M");
+          alert("单个文件大小不能超过50M");
         }
       });
 
@@ -1395,27 +1445,25 @@
 
       return mydate;
     }
-    </script>
-    <script>
-      // const TYPES = ['info', 'warning', 'success', 'error'],
-  //   TITLES = {
-  //     'info': 'Notice!',
-  //     'success': 'Awesome!',
-  //     'warning': 'Watch Out!',
-  //     'error': 'Doh!'
-  //   },
-  //   CONTENT = {
-  //     'info': 'Hello, world! This is a toast message.',
-  //     'success': 'The action has been completed.',
-  //     'warning': 'It\'s all about to go wrong',
-  //     'error': 'It all went wrong.'
-  //   },
-  //   POSITION = ['top-right', 'top-left', 'top-center', 'bottom-right', 'bottom-left', 'bottom-center'];
+    // const TYPES = ['info', 'warning', 'success', 'error'],
+    //   TITLES = {
+    //     'info': 'Notice!',
+    //     'success': 'Awesome!',
+    //     'warning': 'Watch Out!',
+    //     'error': 'Doh!'
+    //   },
+    //   CONTENT = {
+    //     'info': 'Hello, world! This is a toast message.',
+    //     'success': 'The action has been completed.',
+    //     'warning': 'It\'s all about to go wrong',
+    //     'error': 'It all went wrong.'
+    //   },
+    //   POSITION = ['top-right', 'top-left', 'top-center', 'bottom-right', 'bottom-left', 'bottom-center'];
 
-  // $.toastDefaults.position = 'top-center';
-  // $.toastDefaults.dismissible = true;
-  // $.toastDefaults.stackable = true;
-  // $.toastDefaults.pauseDelayOnHover = true;
+    // $.toastDefaults.position = 'top-center';
+    // $.toastDefaults.dismissible = true;
+    // $.toastDefaults.stackable = true;
+    // $.toastDefaults.pauseDelayOnHover = true;
 
     // 成果添加到购物车
     $("#cartButton").click(function() {
@@ -1424,47 +1472,73 @@
         alert("请先勾选成果！");
         return false;
       }
-        if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+      if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
+        var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+      }
+      if (selectRow[0].Articlecontent[0]) {
+        var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+      }
+      if (selectRow[0].Pdflink[0]) {
+        var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+      }
+      if (site) {
+        alert("同步成果不允许！");
+        return;
+      }
+      var title = $.map(selectRow, function(row) {
+        return row.Title;
+      })
+      var ids = "";
+      for (var i = 0; i < selectRow.length; i++) {
+        if (i == 0) {
+          ids = selectRow[i].Id;
+        } else {
+          ids = ids + "," + selectRow[i].Id;
         }
-        if (selectRow[0].Articlecontent[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+      }
+      $.ajax({
+        type: "post",
+        url: "/v1/cart/createproductcart",
+        data: { ids: ids },
+        success: function(data, status) {
+          alert("添加“" + data.data[0].Title + "”购物车成功！(status:" + status + "！)");
+          // $.toast({
+          //   type: TYPES[1],
+          //   title: TITLES['info'],
+          //   subtitle: '11 mins ago',
+          //   content: CONTENT['info'],
+          //   delay: 5000
+          // });
         }
-        if (selectRow[0].Pdflink[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
-        }
-        if (site) {
-          alert("同步成果不允许！");
-          return;
-        }
-          var title = $.map(selectRow, function(row) {
-            return row.Title;
-          })
-          var ids = "";
-          for (var i = 0; i < selectRow.length; i++) {
-            if (i == 0) {
-              ids = selectRow[i].Id;
-            } else {
-              ids = ids + "," + selectRow[i].Id;
-            }
-          }
-          $.ajax({
-            type: "post",
-            url: "/v1/cart/createproductcart",
-            data: { ids: ids },
-            success: function(data, status) {
-              alert("添加“" + data.data[0].Title + "”购物车成功！(status:" + status + "！)");
-              // $.toast({
-              //   type: TYPES[1],
-              //   title: TITLES['info'],
-              //   subtitle: '11 mins ago',
-              //   content: CONTENT['info'],
-              //   delay: 5000
-              // });
-            }
-          });
+      });
     })
-  </script>
+
+    $(function() {
+      $('.popup-gallery').magnificPopup({
+        delegate: 'a',
+        type: 'image',
+        removalDelay: 300,
+        mainClass: 'mfp-with-zoom',
+        titleSrc: 'title',
+        gallery: {
+          enabled: true
+        },
+        zoom: {
+          enabled: true, // By default it's false, so don't forget to enable it
+          duration: 300, // duration of the effect, in milliseconds
+          easing: 'ease-in-out', // CSS transition easing function
+          // The "opener" function should return the element from which popup will be zoomed in
+          // and to which popup will be scaled down
+          // By defailt it looks for an image tag:
+          opener: function(openerElement) {
+            // openerElement is the element on which popup was initialized, in this case its <a> tag
+            // you don't need to add "opener" option if this code matches your needs, it's defailt one.
+            return openerElement.is('img') ? openerElement : openerElement.find('img');
+          }
+        }
+      });
+    });
+    </script>
     <!-- 批量上传 -->
     <div class="form-horizontal">
       <div class="modal fade" id="modalTable">

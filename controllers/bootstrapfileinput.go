@@ -53,7 +53,7 @@ type PreviewConfig struct {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /bootstrapfileinput [post]
-//独立上传文件模式
+// 上传excel文件，格式：第一行，序号-名称-编号，都打上格子
 func (c *FileinputController) BootstrapFileInput() {
 	//获取上传的文件
 	_, h, err := c.GetFile("input-ke-2[]")
@@ -113,6 +113,7 @@ func (c *FileinputController) BootstrapFileInput() {
 								if j == 0 {
 									LibraryNumber = w.Category + " " + w.Number + "-" + w.Year //规范有效版本库中的完整编号
 								} else {
+									//数据库中出现了category和number前面都多了一个空格，执行日期出错：2011\-m\-10
 									LibraryNumber = LibraryNumber + "," + w.Category + " " + w.Number + "-" + w.Year //规范有效版本库中的完整编号
 								}
 							}

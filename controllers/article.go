@@ -1752,9 +1752,9 @@ func (c *ArticleController) AddArticle() {
 
 // @Title post wx artile by catalogId
 // @Description post article by catalogid
-// @Param title query string  true "The title of article"
-// @Param content query string  true "The content of article"
-// @Param skey query string  true "The skey of user"
+// @Param title query string true "The title of article"
+// @Param content query string true "The content of article"
+// @Param skey query string false "The skey of user"
 // @Success 200 {object} models.AddArticle
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found

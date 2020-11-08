@@ -1578,6 +1578,189 @@ paths:
           description: Invalid page supplied
         "404":
           description: bbs not found
+  /cart/createproductcart:
+    post:
+      tags:
+      - cart
+      description: post create a new cart
+      operationId: CartController.post create a new cart
+      parameters:
+      - in: query
+        name: ids
+        description: The ids of product
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.AddArticle'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /cart/deleteusercart:
+    post:
+      tags:
+      - cart
+      description: post delete a usercart
+      operationId: CartController.post delete usercart
+      parameters:
+      - in: query
+        name: ids
+        description: The ids of usercats
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.DeleteUserCart'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articl not found
+  /cart/getapplycart:
+    get:
+      tags:
+      - cart
+      description: get usercartlist
+      operationId: CartController.get usercartlist
+      parameters:
+      - in: query
+        name: status
+        description: The status for usercart list
+        required: true
+        type: string
+      - in: query
+        name: searchText
+        description: The searchText of usercart
+        type: string
+      - in: query
+        name: pageNo
+        description: The page for usercart list
+        required: true
+        type: string
+      - in: query
+        name: limit
+        description: The limit of page for usercart list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Create'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
+  /cart/getapprovalcart:
+    get:
+      tags:
+      - cart
+      description: get usercartlist
+      operationId: CartController.get usercartlist
+      parameters:
+      - in: query
+        name: status
+        description: The status for usercart list
+        required: true
+        type: string
+      - in: query
+        name: searchText
+        description: The searchText of usercart
+        type: string
+      - in: query
+        name: pageNo
+        description: The page for usercart list
+        required: true
+        type: string
+      - in: query
+        name: limit
+        description: The limit of page for usercart list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Create'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
+  /cart/getcart:
+    get:
+      tags:
+      - cart
+      description: get usercarttpl
+      operationId: CartController.get usercarttpl
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Create'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
+  /cart/gethistorycart:
+    get:
+      tags:
+      - cart
+      description: get usercartlist
+      operationId: CartController.get usercartlist
+      parameters:
+      - in: query
+        name: status
+        description: The status for usercart list
+        required: true
+        type: string
+      - in: query
+        name: searchText
+        description: The searchText of usercart
+        type: string
+      - in: query
+        name: pageNo
+        description: The page for usercart list
+        required: true
+        type: string
+      - in: query
+        name: limit
+        description: The limit of page for usercart list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Create'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
+  /cart/updateapprovalcart:
+    post:
+      tags:
+      - cart
+      description: post update carts
+      operationId: CartController.post update carts
+      parameters:
+      - in: query
+        name: ids
+        description: The ids of approvalcats
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Update'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
   /checkin/activity/actInfo:
     post:
       tags:
@@ -2230,7 +2413,7 @@ paths:
         description: The id of project
         type: string
       - in: query
-        name: page
+        name: pageNo
         description: The page of projectlist
         type: string
       - in: query
@@ -2300,6 +2483,69 @@ paths:
           description: Invalid page supplied
         "404":
           description: data not found
+  /project/projectuserrole:
+    get:
+      tags:
+      - project
+      description: get project user permission
+      operationId: ProjController.get project user permission
+      parameters:
+      - in: query
+        name: pid
+        description: The id of project
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProjectPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: project not found
+  /project/userprojecteditortree:
+    get:
+      tags:
+      - project
+      description: get user project editor tree
+      operationId: ProjController.get user project editor tree
+      parameters:
+      - in: query
+        name: pid
+        description: The id of project
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProjectPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: project not found
+  /project/userprojectpermission:
+    get:
+      tags:
+      - project
+      description: get user project editor tree
+      operationId: ProjController.get user project editor tree
+      parameters:
+      - in: query
+        name: pid
+        description: The id of project
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProjectPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: project not found
   /share/browse:
     get:
       tags:
@@ -2521,6 +2767,37 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
+  /wx/addbusiness/{id}:
+    post:
+      tags:
+      - wx
+      description: post business by userid
+      operationId: PayController.post business by userid
+      parameters:
+      - in: query
+        name: id
+        description: The id of project
+        required: true
+        type: string
+      - in: query
+        name: title
+        description: The title of article
+        required: true
+        type: string
+      - in: query
+        name: content
+        description: The content of article
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.CreateBusiness'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pas not found
   /wx/addwxarticle:
     post:
       tags:
@@ -2541,7 +2818,6 @@ paths:
       - in: query
         name: skey
         description: The skey of user
-        required: true
         type: string
       responses:
         "200":
@@ -2559,7 +2835,7 @@ paths:
       description: post article by catalogid
       operationId: ArticleController.post wx artile by catalogId
       parameters:
-      - in: query
+      - in: path
         name: id
         description: The id of project
         required: true
@@ -2663,6 +2939,11 @@ paths:
       operationId: DiaryController.post wx diary by catalogId
       parameters:
       - in: query
+        name: projectid
+        description: The projectid of diary
+        required: true
+        type: string
+      - in: query
         name: title
         description: The title of diary
         required: true
@@ -2738,6 +3019,11 @@ paths:
       description: post finance by projectid
       operationId: FinanceController.post wx finance by catalogId
       parameters:
+      - in: path
+        name: id
+        description: The projectid of finance
+        required: true
+        type: string
       - in: query
         name: amount
         description: The amount of finance
@@ -3023,6 +3309,56 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
+  /wx/getuserarticle:
+    get:
+      tags:
+      - wx
+      description: get userarticles by projid
+      operationId: ArticleController.get wx userarticles count
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articles not found
+  /wx/getuservideo/{id}:
+    get:
+      tags:
+      - wx
+      description: get uservideolist
+      operationId: VideoController.get uservideolist
+      parameters:
+      - in: path
+        name: id
+        description: The id of project
+        required: true
+        type: string
+      - in: query
+        name: searchText
+        description: The searchText of uservideo
+        type: string
+      - in: query
+        name: pageNo
+        description: The page for uservideo list
+        required: true
+        type: string
+      - in: query
+        name: limit
+        description: The limit of page for uservideo list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Create'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
   /wx/getwxarticle/{id}:
     get:
       tags:
@@ -3197,9 +3533,14 @@ paths:
     get:
       tags:
       - wx
-      description: get diaries by page
-      operationId: DiaryController.get wx diaries list
+      description: get diaries to doc
+      operationId: DiaryController.get wx diaries to doc
       parameters:
+      - in: query
+        name: projectid
+        description: The projectid of diary
+        required: true
+        type: string
       - in: query
         name: page
         description: The page for diaries list
@@ -3210,10 +3551,6 @@ paths:
         description: The limit of page for diaries list
         required: true
         type: string
-      - in: query
-        name: skey
-        description: The skey for diary
-        type: string
       responses:
         "200":
           description: ""
@@ -3223,13 +3560,18 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
-  /wx/getwxdiaries2:
+  /wx/getwxdiaries2/{id}:
     get:
       tags:
       - wx
       description: get diaries by page
       operationId: DiaryController.get wx diaries list
       parameters:
+      - in: path
+        name: id
+        description: The id of diaries
+        required: true
+        type: string
       - in: query
         name: page
         description: The page for diaries list
@@ -3312,6 +3654,11 @@ paths:
       description: get finance by page
       operationId: FinanceController.get wx finance list
       parameters:
+      - in: path
+        name: id
+        description: The projectid of finance
+        required: true
+        type: string
       - in: query
         name: page
         description: The page for finance list
@@ -3342,6 +3689,11 @@ paths:
       description: get finance by page
       operationId: FinanceController.get wx finance list
       parameters:
+      - in: path
+        name: id
+        description: The projectid of finance
+        required: true
+        type: string
       - in: query
         name: page
         description: The page for finance list
@@ -3430,6 +3782,27 @@ paths:
           description: Invalid page supplied
         "404":
           description: pdf not found
+  /wx/getwxuserarticles/{id}:
+    get:
+      tags:
+      - wx
+      description: get userarticles by projid
+      operationId: ArticleController.get wx userarticles count
+      parameters:
+      - in: path
+        name: id
+        description: The id of project
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articles not found
   /wx/getwxusergetappreciations:
     get:
       tags:
@@ -3549,6 +3922,21 @@ paths:
           description: Invalid page supplied
         "404":
           description: data not found
+  /wx/photoswipe:
+    get:
+      tags:
+      - wx
+      description: get photoswipe
+      operationId: MainController.get photoswipe
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetAttachbyId'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pdf not found
   /wx/project/product/pdf/{id}:
     get:
       tags:
@@ -3575,6 +3963,36 @@ paths:
           description: Invalid page supplied
         "404":
           description: data not found
+  /wx/search:
+    get:
+      tags:
+      - wx
+      description: get standardlist
+      operationId: StandardController.get standardlist
+      parameters:
+      - in: query
+        name: searchText
+        description: The searchText of standard
+        type: string
+      - in: query
+        name: pageNo
+        description: The page for standard list
+        required: true
+        type: string
+      - in: query
+        name: limit
+        description: The limit of page for standard list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Create'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
   /wx/searchwxdrawings:
     get:
       tags:
@@ -3893,6 +4311,12 @@ paths:
       - wx
       description: post article img by catalogid
       operationId: FroalaController.post wx artile img by catalogId
+      parameters:
+      - in: query
+        name: projectid
+        description: The projectid of wxeditor
+        required: true
+        type: string
       responses:
         "200":
           description: ""
@@ -3924,7 +4348,7 @@ paths:
       description: post article img by catalogid
       operationId: FroalaController.post wx artile img by catalogId
       parameters:
-      - in: query
+      - in: path
         name: id
         description: The id of project
         required: true
@@ -3938,6 +4362,68 @@ paths:
           description: Invalid page supplied
         "404":
           description: articl not found
+  /wx/uploadwxvideo/{id}:
+    post:
+      tags:
+      - wx
+      description: post video by catalogid
+      operationId: FroalaController.post wx video by catalogId
+      parameters:
+      - in: path
+        name: id
+        description: The id of project
+        required: true
+        type: string
+      - in: query
+        name: desc
+        description: The descript of video
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.SUCCESS'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: article not found
+  /wx/uploadwxvideocover/{id}:
+    post:
+      tags:
+      - wx
+      description: post videoCover by videoid
+      operationId: FroalaController.post wx videoCover by videoid
+      parameters:
+      - in: query
+        name: id
+        description: The id of video
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.SUCCESS'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: article not found
+  /wx/usermanage:
+    get:
+      tags:
+      - wx
+      description: get usermanage
+      operationId: MainController.get usermanage
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetAttachbyId'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pdf not found
   /wx/wxhassession:
     get:
       tags:
@@ -4082,7 +4568,13 @@ definitions:
     type: object
   .Attachment:
     type: object
+  .Create:
+    type: object
+  .CreateBusiness:
+    type: object
   .DeleteTopicReply:
+    type: object
+  .DeleteUserCart:
     type: object
   .GetAdminCategory:
     type: object
@@ -4098,6 +4590,8 @@ definitions:
     type: object
   .GetProductsPage:
     type: object
+  .GetProjectPage:
+    type: object
   .GetUserMoney:
     type: object
   .Gettest:
@@ -4105,6 +4599,8 @@ definitions:
   .SUCCESS:
     type: object
   .SaveUser:
+    type: object
+  .Update:
     type: object
   .success:
     type: object
@@ -4114,7 +4610,7 @@ tags:
     VueFlow API
 - name: wx
   description: |
-    CMSWXDIARY API
+    CMSVideo API
 - name: adminlog
   description: |
     CMSADMIN API

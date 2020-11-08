@@ -3,6 +3,7 @@
 
 <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
   <title>flv.js demo</title>
   <!-- <link rel="stylesheet" type="text/css" href="demo.css" /> -->
   <style type="text/css">
@@ -125,7 +126,8 @@
       <div id="streamURL">
         <div class="url-input">
           <label for="sURL">Stream URL:</label>
-          <input id="sURL" type="text" value="/static/download/VID20190517113037.mp4" />
+          <input id="sURL" type="text" value="{{.Mp4Link}}"/>
+          <!-- "/static/download/VID20190517113037.mp4"  -->
           <button onclick="switch_mds()">Switch to MediaDataSource</button>
         </div>
         <div class="options">
@@ -166,6 +168,11 @@
   </div>
   <script src="/static/js/flv.min.js"></script>
   <script>
+    $(function() {
+      $('#sURL').val('{{.Mp4Link}}');
+      // document.getElementById('name1').value='值';
+    })
+
   var checkBoxFields = ['isLive', 'withCredentials', 'hasAudio', 'hasVideo'];
   var streamURL, mediaSourceURL;
 

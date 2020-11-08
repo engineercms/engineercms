@@ -94,7 +94,7 @@ func (c *ProjController) Get() {
 // @Title get cms projectlist...
 // @Description get projectlist..
 // @Param projectid query string false "The id of project"
-// @Param page query string false "The page of projectlist"
+// @Param pageNo query string false "The page of projectlist"
 // @Param limit query string false "The size of page"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
@@ -110,7 +110,7 @@ func (c *ProjController) GetProjects() {
 	// var err error
 	limit := c.Input().Get("limit")
 	if limit == "" {
-		limit1 = 0
+		limit1 = 15
 	} else {
 		limit1, err = strconv.ParseInt(limit, 10, 64)
 		if err != nil {
@@ -119,7 +119,7 @@ func (c *ProjController) GetProjects() {
 	}
 	page := c.Input().Get("pageNo")
 	if page == "" {
-		limit1 = 0
+		limit1 = 15
 		page1 = 1
 	} else {
 		page1, err = strconv.ParseInt(page, 10, 64)
@@ -144,11 +144,13 @@ func (c *ProjController) GetProjects() {
 		// } else {
 		// 	offset = (page1 - 1) * limit1
 		// }
+		// beego.Info(offset)
+		// beego.Info(limit1)
 		projects, err := models.GetProjectsPage(limit1, offset, searchText)
 		if err != nil {
 			beego.Error(err)
 		}
-
+		// beego.Info(projects)
 		//记录开始时间
 		// start := time.Now()
 
@@ -726,6 +728,44 @@ func (c *ProjController) UserpProjectEditorTree() {
 	if projectuser.Id == uid || isadmin {
 		c.Data["Id"] = pid
 		c.TplName = "user_projecteditortree.tpl"
+	} else {
+		c.Data["json"] = "非管理员，也非本人"
+		c.ServeJSON()
+	}
+}
+
+// @Title get user project editor tree
+// @Description get user project editor tree
+// @Param pid query string true "The id of project"
+// @Success 200 {object} models.GetProjectPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 project not found
+// @router /userprojectpermission [get]
+//用户跳转到自己编辑项目目录页面
+func (c *ProjController) UserProjectPermission() {
+	_, _, uid, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	}
+	pid := c.Input().Get("pid")
+	//id转成64位
+	idNum, err := strconv.ParseInt(pid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	projectuser, err := models.GetProjectUser(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	if projectuser.Id == uid || isadmin {
+		c.Data["Id"] = pid
+		c.Data["IsAdmin"] = isadmin
+		c.TplName = "user_projectpermission.tpl"
 	} else {
 		c.Data["json"] = "非管理员，也非本人"
 		c.ServeJSON()
@@ -1369,7 +1409,7 @@ func (c *ProjController) DeleteProjectCate() {
 func (c *ProjController) DeleteProject() {
 	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
 	ids := c.Input().Get("ids")
-	beego.Info(ids)
+	// beego.Info(ids)
 	array := strings.Split(ids, ",")
 	//id转成64位
 	idNum, err := strconv.ParseInt(array[0], 10, 64)

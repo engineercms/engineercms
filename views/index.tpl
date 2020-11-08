@@ -19,9 +19,9 @@
 <body>
   <!-- <div id="main" style="height: 400"></div> -->
   <!-- 侧栏 -->
-  <!-- <div id="treeview" class="col-xs-2 col-sm-2 col-md-2 col-lg-2"></div> -->
+  <div id="treeview" class="col-xs-2 col-sm-2 col-md-2 col-lg-2"></div>
   <!-- 右侧frame -->
-  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+  <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
     <iframe src="/index/user" name='main' frameborder="0" width="100%" scrolling="no" marginheight="0" marginwidth="0" id="iframepage" onload="this.height=100"></iframe>
   </div>
   <div id="footer">
@@ -79,7 +79,7 @@
   <script type="text/javascript">
   $(function() {
     $('#treeview').treeview({
-      data: { {.json } }, //[{{.json}}]——有时候加个中括号就行了。
+      data: {{.json }}, //[{{.json}}]——有时候加个中括号就行了。
       // data:alternateData,
       levels: 2, // expanded to 5 levels
       // enableLinks:true,

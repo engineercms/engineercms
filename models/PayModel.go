@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/astaxie/beego"
 	"github.com/jinzhu/gorm"
 	"time"
@@ -40,36 +40,42 @@ type Recharge struct {
 	User   User  `gorm:"foreignkey:UserId"`
 }
 
+/*20201008这些都应该放到models文件夹里第一个文件里，这样，程序初始化的时候先定义这些全局变量……*/
 //定义全局的db对象，我们执行数据库操作主要通过他实现。
-var _db *gorm.DB
+// var _db *gorm.DB
 
 func init() {
-	var err error
-	var dns string
-	db_type := beego.AppConfig.String("db_type")
-	db_name := beego.AppConfig.String("db_name")
-	db_path := beego.AppConfig.String("db_path")
-	if db_path == "" {
-		db_path = "./"
-	}
+	// var err error
+	// var dns string
+	// db_type := beego.AppConfig.String("db_type")
+	// db_name := beego.AppConfig.String("db_name")
+	// db_path := beego.AppConfig.String("db_path")
+	// if db_path == "" {
+	// 	db_path = "./"
+	// }
+	// dns = fmt.Sprintf("%s%s.db", db_path, db_name)
+	// _db, err = gorm.Open(db_type, dns)
 
-	dns = fmt.Sprintf("%s%s.db", db_path, db_name)
-	_db, err = gorm.Open(db_type, dns)
 	// defer _db.Close()//20200803这个不能打开。
 	// _db.LogMode(true)
-	if err != nil {
-		panic("连接数据库失败, error=" + err.Error())
-	}
+
+	// if err != nil {
+	// 	panic("连接数据库失败, error=" + err.Error())
+	// }
+
 	// defer gdb.Close()
 	//禁止表名复数形式
-	_db.SingularTable(true)
+
+	// _db.SingularTable(true)
+
 	// 开发的时候需要打开调试日志
 	// _db.LogMode(true)
 	//设置数据库连接池参数
-	_db.DB().SetMaxOpenConns(100) //设置数据库连接池最大连接数
-	_db.DB().SetMaxIdleConns(20)  //连接池最大允许的空闲连接数，如果没有sql任务需要执行的连接数大于20，超过的连接会被连接池关闭。
 
+	// _db.DB().SetMaxOpenConns(100) //设置数据库连接池最大连接数
+	// _db.DB().SetMaxIdleConns(20)  //连接池最大允许的空闲连接数，如果没有sql任务需要执行的连接数大于20，超过的连接会被连接池关闭。
 	_db.CreateTable(&Pay{}, &Money{}, &Recharge{})
+
 	// if !gdb.HasTable(&Pay1{}) {
 	// 	if err = gdb.CreateTable(&Pay1{}).Error; err != nil {
 	// 		panic(err)
@@ -82,9 +88,9 @@ func init() {
 // db对象在调用他的方法的时候会从数据库连接池中获取新的连接
 // 注意：使用连接池技术后，千万不要使用完db后调用db.Close关闭数据库连接，
 // 这样会导致整个数据库连接池关闭，导致连接池没有可用的连接
-func GetDB() *gorm.DB {
-	return _db
-}
+// func GetDB() *gorm.DB {
+// 	return _db
+// }
 
 //查询某个打赏记录
 func GetPay(id int64) (pay Pay, err error) {

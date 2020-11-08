@@ -198,7 +198,7 @@ video {
   </script>
   <script type="text/javascript">
   $(function() { //这个和$(document).ready(function()等价
-    value = { {.product.Label } };
+    value = {{.product.Label }};
     array = value.split(",");
     var labelarray = new Array();
     for (i = 0; i < array.length; i++) {
@@ -209,7 +209,7 @@ video {
 
   //编辑文章
   function updatearticle() {
-    var articleid = { {.article.Id } };
+    var articleid = {{.article.Id }};
     var subtext = $('#subtext').val();
     var html = $('#edit').val();
     $.ajax({
@@ -218,7 +218,7 @@ video {
       data: { aid: articleid, subtext: subtext, content: html }, //父级id
       success: function(data, status) {
         alert("修改“" + data + "”成功！(status:" + status + ".)");
-        window.location.href = "/project/product/article/" + { {.article.Id } };
+        window.location.href = "/project/product/article/" + {{.article.Id }};
       },
     });
   }

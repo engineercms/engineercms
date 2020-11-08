@@ -24,8 +24,11 @@ type Legislationmore struct {
 	Execute       string //执行时间
 }
 
-func (c *LegislationController) Index() { //
-	c.Data["IsLegislation"] = true //
+func (c *LegislationController) Index() {
+	_, _, _, isadmin, islogin := checkprodRole(c.Ctx)
+	c.Data["IsAdmin"] = isadmin
+	c.Data["IsLogin"] = islogin
+	c.Data["IsLegislation"] = true
 	c.TplName = "legislation.tpl"
 
 	logs := logs.NewLogger(1000)
@@ -174,7 +177,7 @@ func (c *LegislationController) Checklist() { //checklist用的是post方法
 
 //上传文档供解析-替换（增加）标准号
 func (c *LegislationController) FileInput() { //
-	c.Data["IsLegislation"] = true //
+	c.Data["IsLegislation_upfile"] = true //
 	c.TplName = "legislation_upfile.tpl"
 
 	logs := logs.NewLogger(1000)

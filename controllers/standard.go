@@ -17,7 +17,7 @@ type StandardController struct {
 
 type Standardmore struct {
 	Id            int64
-	Number        string //`orm:"unique"`
+	Number        string
 	Title         string
 	NumTitle      string
 	Uname         string //换成用户名
@@ -52,6 +52,19 @@ func (c *StandardController) GetStandard() {
 
 //修改规范
 func (c *StandardController) UpdateStandard() {
+	_, _, _, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		route := c.Ctx.Request.URL.String()
+		c.Data["Url"] = route
+		c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	} else if !isadmin {
+		c.Data["json"] = "非管理员"
+		c.ServeJSON()
+		return
+	}
 	id := c.Input().Get("cid")
 	idNum, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -74,6 +87,19 @@ func (c *StandardController) UpdateStandard() {
 
 //删除规范
 func (c *StandardController) DeleteStandard() {
+	_, _, _, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		route := c.Ctx.Request.URL.String()
+		c.Data["Url"] = route
+		c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	} else if !isadmin {
+		c.Data["json"] = "非管理员"
+		c.ServeJSON()
+		return
+	}
 	ids := c.GetString("ids")
 	array := strings.Split(ids, ",")
 	// beego.Info(array)
@@ -127,11 +153,53 @@ func (c *StandardController) Index() { //
 	logs.Close()
 }
 
+//后端分页的数据结构
+type StandardTableserver struct {
+	Rows  []Standardmore `json:"rows"`
+	Page  int            `json:"page"`
+	Total int64          `json:"total"` //string或int64都行！
+}
+
+// @Title get standardlist
+// @Description get standardlist
+// @Param searchText query string false "The searchText of standard"
+// @Param pageNo query string true "The page for standard list"
+// @Param limit query string true "The limit of page for standard list"
+// @Success 200 {object} models.Create
+// @Failure 400 Invalid page supplied
+// @Failure 404 cart not found
+// @router /search [get]
+//根据用户输入的关键字，查询规范
 //搜索规范或者图集的名称或编号
 //20170704：linumber没有用。因为用category+编号+年份比较好
 func (c *StandardController) Search() { //search用的是post方法
-	name := c.Input().Get("name")
-	if name == "allstandard" {
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit = "15"
+	}
+	limit1, err := strconv.Atoi(limit)
+	if err != nil {
+		beego.Error(err)
+	}
+	page := c.Input().Get("pageNo")
+	page1, err := strconv.Atoi(page)
+	if err != nil {
+		beego.Error(err)
+	}
+	var offset int
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	searchText := c.Input().Get("searchText")
+	if searchText == "" {
+		c.Data["json"] = map[string]interface{}{"code": "OK", "msg": "关键字为空"}
+		c.ServeJSON()
+		return
+	}
+	if searchText == "allstandard" {
 		standards, err := models.GetAllStandards()
 		if err != nil {
 			beego.Error(err.Error)
@@ -140,34 +208,25 @@ func (c *StandardController) Search() { //search用的是post方法
 			c.ServeJSON()
 		}
 	} else {
-		c.Data["IsStandard"] = true //
-		c.TplName = "standard.tpl"
-		// c.Data["IsLogin"] = checkAccount(c.Ctx)
-		// uname, _, _ := checkRoleread(c.Ctx) //login里的
-		// rolename, _ = strconv.Atoi(role)
-		// c.Data["Uname"] = uname
 		//搜索名称
-		Results1, err := models.SearchStandardsName(name, false)
-		if err != nil {
-			beego.Error(err.Error)
-		}
-		// beego.Info(Results1[0].Title)
-		// beego.Info(Results1[1].Title)
+		// Results1, err := models.SearchStandardsName(searchText, false)
+		// if err != nil {
+		// 	beego.Error(err.Error)
+		// }
 		//搜索编号
-		Results2, err := models.SearchStandardsNumber(name, false)
+		// Results2, err := models.SearchStandardsNumber(searchText, false)
+		// if err != nil {
+		// 	beego.Error(err.Error)
+		// }
+		// Results1 = append(Results1, Results2...)
+		Results1, err := models.GetUserStandard(limit1, offset, searchText)
 		if err != nil {
 			beego.Error(err.Error)
 		}
-		// Standards := make([]*Standard, 0)
-		Results1 = append(Results1, Results2...)
 		//由categoryid查categoryname
 		aa := make([]Standardmore, len(Results1))
 		//由standardnumber查librarynumber
 		for i, v := range Results1 {
-			//由userid查username
-			// user := models.GetUserByUserId(v.Uid)
-			// beego.Info(v.Uid)
-			// beego.Info(user.Username)
 			//由standardnumber正则得到编号50268和分类GB
 			Category, _, Number := SplitStandardFileNumber(v.Number)
 			//由分类和编号查有效版本库中的编号
@@ -178,10 +237,7 @@ func (c *StandardController) Search() { //search用的是post方法
 			aa[i].Id = v.Id
 			aa[i].Number = v.Number //`orm:"unique"`
 			aa[i].Title = v.Title
-			// aa[i].Uname = user.Username //换成用户名
-			// beego.Info(aa[i].Uname)
-			// CategoryName   //换成规范类别GB、DL……
-			// Content
+			aa[i].Uname = v.UserName //换成用户名
 			aa[i].Route = v.Route
 			aa[i].Created = v.Created
 			aa[i].Updated = v.Updated
@@ -196,14 +252,19 @@ func (c *StandardController) Search() { //search用的是post方法
 				aa[i].LibraryNumber = ""
 			}
 		}
-		c.Data["json"] = aa //这里必须要是c.Data["json"]，其他c.Data["Data"]不行
+		count, err := models.GetUserStandardCount(searchText)
+		if err != nil {
+			beego.Error(err)
+		}
+		table := StandardTableserver{aa, page1, count}
+		c.Data["json"] = table //这里必须要是c.Data["json"]，其他c.Data["Data"]不行
 		c.ServeJSON()
 	}
 
 	logs := logs.NewLogger(1000)
 	logs.SetLogger("file", `{"filename":"log/test.log"}`)
 	logs.EnableFuncCallDepth(true)
-	logs.Info(c.Ctx.Input.IP() + " " + "SearchStandardsName:" + name)
+	logs.Info(c.Ctx.Input.IP() + " " + "SearchStandardsName:" + searchText)
 	logs.Close()
 	// standards, err := models.GetAllStandards() //这里传入空字符串
 	// if err != nil {
@@ -357,6 +418,19 @@ func (c *StandardController) Valid() { //search用的是post方法
 
 //删除有效库中选中
 func (c *StandardController) DeleteValid() { //search用的是post方法
+	_, _, _, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		route := c.Ctx.Request.URL.String()
+		c.Data["Url"] = route
+		c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	} else if !isadmin {
+		c.Data["json"] = "非管理员"
+		c.ServeJSON()
+		return
+	}
 	ids := c.GetString("ids")
 	array := strings.Split(ids, ",")
 	// beego.Info(array)
@@ -388,6 +462,19 @@ func (c *StandardController) DeleteValid() { //search用的是post方法
 
 //上传excel文件，导入到规范数据库，用于批量导入规范文件
 func (c *StandardController) ImportExcel() {
+	_, _, _, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		route := c.Ctx.Request.URL.String()
+		c.Data["Url"] = route
+		c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	} else if !isadmin {
+		c.Data["json"] = "非管理员"
+		c.ServeJSON()
+		return
+	}
 	//获取上传的文件
 	_, h, err := c.GetFile("excel")
 	if err != nil {
@@ -454,6 +541,19 @@ func (c *StandardController) ImportExcel() {
 
 //上传excel文件，导入到有效版本数据库
 func (c *StandardController) ImportLibrary() {
+	_, _, _, isadmin, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		route := c.Ctx.Request.URL.String()
+		c.Data["Url"] = route
+		c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	} else if !isadmin {
+		c.Data["json"] = "非管理员"
+		c.ServeJSON()
+		return
+	}
 	//获取上传的文件
 	_, h, err := c.GetFile("excel2")
 	if err != nil {
@@ -533,6 +633,7 @@ func (c *StandardController) ImportLibrary() {
 }
 
 func (c *StandardController) Standard_one_addbaidu() { //一对一模式
+	_, _, uid, _, _ := checkprodRole(c.Ctx)
 	var standard models.Standard
 	//获取上传的文件
 	_, h, err := c.GetFile("file")
@@ -583,6 +684,7 @@ func (c *StandardController) Standard_one_addbaidu() { //一对一模式
 	standard.Category = categoryname //2016-7-16这里改为GBT这种，空格前的名字
 	standard.Created = time.Now()
 	standard.Updated = time.Now()
+	standard.Uid = uid
 	standard.Route = "/attachment/standard/" + category + "/" + h.Filename
 	_, err = models.SaveStandard(standard)
 	if err != nil {

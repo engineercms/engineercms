@@ -251,6 +251,15 @@
                 title: 'Enter Count'  
             }
           },{
+            field: 'Port',
+            title: '端口号',
+            editable: {
+                type: 'text',
+                pk: 1,
+                url: '/admin/user/updateuser',
+                title: 'Enter port'  
+            }
+          },{
             field: 'Status',
             title: '状态',
             // editable: {

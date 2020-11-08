@@ -171,10 +171,10 @@ a.navbar-brand {
           <li {{if .IsLegislation}} class="active" {{end}}>
             <a href="/legislation" target="_blank">输入框对标</a>
           </li>
-          <li {{if .IsLegislation}} class="active" {{end}}>
+          <li {{if .IsLegislation_upfile}} class="active" {{end}}>
             <a href="/legislation/fileinput" target="_blank">excel对标</a>
           </li>
-          <li {{if .IsLegislation}} class="active" {{end}}>
+          <li {{if .IsLegislation_wordfile}} class="active" {{end}}>
             <a href="/legislation/wordfileinput" target="_blank">word对标</a>
           </li>
         </ul>
@@ -219,7 +219,7 @@ a.navbar-brand {
     </ul>
     <div class="pull-right">
       <ul class="nav navbar-nav navbar-right">
-        {{if eq true .IsLogin .IsAdmin}}
+        {{if eq true .IsAdmin}}
         
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{.Username}} <b class="caret"></b></a>

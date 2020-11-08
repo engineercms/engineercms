@@ -8,6 +8,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
@@ -20,6 +21,9 @@ import (
 )
 
 var engine *xorm.Engine
+
+//定义全局的db对象，我们执行数据库操作主要通过他实现。
+var _db *gorm.DB
 
 // var gdb *gorm.DB
 
@@ -130,6 +134,7 @@ func init() {
 	gob.Register(Template{})
 
 	var dns string
+	var err error
 	db_type := beego.AppConfig.String("db_type")
 	db_host := beego.AppConfig.String("db_host")
 	db_port := beego.AppConfig.String("db_port")
@@ -143,7 +148,7 @@ func init() {
 		orm.RegisterDriver("mysql", orm.DRMySQL)
 		dns = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", db_user, db_pass, db_host, db_port, db_name)
 		// 注册xorm
-		var err error
+		// var err error
 		engine, err = xorm.NewEngine(db_type, dns)
 		if err != nil {
 			log.Println(err)
@@ -159,7 +164,7 @@ func init() {
 		}
 		dns = fmt.Sprintf("%s%s.db", db_path, db_name)
 		// 注册xorm
-		var err error
+		// var err error
 		engine, err = xorm.NewEngine(db_type, dns)
 		if err != nil {
 			log.Println(err)
@@ -173,6 +178,41 @@ func init() {
 
 	// orm.RegisterDriver("sqlite", orm.DRSqlite)
 	// orm.RegisterDataBase("default", "sqlite3", "database/engineer.db", 10)
+
+	// 初始化gorm-20201008
+	// 	var err error
+	// var dns string
+	// db_type := beego.AppConfig.String("db_type")
+	// db_name := beego.AppConfig.String("db_name")
+	// db_path := beego.AppConfig.String("db_path")
+	// if db_path == "" {
+	// 	db_path = "./"
+	// }
+
+	dns = fmt.Sprintf("%s%s.db", db_path, db_name)
+	_db, err = gorm.Open(db_type, dns)
+	// defer _db.Close()//20200803这个不能打开。
+	// _db.LogMode(true)
+	if err != nil {
+		panic("连接数据库失败, error=" + err.Error())
+	}
+	// defer gdb.Close()
+	//禁止表名复数形式
+	_db.SingularTable(true)
+	// 开发的时候需要打开调试日志
+	// _db.LogMode(true)
+	//设置数据库连接池参数
+	_db.DB().SetMaxOpenConns(100) //设置数据库连接池最大连接数
+	_db.DB().SetMaxIdleConns(20)  //连接池最大允许的空闲连接数，如果没有sql任务需要执行的连接数大于20，超过的连接会被连接池关闭。
+}
+
+//获取gorm db对象，其他包需要执行数据库查询的时候，只要通过tools.getDB()获取db对象即可。
+//不用担心协程并发使用同样的db对象会共用同一个连接，
+// db对象在调用他的方法的时候会从数据库连接池中获取新的连接
+// 注意：使用连接池技术后，千万不要使用完db后调用db.Close关闭数据库连接，
+// 这样会导致整个数据库连接池关闭，导致连接池没有可用的连接
+func GetDB() *gorm.DB {
+	return _db
 }
 
 //创建数据库_来自github.com/beego/admin——这个仅作为参考用，没有使用
@@ -350,7 +390,7 @@ func DeleteAdminCategory(cid int64) error {
 func GetAdminCategory(pid int64) (categories []*AdminCategory, err error) {
 	o := orm.NewOrm()
 	categories = make([]*AdminCategory, 0)
-	qs := o.QueryTable("AdminCategory") //这个表名AchievementTopic需要用驼峰式，
+	qs := o.QueryTable("AdminCategory")                   //这个表名AchievementTopic需要用驼峰式，
 	_, err = qs.Filter("parent_id", pid).All(&categories) //而这个字段parentid为何又不用呢
 	if err != nil {
 		return nil, err

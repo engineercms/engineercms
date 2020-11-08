@@ -28,7 +28,7 @@
     <h3>项目列表</h3>
     <div id="toolbar1" class="btn-toolbar" role="toolbar" aria-label="...">
       <div class="btn-group">
-        <button {{if ne true .IsLogin}} style="display:none" {{end}} type="button" id="addButton" class="btn btn-default"> <i class="fa fa-plus">添加</i>
+        <button {{if ne true .IsLogin}} style="display:none" {{end}} type="button" id="addButton" class="btn btn-default" title="新建项目"> <i class="fa fa-plus">添加</i>
         </button>
         <button {{if ne true .IsLogin}} style="display:none" {{end}} type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="编辑">
           <i class="fa fa-edit">&nbsp;&nbsp;编辑</i>
@@ -40,6 +40,9 @@
           </li>
           <li>
             <a href="#" onclick="editorProjTreeButton()"><i class="fa fa-edit">&nbsp;&nbsp;编辑项目目录</i></a>
+          </li>
+          <li>
+            <a href="#" onclick="ProjPermissionButton()"><i class="fa fa-edit">&nbsp;&nbsp;设置项目权限</i></a>
           </li>
         </ul>
       </div>
@@ -73,7 +76,7 @@
         // 返回false将会终止请求。
         pageSize: 15,
         pageNumber: 1,
-        pageList: [15, 20, 50, 100],
+        pageList: [15, 20, 50, 'All'],
         singleSelect: "true",
         clickToSelect: "true",
         queryParams: function queryParams(params) { //设置查询参数
@@ -517,7 +520,7 @@
           backdrop: 'static'
         });
       }
-
+      // 编辑项目目录
       function editorProjTreeButton() {
         if (!{{.IsLogin }}) {
           alert("未登陆！");
@@ -554,7 +557,43 @@
           }
         });
       }
-
+      // 设置项目权限
+      function ProjPermissionButton() {
+        if (!{{.IsLogin }}) {
+          alert("未登陆！");
+          return;
+        }
+        var selectRow = $('#table0').bootstrapTable('getSelections');
+        if (selectRow.length < 1) {
+          alert("请先勾选项目！");
+          return;
+        }
+        if (selectRow.length > 1) {
+          alert("请不要勾选一个以上！");
+          return;
+        }
+        // alert({{.IsAdmin}})
+        $.ajax({
+          type: "get",
+          url: "/v1/project/projectuserrole",
+          data: { pid: selectRow[0].Id },
+          success: function(data, status) {
+            // alert(data.userrole)
+            if (data.userrole=="isme"||{{.IsAdmin}}){
+              //跳转到新页面
+              window.location.href = "/v1/project/userprojectpermission?pid="+selectRow[0].Id;
+            }else{
+              alert("非管理员、非本人，无修改权限")
+            }
+          },
+          complete:function(data){
+            //请求完成的处理
+          },
+          error:function(data){
+            //请求出错处理
+          }
+        });
+      }
       // 删除项目
       $("#deleteButton").click(function() {
         if ({{.role }} != 1) {

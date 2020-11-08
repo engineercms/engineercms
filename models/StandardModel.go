@@ -153,7 +153,7 @@ func SaveLibrary(library Library) (lid int64, err error) {
 	// return uid, err
 }
 
-//由名字模糊搜索
+//由名字模糊搜索_作废
 func SearchStandardsName(name string, isDesc bool) ([]*Standard, error) {
 	o := orm.NewOrm()
 	Standards := make([]*Standard, 0)
@@ -189,7 +189,7 @@ func SearchStandardsNamePage(limit, offset int64, name string, isDesc bool) ([]*
 	return Standards, err
 }
 
-//由编号模糊搜索
+//由编号模糊搜索_作废
 func SearchStandardsNumber(number string, isDesc bool) ([]*Standard, error) {
 	o := orm.NewOrm()
 	Standards := make([]*Standard, 0)
@@ -223,6 +223,55 @@ func SearchStandardsNumberPage(limit, offset int64, number string, isDesc bool) 
 		//o.QueryTable("user").Filter("name", "slene").All(&users)
 	}
 	return Standards, err
+}
+
+//gorm查询规范，join用户
+type UserStandard struct {
+	Id       int64
+	Number   string //`orm:"unique"`
+	Title    string
+	Category string
+	Content  string
+	Route    string
+	Created  time.Time
+	Updated  time.Time
+	Views    int64
+	UserName string
+}
+
+//查询某个用户借阅记录
+func GetUserStandard(limit, offset int, searchText string) (ustds []UserStandard, err error) {
+	db := GetDB()
+	if searchText != "" {
+		err = db.Order("standard.updated desc").Table("standard").
+			Select("standard.id,standard.number,standard.title,standard.category,standard.content,standard.route,user.nickname as user_name").
+			Where("title LIKE ? OR number LIKE ?", "%"+searchText+"%", "%"+searchText+"%").
+			Joins("left JOIN user on user.id = standard.uid").
+			Limit(limit).Offset(offset).Scan(&ustds).Error
+	} else {
+		err = db.Order("standard.updated desc").Table("standard").
+			Select("standard.id,standard.number,standard.title,standard.category,standard.content,standard.route,user.nickname as user_name").
+			Joins("left JOIN user on user.id = standard.uid").
+			Limit(limit).Offset(offset).Scan(&ustds).Error
+	}
+	return ustds, err
+	// 多连接及参数
+	// db.Joins("JOIN pays ON pays.user_id = users.id", "jinzhu@example.org").Joins("JOIN credit_cards ON credit_cards.user_id = users.id").Where("user_id = ?", uid).Find(&pays)
+}
+
+//查询规范记录总数
+func GetUserStandardCount(searchText string) (count int64, err error) {
+	//获取DB
+	db := GetDB()
+	if searchText != "" {
+		err = db.Table("standard").
+			Where("title LIKE ? OR number LIKE ?", "%"+searchText+"%", "%"+searchText+"%").
+			Count(&count).Error
+	} else {
+		err = db.Table("standard").
+			Count(&count).Error
+	}
+	return count, err
 }
 
 //由分类SL和编号搜索有效版本库

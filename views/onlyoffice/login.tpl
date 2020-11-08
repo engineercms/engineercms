@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="initial-scale=1,user-scalable=no" />
-  <title>远程审讯系统</title>
+  <title>OnlyOffice</title>
   <!-- 收藏用logo图标 -->
   <link rel="bookmark"  type="image/x-icon"  href="/static/img/only.ico"/>
   <!-- 网站显示页logo图标 -->
@@ -26,7 +26,7 @@
     <div class="content">
       <div class="title">
         <span class="monileHidden">认证登录</span>
-        <span class="pcHidden">远程审讯系统</span>
+        <span class="pcHidden">engineercms系统</span>
       </div>
       <input type="hidden" name="url" value="{{.Url}}"/>
       <input id="referrer" type="text" name="referrer" class="form-control" style="display:none;">

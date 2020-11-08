@@ -215,6 +215,8 @@
           url: "/admin/user/adduser",
           data: { username: Username, nickname: Nickname, password: Password, repassword: Repassword, email: Email, department: Department, secoffice: Secoffice, ip: Ip, port: Port, status: Status, role: Role },
           success: function(data, status) {
+            $('#table0').bootstrapTable('refresh', { url: '/admin/user' });
+            $('#modalTable').modal('hide');
             alert("添加“" + data + "”成功！(status:" + status + ".)");
           }
         });
@@ -222,8 +224,6 @@
         alert("用户名等不能为空！");
       }
       // $(function(){$('#myModal').modal('hide')}); 
-      $('#modalTable').modal('hide');
-      $('#table0').bootstrapTable('refresh', { url: '/admin/user' });
       // "/category/modifyfrm?cid="+cid
       // window.location.reload();//刷新页面
     }
@@ -236,11 +236,8 @@
         return false;
       }
       if (confirm("确定删除吗？一旦删除将无法恢复！")) {
-        var names = $.map(selectRow, function(row) {
-          // alert(row.Id);
-          // return row.Id;
-          // alert(row.Title);
-          return row.name;
+        var ids2 = $.map(selectRow, function(row) {
+          return row.Id;
         })
         var ids = "";
         for (var i = 0; i < selectRow.length; i++) {
@@ -258,8 +255,8 @@
             alert("删除“" + data + "”成功！(status:" + status + ".)");
             //删除已选数据
             $('#table0').bootstrapTable('remove', {
-              field: 'name',
-              values: names
+              field: 'Id',
+              values: ids2
             });
           }
         });
@@ -374,7 +371,7 @@
             }
           }, {
             field: 'Port',
-            title: 'CMS端口Port',
+            title: '端口Port',
             editable: {
               type: 'text',
               pk: 1,

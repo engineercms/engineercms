@@ -2,18 +2,22 @@
 <!-- KRAJEE EXPLORER THEME (ADVANCED) -->
 <title>规范对标</title>
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-<link href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" rel="stylesheet">
+<!-- <link href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" rel="stylesheet"> -->
+<link href="/static/bootstrap-fileinput/css/all.css" rel="stylesheet">
 <link href="/static/bootstrap-fileinput/assets/prod/all-krajee.min.css?ver=201903112143" rel="stylesheet">
 <link href="/static/bootstrap-fileinput/assets/1d958cec/css/fileinput.css?ver=201909132002" rel="stylesheet">
 <link href="/static/bootstrap-fileinput/assets/1d958cec/themes/explorer/theme.min.css?ver=201908311938" rel="stylesheet">
 <link href="/static/bootstrap-fileinput/assets/fc69cbca/css/dropdown.min.css" rel="stylesheet">
-<script src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" async></script>
-<script src="https://buttons.github.io/buttons.js" async></script>
+<!-- <script src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" async></script> -->
+<!-- <script src="https://buttons.github.io/buttons.js" async></script> -->
+<script src="/static/bootstrap-fileinput/js/buttons.js" async></script>
 <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css"/>
 
-<script id="dsq-count-scr" src="//krajee.disqus.com/count.js" async></script>
+<!-- <script id="dsq-count-scr" src="//krajee.disqus.com/count.js" async></script> -->
 <script src="/static/bootstrap-fileinput/assets/1d958cec/js/plugins/purify.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script> -->
+<script src="/static/bootstrap-fileinput/js/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="/static/bootstrap-fileinput/assets/prod/all-krajee.min.js?ver=201903112143"></script>
 <script src="/static/bootstrap-fileinput/assets/1d958cec/js/plugins/sortable.min.js"></script>

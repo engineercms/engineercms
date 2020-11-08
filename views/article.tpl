@@ -165,8 +165,8 @@
   </style>
   <link rel="stylesheet" type="text/css" id="gravatar-card-css" href="/static/wordpress/hovercard.min.css">
   <link rel="stylesheet" type="text/css" id="gravatar-card-services-css" href="/static/wordpress/services.min.css">
-  <script type="text/javascript" src="/static/wordpress/PEJHFPIHPJC2PD3IMTCWTT"></script>
-  <script async="true" type="text/javascript" src="/static/wordpress/WV6A5O5PBJBIBDYGZHVBM5"></script>
+  <!-- <script type="text/javascript" src="/static/wordpress/PEJHFPIHPJC2PD3IMTCWTT"></script> -->
+  <!-- <script async="true" type="text/javascript" src="/static/wordpress/WV6A5O5PBJBIBDYGZHVBM5"></script> -->
 </head>
 
 <body class="wpcomblog" style="padding-top: 40px; position: relative;">
@@ -241,91 +241,7 @@
         </div>
         <div class="entrytext">
           {{str2html .article.Content}}
-          <!-- <div style="margin-top: 2em" class="blog-subscribe">
-                        <hr>
-                        <p><strong><label for="subscribe-field">Email Newsletter</label></strong></p>
-                        <form action="https://subscribe.wordpress.com/" method="post" accept-charset="utf-8" id="subscribe-blog">
-                            <p>Missing out on the latest EngineerCMS.com developments? Enter your email below to receive future announcements direct to your inbox. An email confirmation will be sent before you will start receiving notifications - please check your spam folder if you don't receive this.</p>
-                            <p>Join 67,363,119 other followers</p>
-                            <p><input type="text" name="email" style="width: 95%; padding: 1px 2px" placeholder="Enter your email address" value="" id="subscribe-field"></p>
-                            <p>
-                                <input type="hidden" name="action" value="subscribe">
-                                <input type="hidden" name="blog_id" value="3584907">
-                                <input type="hidden" name="source" value="https://en.blog.wordpress.com/2019/11/12/recurring-payments/">
-                                <input type="hidden" name="sub-type" value="widget">
-                                <input type="hidden" name="redirect_fragment" value="461">
-                                <input type="hidden" id="_wpnonce" name="_wpnonce" value="64c48aec16"> <button type="submit">
-                                    Follow </button>
-                            </p>
-                        </form>
-                    </div>
-                    <div id="jp-post-flair" class="sharedaddy sd-like-enabled sd-sharing-enabled">
-                        <div class="sharedaddy sd-sharing-enabled">
-                            <div class="robots-nocontent sd-block sd-social sd-social-icon sd-sharing">
-                                <h3 class="sd-title">Share this:</h3>
-                                <div class="sd-content">
-                                    <ul>
-                                        <li class="share-twitter"><a rel="nofollow noopener noreferrer" data-shared="sharing-twitter-41687" class="share-twitter sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=twitter" target="_blank" title="Click to share on Twitter"><span></span><span class="sharing-screen-reader-text">Click to share on Twitter (Opens in new window)</span></a></li>
-                                        <li class="share-facebook"><a rel="nofollow noopener noreferrer" data-shared="sharing-facebook-41687" class="share-facebook sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=facebook" target="_blank" title="Click to share on Facebook"><span></span><span class="sharing-screen-reader-text">Click to share on Facebook (Opens in new window)</span></a></li>
-                                        <li class="share-linkedin"><a rel="nofollow noopener noreferrer" data-shared="sharing-linkedin-41687" class="share-linkedin sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=linkedin" target="_blank" title="Click to share on LinkedIn"><span></span><span class="sharing-screen-reader-text">Click to share on LinkedIn (Opens in new window)</span></a></li>
-                                        <li class="share-pinterest"><a rel="nofollow noopener noreferrer" data-shared="sharing-pinterest-41687" class="share-pinterest sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=pinterest" target="_blank" title="Click to share on Pinterest"><span></span><span class="sharing-screen-reader-text">Click to share on Pinterest (Opens in new window)</span></a></li>
-                                        <li class="share-telegram"><a rel="nofollow noopener noreferrer" data-shared="" class="share-telegram sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=telegram" target="_blank" title="Click to share on Telegram"><span></span><span class="sharing-screen-reader-text">Click to share on Telegram (Opens in new window)</span></a></li>
-                                        <li class="share-jetpack-whatsapp"><a rel="nofollow noopener noreferrer" data-shared="" class="share-jetpack-whatsapp sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=jetpack-whatsapp" target="_blank" title="Click to share on WhatsApp"><span></span><span class="sharing-screen-reader-text">Click to share on WhatsApp (Opens in new window)</span></a></li>
-                                        <li><a href="file:///C:/Users/Administrator/Desktop/3.html#" class="sharing-anchor sd-button share-more"><span>More</span></a></li>
-                                        <li class="share-end"></li>
-                                    </ul>
-                                    <div class="sharing-hidden">
-                                        <div class="inner" style="display: none;">
-                                            <ul>
-                                                <li class="share-email"><a rel="nofollow noopener noreferrer" data-shared="" class="share-email sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=email" target="_blank" title="Click to email this to a friend"><span></span><span class="sharing-screen-reader-text">Click to email this to a friend (Opens in new window)</span></a></li>
-                                                <li class="share-print"><a rel="nofollow noopener noreferrer" data-shared="" class="share-print sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/#print" target="_blank" title="Click to print"><span></span><span class="sharing-screen-reader-text">Click to print (Opens in new window)</span></a></li>
-                                                <li class="share-end"></li>
-                                                <li class="share-tumblr"><a rel="nofollow noopener noreferrer" data-shared="" class="share-tumblr sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=tumblr" target="_blank" title="Click to share on Tumblr"><span></span><span class="sharing-screen-reader-text">Click to share on Tumblr (Opens in new window)</span></a></li>
-                                                <li class="share-reddit"><a rel="nofollow noopener noreferrer" data-shared="" class="share-reddit sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=reddit" target="_blank" title="Click to share on Reddit"><span></span><span class="sharing-screen-reader-text">Click to share on Reddit (Opens in new window)</span></a></li>
-                                                <li class="share-end"></li>
-                                                <li class="share-pocket"><a rel="nofollow noopener noreferrer" data-shared="" class="share-pocket sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=pocket" target="_blank" title="Click to share on Pocket"><span></span><span class="sharing-screen-reader-text">Click to share on Pocket (Opens in new window)</span></a></li>
-                                                <li class="share-skype"><a rel="nofollow noopener noreferrer" data-shared="sharing-skype-41687" class="share-skype sd-button share-icon no-text" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?share=skype" target="_blank" title="Click to share on Skype"><span></span><span class="sharing-screen-reader-text">Click to share on Skype (Opens in new window)</span></a></li>
-                                                <li class="share-end"></li>
-                                                <li class="share-end"></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="sharedaddy sd-block sd-like jetpack-likes-widget-wrapper jetpack-likes-widget-unloaded" id="like-post-wrapper-3584907-41687-5e3b6a71ab2d0" data-src="//widgets.wp.com/likes/index.html?ver=20190321#blog_id=3584907&amp;post_id=41687&amp;origin=en.blog.wordpress.com&amp;obj_id=3584907-41687-5e3b6a71ab2d0" data-name="like-post-frame-3584907-41687-5e3b6a71ab2d0">
-                            <h3 class="sd-title">Like this:</h3>
-                            <div class="likes-widget-placeholder post-likes-widget-placeholder" style="height: 55px;"><span class="button"><span>Like</span></span> <span class="loading">Loading...</span></div><span class="sd-text-color"></span><a class="sd-link-color"></a>
-                        </div>
-                        <div id="jp-relatedposts" class="jp-relatedposts" style="display: block;">
-                            <h3 class="jp-relatedposts-headline"><em>Related</em></h3>
-                            <div class="jp-relatedposts-items jp-relatedposts-items-minimal">
-                                <p class="jp-relatedposts-post jp-relatedposts-post0" data-post-id="31384" data-post-format="false"><span class="jp-relatedposts-post-title"><a class="jp-relatedposts-post-a" href="https://en.blog.wordpress.com/2015/07/01/videopress-next/" title="Reinvented Video for WordPress The next generation VideoPress is here -- powerful, simple video hosting for your blog or website." data-origin="41687" data-position="0">Reinvented Video for WordPress</a></span><span class="jp-relatedposts-post-context">In "New Features"</span></p>
-                                <p class="jp-relatedposts-post jp-relatedposts-post1" data-post-id="40644" data-post-format="false"><span class="jp-relatedposts-post-title"><a class="jp-relatedposts-post-a" href="https://en.blog.wordpress.com/2018/08/14/introducing-the-simple-payment-widget/" title="Introducing the Simple Payment WidgetTake payments anywhere on your site." data-origin="41687" data-position="1">Introducing the Simple Payment Widget</a></span><span class="jp-relatedposts-post-context">In "New Features"</span></p>
-                                <p class="jp-relatedposts-post jp-relatedposts-post2" data-post-id="13600" data-post-format="false"><span class="jp-relatedposts-post-title"><a class="jp-relatedposts-post-a" href="https://en.blog.wordpress.com/2013/02/26/reader-tips/" title="Exploring the Reader: Find Your Fans and Follow Your Faves When you become a part of WordPress.com, you’re actually getting two awesome services for the price of none: your blog plus your Reader, which brings every WordPress.com blog together in one easy-to-search place. Your blog is where your ideas come to life, and your Reader is where you connect with…" data-origin="41687" data-position="2">Exploring the Reader: Find Your Fans and Follow Your Faves</a></span><span class="jp-relatedposts-post-context">In "Community"</span></p>
-                            </div>
-                        </div>
-                    </div> -->
         </div>
-        <!-- <div id="entry-side">
-                    <ul id="post-meta">
-                        <li class="time"></li>
-                        <li class="categories"><svg class="icon icon-category" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M18 19H6c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h3c1.1 0 2 .9 2 2h7c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2z"></path>
-                            </svg><a href="https://en.blog.wordpress.com/category/community/" rel="category tag">Community</a>, <a href="https://en.blog.wordpress.com/category/earn-from-your-site/" rel="category tag">Earn from your site</a>, <a href="https://en.blog.wordpress.com/category/features/" rel="category tag">Features</a>, <a href="https://en.blog.wordpress.com/category/new-features/" rel="category tag">New Features</a></li>
-                        <li class="tags"><svg class="icon icon-tag" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M20 2.007h-7.087c-.53 0-1.039.211-1.414.586l-8.906 8.906c-.781.781-.781 2.047 0 2.828l7.086 7.086c.781.781 2.047.781 2.828 0l8.906-8.906c.376-.374.587-.883.587-1.413v-7.087c0-1.105-.895-2-2-2zm-2.993 6.993c-1.105 0-2-.895-2-2s.895-2 2-2 2 .895 2 2-.895 2-2 2z"></path>
-                            </svg><a href="https://en.blog.wordpress.com/tag/community/" rel="tag">Community</a>, <a href="https://en.blog.wordpress.com/tag/earn/" rel="tag">Earn</a>, <a href="https://en.blog.wordpress.com/tag/subscriptions/" rel="tag">subscriptions</a></li>
-                    </ul>
-                    <ol id="post-navigation">
-                        <li class="next-post">
-                            <h4>Next Post</h4><a href="https://en.blog.wordpress.com/2019/11/28/php-7-4-just-came-out-and-so-did-our-php-version-switcher/" rel="next">PHP 7.4 Just Came Out, and So Did Our PHP Version&nbsp;Switcher</a>
-                        </li>
-                        <li class="previous-post">
-                            <h4>Previous Post</h4><a href="https://en.blog.wordpress.com/2019/09/12/digital-climate-strike/" rel="prev">Join us in a Digital Climate&nbsp;Strike</a>
-                        </li>
-                    </ol>
-                </div> -->
         <div id="entry-comments">
           <h3 id="comments" class="commentsheader">26 Comments</h3>
           <p class="nocomments"><span>Comments are closed.</span></p>
@@ -420,9 +336,7 @@
                                     </ul>
                                 </li>
                             </ul>
-                            
                         </ul>
-                        
                     </ol> -->
           <div class="commentnav">
             <div class="alignleft"></div>

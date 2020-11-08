@@ -613,6 +613,9 @@ func init() {
 	//添加删除wiki的评论
 	beego.Router("/reply/addwiki", &controllers.ReplyController{}, "post:AddWiki")
 	beego.Router("/reply/deletewiki", &controllers.ReplyController{}, "get:DeleteWiki")
+
+	// beego.InsertFilter("/attachment/standard/", beego.BeforeRouter, FilterUser)
+	// beego.SetStaticPath("/attachment/standard/", "attachment/standard/")
 	//这个有哦何用？
 	beego.SetStaticPath("/attachment/wiki", "attachment/wiki")
 	beego.SetStaticPath("/swagger", "swagger")
@@ -620,9 +623,9 @@ func init() {
 	beego.Router("/searchwiki", &controllers.SearchController{}, "get:SearchWiki")
 
 	//规范管理
-	beego.Router("/standard", &controllers.StandardController{}, "*:Index")
-	beego.Router("/standard/search", &controllers.StandardController{}, "*:Search")
-	beego.Router("/standard/importexcel", &controllers.StandardController{}, "*:ImportExcel")
+	beego.Router("/standard", &controllers.StandardController{}, "get:Index")
+	beego.Router("/standard/search", &controllers.StandardController{}, "get:Search")
+	beego.Router("/standard/importexcel", &controllers.StandardController{}, "post:ImportExcel")
 	beego.Router("/standard/standard_one_addbaidu", &controllers.StandardController{}, "post:Standard_one_addbaidu")
 	beego.Router("/standard/importlibrary", &controllers.StandardController{}, "post:ImportLibrary")
 	//显示规范所有
