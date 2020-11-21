@@ -105,6 +105,7 @@ func (c *CartController) GetCart() {
 	var user models.User
 	var userid, roleid string
 	var err error
+	var islogin bool
 	if v != nil { //如果登录了
 		user, err = models.GetUserByUsername(v.(string))
 		if err != nil {
@@ -118,14 +119,17 @@ func (c *CartController) GetCart() {
 		}
 		userid = strconv.FormatInt(user.Id, 10)
 		roleid = strconv.FormatInt(role.Id, 10)
-
+		islogin = true
 	} else {
 		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
 		c.ServeJSON()
+		islogin = false
 		return
 	}
 	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
 	c.Data["IsAdmin"] = isadmin
+	c.Data["IsLogin"] = islogin
+	c.Data["Username"] = user.Nickname
 	site := c.Ctx.Input.Site()
 	port := strconv.Itoa(c.Ctx.Input.Port())
 	if port == "80" {
@@ -300,71 +304,66 @@ func (c *CartController) GetApplyCart() {
 // @Failure 404 cart not found
 // @router /gethistorycart [get]
 //根据用户id获得借阅记录，如果是admin角色，则查询全部
-func (c *CartController) GetHistoryCart() {
-	v := c.GetSession("uname")
-	var user models.User
-	var userid, roleid string
-	var err error
-	if v != nil { //如果登录了
-		user, err = models.GetUserByUsername(v.(string))
-		if err != nil {
-			beego.Error(err)
-		}
-		//查询admin角色的id
-		//重新获取roleid
-		role, err := models.GetRoleByRolename("admin")
-		if err != nil {
-			beego.Error(err)
-		}
-		userid = strconv.FormatInt(user.Id, 10)
-		roleid = strconv.FormatInt(role.Id, 10)
+// func (c *CartController) GetHistoryCart() {
+// 	v := c.GetSession("uname")
+// 	var user models.User
+// 	var userid, roleid string
+// 	var err error
+// 	if v != nil {
+// 		user, err = models.GetUserByUsername(v.(string))
+// 		if err != nil {
+// 			beego.Error(err)
+// 		}
+// 		role, err := models.GetRoleByRolename("admin")
+// 		if err != nil {
+// 			beego.Error(err)
+// 		}
+// 		userid = strconv.FormatInt(user.Id, 10)
+// 		roleid = strconv.FormatInt(role.Id, 10)
 
-	} else {
-		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
-		c.ServeJSON()
-		return
-	}
-	status := c.Input().Get("status")
-	status1, err := strconv.Atoi(status)
-	if err != nil {
-		beego.Error(err)
-	}
-	searchText := c.Input().Get("searchText")
-	limit := c.Input().Get("limit")
-	if limit == "" {
-		limit = "15"
-	}
-	limit1, err := strconv.Atoi(limit)
-	if err != nil {
-		beego.Error(err)
-	}
-	page := c.Input().Get("pageNo")
-	page1, err := strconv.Atoi(page)
-	if err != nil {
-		beego.Error(err)
-	}
-	var offset int
-	if page1 <= 1 {
-		offset = 0
-	} else {
-		offset = (page1 - 1) * limit1
-	}
-	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
-	beego.Info(isadmin)
-	carts, err := models.GetHistoryCart(user.Id, limit1, offset, status1, searchText, isadmin)
-	if err != nil {
-		beego.Error(err)
-	}
-	count, err := models.GetHistoryCartCount(user.Id, status1, searchText, isadmin)
-	if err != nil {
-		beego.Error(err)
-	}
-	// c.Data["json"] = carts
-	c.Data["json"] = map[string]interface{}{"page": page1, "total": count, "rows": carts}
-
-	// c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "mycarts": carts}
-	c.ServeJSON()
-}
+// 	} else {
+// 		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+// 		c.ServeJSON()
+// 		return
+// 	}
+// 	status := c.Input().Get("status")
+// 	status1, err := strconv.Atoi(status)
+// 	if err != nil {
+// 		beego.Error(err)
+// 	}
+// 	searchText := c.Input().Get("searchText")
+// 	limit := c.Input().Get("limit")
+// 	if limit == "" {
+// 		limit = "15"
+// 	}
+// 	limit1, err := strconv.Atoi(limit)
+// 	if err != nil {
+// 		beego.Error(err)
+// 	}
+// 	page := c.Input().Get("pageNo")
+// 	page1, err := strconv.Atoi(page)
+// 	if err != nil {
+// 		beego.Error(err)
+// 	}
+// 	var offset int
+// 	if page1 <= 1 {
+// 		offset = 0
+// 	} else {
+// 		offset = (page1 - 1) * limit1
+// 	}
+// 	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
+// 	beego.Info(isadmin)
+// 	carts, err := models.GetHistoryCart(user.Id, limit1, offset, status1, searchText, isadmin)
+// 	if err != nil {
+// 		beego.Error(err)
+// 	}
+// 	count, err := models.GetHistoryCartCount(user.Id, status1, searchText, isadmin)
+// 	if err != nil {
+// 		beego.Error(err)
+// 	}
+// 	c.Data["json"] = map[string]interface{}{"page": page1, "total": count, "rows": carts}
+// 	c.ServeJSON()
+// }
 
 // @Title post delete usercart
 // @Description post delete a usercart

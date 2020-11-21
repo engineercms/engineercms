@@ -1705,41 +1705,6 @@ paths:
           description: Invalid page supplied
         "404":
           description: cart not found
-  /cart/gethistorycart:
-    get:
-      tags:
-      - cart
-      description: get usercartlist
-      operationId: CartController.get usercartlist
-      parameters:
-      - in: query
-        name: status
-        description: The status for usercart list
-        required: true
-        type: string
-      - in: query
-        name: searchText
-        description: The searchText of usercart
-        type: string
-      - in: query
-        name: pageNo
-        description: The page for usercart list
-        required: true
-        type: string
-      - in: query
-        name: limit
-        description: The limit of page for usercart list
-        required: true
-        type: string
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/.Create'
-        "400":
-          description: Invalid page supplied
-        "404":
-          description: cart not found
   /cart/updateapprovalcart:
     post:
       tags:
@@ -2772,7 +2737,7 @@ paths:
       tags:
       - wx
       description: post business by userid
-      operationId: PayController.post business by userid
+      operationId: BusinessController.post business by userid
       parameters:
       - in: query
         name: id
@@ -4608,9 +4573,6 @@ tags:
 - name: admin
   description: |
     VueFlow API
-- name: wx
-  description: |
-    CMSVideo API
 - name: adminlog
   description: |
     CMSADMIN API

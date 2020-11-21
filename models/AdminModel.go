@@ -118,9 +118,7 @@ func init() {
 		new(TeamRelationship),
 		new(Itemsets),
 	)
-
 	orm.RegisterModelWithPrefix("share_", new(Bridge), new(Share))
-
 	//gorm设置默认表名前缀
 	// gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 	// 	return "prefix_" + defaultTableName
@@ -128,7 +126,6 @@ func init() {
 	// //gorm自动生成表
 	// db.AutoMigrate(&Product{}, &Email{})
 	// db.CreateTable(&User{})
-
 	gob.Register(Blog{})
 	gob.Register(Document{})
 	gob.Register(Template{})
@@ -149,10 +146,10 @@ func init() {
 		dns = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", db_user, db_pass, db_host, db_port, db_name)
 		// 注册xorm
 		// var err error
-		engine, err = xorm.NewEngine(db_type, dns)
-		if err != nil {
-			log.Println(err)
-		}
+		// engine, err = xorm.NewEngine(db_type, dns)
+		// if err != nil {
+		// 	log.Println(err)
+		// }
 		break
 	case "postgres":
 		orm.RegisterDriver("postgres", orm.DRPostgres)
@@ -163,19 +160,26 @@ func init() {
 			db_path = "./"
 		}
 		dns = fmt.Sprintf("%s%s.db", db_path, db_name)
-		// 注册xorm
-		// var err error
-		engine, err = xorm.NewEngine(db_type, dns)
-		if err != nil {
-			log.Println(err)
-		}
-
 		break
 	default:
 		beego.Critical("Database driver is not allowed:", db_type)
 	}
 	orm.RegisterDataBase("default", db_type, dns, 10)
 
+	// 注册xorm
+	// var err error
+	engine, err = xorm.NewEngine(db_type, dns)
+	if err != nil {
+		log.Println(err)
+	}
+
+	// 注册gorm
+	_db, err = gorm.Open(db_type, dns)
+	// defer _db.Close()//20200803这个不能打开。
+	// _db.LogMode(true)
+	if err != nil {
+		panic("连接数据库失败, error=" + err.Error())
+	}
 	// orm.RegisterDriver("sqlite", orm.DRSqlite)
 	// orm.RegisterDataBase("default", "sqlite3", "database/engineer.db", 10)
 
@@ -189,13 +193,6 @@ func init() {
 	// 	db_path = "./"
 	// }
 
-	dns = fmt.Sprintf("%s%s.db", db_path, db_name)
-	_db, err = gorm.Open(db_type, dns)
-	// defer _db.Close()//20200803这个不能打开。
-	// _db.LogMode(true)
-	if err != nil {
-		panic("连接数据库失败, error=" + err.Error())
-	}
 	// defer gdb.Close()
 	//禁止表名复数形式
 	_db.SingularTable(true)

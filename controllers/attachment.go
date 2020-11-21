@@ -1398,24 +1398,11 @@ func (c *AttachController) DownloadAttachment() {
 		return
 	}
 	useridstring := strconv.FormatInt(uid, 10)
-
-	// c.Data["IsLogin"] = checkAccount(c.Ctx)
 	//4.取得客户端用户名
 	var projurl string
-	// username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
-	// c.Data["Username"] = username
-	// c.Data["Ip"] = c.Ctx.Input.IP()
-	// c.Data["role"] = role
-	// c.Data["IsAdmin"] = isadmin
-	// c.Data["IsLogin"] = islogin
-	// c.Data["Uid"] = uid
-	// useridstring := strconv.FormatInt(uid, 10)
-	// var usersessionid string //客户端sesssionid
+	// var usersessionid string
 	// if isLogin {
-	// usersessionid = c.Ctx.Input.Cookie("hotqinsessionid")
-	//服务端sessionid怎么取出
-	// v := c.GetSession("uname")
-	// beego.Info(v.(string))
+	// 	usersessionid = c.Ctx.Input.Cookie("hotqinsessionid")
 	// }
 	id := c.Input().Get("id")
 	//pid转成64为
@@ -1507,7 +1494,7 @@ func (c *AttachController) DownloadAttachment() {
 			c.Redirect("/roleerr?url="+route, 302)
 			return
 		}
-	// case ".dwg", ".DWG"://保留，dwg在线阅览模式！！！！
+	// case ".dwg", ".DWG": //保留，dwg在线阅览模式！！！！
 	// 	if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) || isadmin || isme { //+ strconv.Itoa(c.Ctx.Input.Port())
 	// 		dwglink, err := url.ParseRequestURI(c.Ctx.Input.Scheme() + "://" + c.Ctx.Input.IP() + ":" + strconv.Itoa(c.Ctx.Input.Port()) + "/" + fileurl + "/" + attachment.FileName)
 	// 		if err != nil {
@@ -1517,6 +1504,7 @@ func (c *AttachController) DownloadAttachment() {
 	// 		c.Data["FileName"] = attachment.FileName
 	// 		c.Data["Id"] = id
 	// 		c.Data["DwgLink"] = dwglink
+	// 		beego.Info(dwglink)
 	// 		c.Data["Sessionid"] = usersessionid
 	// 		c.TplName = "dwg.tpl"
 	// 	} else {
@@ -1583,8 +1571,8 @@ func (c *AttachController) Attachment() {
 
 	var useridstring string
 	_, _, uid, isadmin, islogin := checkprodRole(c.Ctx)
-	beego.Info(uid)
-	beego.Info(isadmin)
+	// beego.Info(uid)
+	// beego.Info(isadmin)
 	useridstring = strconv.FormatInt(uid, 10)
 	//1.url处理中文字符路径，[1:]截掉路径前面的/斜杠
 	// filePath := path.Base(c.Ctx.Request.RequestURI)
@@ -1592,7 +1580,7 @@ func (c *AttachController) Attachment() {
 	if err != nil {
 		beego.Error(err)
 	}
-	beego.Info(filePath)
+	// beego.Info(filePath)
 	//attachment/standard/SL/SLZ 5077-2016水工建筑物荷载设计规范.pdf
 	if strings.Contains(filePath, "?") { //hotqinsessionid=
 		filePathtemp := strings.Split(filePath, "?")

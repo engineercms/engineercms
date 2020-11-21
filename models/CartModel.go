@@ -152,44 +152,39 @@ func GetApplyCart(uid int64, limit, offset, status int, searchText string, isadm
 	// db.Joins("JOIN pays ON pays.user_id = users.id", "jinzhu@example.org").Joins("JOIN credit_cards ON credit_cards.user_id = users.id").Where("user_id = ?", uid).Find(&pays)
 }
 
-//查询某个用户历史申请的记录
-func GetHistoryCart(uid int64, limit, offset, status int, searchText string, isadmin bool) (usercarts []UserCart, err error) {
-	//获取DB Where("product.title LIKE ?", "%searchText%").不对
-	//用"%"+searchText+"%"
-	db := GetDB()
-	if isadmin {
-		// 必须要写全select，坑爹啊
-		err = db.Order("cart.updated desc").Table("cart").
-			Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
-			Where("cart.status=?", status).
-			Joins("left JOIN user on user.id = cart.user_id").
-			Joins("left join product on product.id = cart.product_id").
-			Joins("left join project AS t1 on t1.id = product.project_id").
-			Joins("left join project AS t2 ON t2.id = product.top_project_id").
-			Limit(limit).Offset(offset).Scan(&usercarts).Error
-	} else if searchText != "" {
-		err = db.Order("cart.updated desc").Table("cart").
-			Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
-			Where("cart.user_id=? AND cart.status=?", uid, status).
-			Joins("left JOIN user on user.id = cart.user_id").
-			Joins("left join product on product.id = cart.product_id").
-			Joins("left join project AS t1 on t1.id = product.project_id").
-			Joins("left join project AS t2 ON t2.id = product.top_project_id").
-			Limit(limit).Offset(offset).Scan(&usercarts).Error
-	} else { //普通用户只显示别人申请自己项目的
-		err = db.Order("cart.updated desc").Table("cart").
-			Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
-			Where("cart.user_id=? AND cart.status=?", uid, status).
-			Joins("left JOIN user on user.id = cart.user_id").
-			Joins("left join product on product.id = cart.product_id").
-			Joins("left join project AS t1 on t1.id = product.project_id").
-			Joins("left join project AS t2 ON t2.id = product.top_project_id").
-			Limit(limit).Offset(offset).Scan(&usercarts).Error
-	}
-	return usercarts, err
-	// 多连接及参数
-	// db.Joins("JOIN pays ON pays.user_id = users.id", "jinzhu@example.org").Joins("JOIN credit_cards ON credit_cards.user_id = users.id").Where("user_id = ?", uid).Find(&pays)
-}
+//查询某个用户历史申请的记录——用上面的即可
+// func GetApplyHistoryCart(uid int64, limit, offset, status int, searchText string, isadmin bool) (usercarts []UserCart, err error) {
+// 	db := GetDB()
+// 	if isadmin {
+// 		err = db.Order("cart.updated desc").Table("cart").
+// 			Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
+// 			Where("cart.status=?", status).
+// 			Joins("left JOIN user on user.id = cart.user_id").
+// 			Joins("left join product on product.id = cart.product_id").
+// 			Joins("left join project AS t1 on t1.id = product.project_id").
+// 			Joins("left join project AS t2 ON t2.id = product.top_project_id").
+// 			Limit(limit).Offset(offset).Scan(&usercarts).Error
+// 	} else if searchText != "" {
+// 		err = db.Order("cart.updated desc").Table("cart").
+// 			Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
+// 			Where("cart.user_id=? AND cart.status=?", uid, status).
+// 			Joins("left JOIN user on user.id = cart.user_id").
+// 			Joins("left join product on product.id = cart.product_id").
+// 			Joins("left join project AS t1 on t1.id = product.project_id").
+// 			Joins("left join project AS t2 ON t2.id = product.top_project_id").
+// 			Limit(limit).Offset(offset).Scan(&usercarts).Error
+// 	} else { //普通用户只显示别人申请自己项目的
+// 		err = db.Order("cart.updated desc").Table("cart").
+// 			Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
+// 			Where("cart.user_id=? AND cart.status=?", uid, status).
+// 			Joins("left JOIN user on user.id = cart.user_id").
+// 			Joins("left join product on product.id = cart.product_id").
+// 			Joins("left join project AS t1 on t1.id = product.project_id").
+// 			Joins("left join project AS t2 ON t2.id = product.top_project_id").
+// 			Limit(limit).Offset(offset).Scan(&usercarts).Error
+// 	}
+// 	return usercarts, err
+// }
 
 //查询待自己审批的记录总数
 func GetApprovalCartCount(uid int64, status int, searchText string, isadmin bool) (count int64, err error) {
@@ -225,22 +220,21 @@ func GetApplyCartCount(uid int64, status int, searchText string, isadmin bool) (
 	return count, err
 }
 
-//查询自己历史申请记录总数
-func GetHistoryCartCount(uid int64, status int, searchText string, isadmin bool) (count int64, err error) {
-	//获取DB
-	db := GetDB()
-	if isadmin {
-		err = db.Table("cart").Where("cart.status=?", status).
-			Count(&count).Error
-	} else if searchText != "" {
-		err = db.Table("cart").Where("user_id=? AND cart.status=?", uid, status).
-			Count(&count).Error
-	} else {
-		err = db.Table("cart").Where("user_id=? AND cart.status=?", uid, status).
-			Count(&count).Error
-	}
-	return count, err
-}
+//查询自己历史申请记录总数——同上面一样
+// func GetApplyHistoryCartCount(uid int64, status int, searchText string, isadmin bool) (count int64, err error) {
+// 	db := GetDB()
+// 	if isadmin {
+// 		err = db.Table("cart").Where("cart.status=?", status).
+// 			Count(&count).Error
+// 	} else if searchText != "" {
+// 		err = db.Table("cart").Where("user_id=? AND cart.status=?", uid, status).
+// 			Count(&count).Error
+// 	} else {
+// 		err = db.Table("cart").Where("user_id=? AND cart.status=?", uid, status).
+// 			Count(&count).Error
+// 	}
+// 	return count, err
+// }
 
 //查询一个cart
 func GetUserCartbyId(id int64) (cart Cart, err error) {

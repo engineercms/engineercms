@@ -342,8 +342,9 @@ function DynInsert() {
 function InitMxDrawX() {
   var dwgurl={{.DwgLink}}
   // alert(dwgurl.Path)//.replace(/\u0026/,"&")
-  var path=dwgurl.Path+"?hotqinsessionid={{.Sessionid}}"
-  alert(path)
+  var path="http://"+dwgurl.Host+dwgurl.Path+"?hotqinsessionid={{.Sessionid}}"
+  // alert(path)
+  // console.log(path)
   if (mxOcx) {
     if (!mxOcx.IsIniting()) 
     {

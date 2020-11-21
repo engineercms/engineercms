@@ -33,7 +33,14 @@
   }
   </style>
 </head>
-
+<!-- {{template "widgets/footer.tpl" .}} -->
+<div class="container-fill">{{template "T.navbar1.tpl" .}}</div>
+<!-- 引入的文件不能定义difine为模板！！！ -->
+<!-- ../views/T.navbar.tpl -->
+<!-- ../../views/T.navbar.tpl -->
+<!-- ../T.navbar.tpl -->
+<!-- ./T.navbar.tpl -->
+<!-- /views/T.navbar.tpl -->
 <body>
   <!-- <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
@@ -54,7 +61,9 @@
       <li>
         <a href="#apply" data-toggle="tab">我的申请</a>
       </li>
-      <li><a href="#history" data-toggle="tab">历史</a>
+      <li><a href="#approvalhistory" data-toggle="tab">审批历史</a>
+      </li>
+      <li><a href="#applyhistory" data-toggle="tab">申请历史</a>
       </li>
     </ul>
     <div id="myTabContent" class="tab-content">
@@ -73,8 +82,11 @@
       <div class="tab-pane fade" id="apply">
         <table id="table1"></table>
       </div>
-      <div class="tab-pane fade" id="history">
+      <div class="tab-pane fade" id="approvalhistory">
         <table id="table2"></table>
+      </div>
+      <div class="tab-pane fade" id="applyhistory">
+        <table id="table3"></table>
       </div>
     </div>
   </div>
@@ -340,9 +352,9 @@
       valign: "middle"
     }]
   })
-  // 历史
+  // approval历史
   $('#table2').bootstrapTable({
-    url: '/v1/cart/gethistorycart',
+    url: '/v1/cart/getapprovalcart',
     search: 'true',
 
     showSearchClearButton: 'true',
@@ -431,6 +443,97 @@
       valign: "middle"
     }]
   })
+  // apply历史
+  $('#table3').bootstrapTable({
+    url: '/v1/cart/getapplycart',
+    search: 'true',
+
+    showSearchClearButton: 'true',
+
+    showRefresh: 'true',
+    showColumns: 'true',
+    // toolbar: '#toolbar',
+    pagination: 'true',
+    sidePagination: "server",
+    queryParamsType: '',
+    //请求服务器数据时，你可以通过重写参数的方式添加一些额外的参数，例如 toolbar 中的参数 如果 queryParamsType = 'limit' ,返回参数必须包含
+    // limit, offset, search, sort, order 否则, 需要包含: 
+    // pageSize, pageNumber, searchText, sortName, sortOrder. 
+    // 返回false将会终止请求。
+    pageSize: 15,
+    pageNumber: 1,
+    pageList: [15, 50, 100],
+    uniqueId: "id",
+    // singleSelect:"true",
+    clickToSelect: "true",
+    showExport: "true",
+    queryParams: function queryParams(params) { //设置查询参数
+      var param = {
+        limit: params.pageSize, //每页多少条数据
+        pageNo: params.pageNumber, // 页码
+        searchText: $(".search .form-control").val(),
+        status: "1"
+      };
+      //搜索框功能
+      //当查询条件中包含中文时，get请求默认会使用ISO-8859-1编码请求参数，在服务端需要对其解码
+      // if (null != searchText) {
+      //   try {
+      //     searchText = new String(searchText.getBytes("ISO-8859-1"), "UTF-8");
+      //   } catch (Exception e) {
+      //     e.printStackTrace();
+      //   }
+      // }
+      return param;
+    },
+    columns: [{
+      title: '选择',
+      // radio: 'true',
+      checkbox: 'true',
+      width: '10',
+      align: "center",
+      valign: "middle"
+    }, {
+      // field: 'Number',
+      title: '序号',
+      formatter: function(value, row, index) {
+        return index + 1
+      },
+      align: "center",
+      valign: "middle"
+    }, {
+      field: 'usernickname',
+      title: '用户',
+      align: "center",
+      valign: "middle"
+    }, {
+      field: 'producttitle',
+      title: '成果名称',
+      halign: "center",
+      valign: "middle"
+    }, {
+      field: 'projecttitle',
+      title: '目录名称',
+      align: "center",
+      valign: "middle"
+    }, {
+      field: 'status',
+      title: '状态',
+      formatter: 'StatusFormatter',
+      align: "center",
+      valign: "middle"
+    }, {
+      field: 'updated',
+      title: '日期',
+      formatter: 'localDateFormatter',
+      align: "center",
+      valign: "middle"
+    }, {
+      field: 'topprojecttitle',
+      title: '项目名称',
+      align: "center",
+      valign: "middle"
+    }]
+  })  
 
   // 批量删除
   $("#deleteButton").click(function(e, value, row, index) {
@@ -631,7 +734,7 @@
 
   // 关闭模态框后将cart中数据修改状态
   $('#modalShare').on('hide.bs.modal', function () {
-    alert('模态框关闭了');
+    // alert('模态框关闭了');
     var selectRow = $('#table').bootstrapTable('getSelections');
     var ids = "";
     var expireInfinity = "";

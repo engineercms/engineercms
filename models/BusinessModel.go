@@ -14,12 +14,20 @@ type Business struct {
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time
 	DeletedAt    *time.Time
-	UserID       int64          `gorm:"column:user_id;foreignkey:UserId;"` // One-To-One (属于 - 本表的BillingAddressID作外键
-	BusinessUser []BusinessUser `gorm:"foreignkey:UserId"`                 //这个外键难道不是错的么？应该是UserID?没错，因为column:user_id
+	UserID       int64 `gorm:"column:user_id;foreignkey:UserId;"` // One-To-One (属于 - 本表的BillingAddressID作外键
+	Location     string
+	Lat          float64
+	Lng          float64
+	StartDate    time.Time
+	EndDate      time.Time
+	Projecttitle string
+	Drivername   string
+	Subsidy      int
+	Carfare      int
+	Hotelfee     int
+	BusinessUser []BusinessUser `gorm:"foreignkey:UserId"` //这个外键难道不是错的么？应该是UserID?没错，因为column:user_id
 	ArticleID    int64          `gorm:"column:article_id;foreignkey:ArticleId;"`
 	Article      Article        `gorm:"foreignkey:ArticleId"`
-	FromDate     time.Time
-	EndDate      time.Time
 	Worktime     float64
 	Overtime     int
 }
@@ -29,7 +37,7 @@ type BusinessUser struct {
 	gorm.Model
 	// ID     int    `gorm:"primary_key"`
 	UserID     int64 `gorm:"column:user_id;foreignkey:UserId;"` // 外键 (属于), tag `index`是为该列创建索引
-	BusinessID int   `json:"amount" gorm:"column:amount"`
+	BusinessID uint  `json:"amount" gorm:"column:amount"`
 	User       User  `gorm:"foreignkey:UserId"`
 }
 
@@ -63,4 +71,15 @@ func CreateBusiness(business Business) (id uint, err error) {
 	// result.Error        // 返回 error
 	// result.RowsAffected // 返回插入记录的条数
 	return business.ID, result.Error
+}
+
+// 添加用户~出差关联表格
+func CreateUserBusiness(businessuser BusinessUser) (id uint, err error) {
+	db := GetDB()
+	// projectuser := ProjectUser{ProjectId: pid, UserId: uid}
+	result := db.Create(&businessuser) // 通过数据的指针来创建
+	// user.ID             // 返回插入数据的主键
+	// result.Error        // 返回 error
+	// result.RowsAffected // 返回插入记录的条数
+	return businessuser.ID, result.Error
 }

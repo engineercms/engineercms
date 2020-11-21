@@ -45,11 +45,14 @@
   <link rel="stylesheet" href="/static/froala/css/plugins/special_characters.css">
   <link rel="stylesheet" href="/static/froala/js/codemirror.min.css">
   <link rel="stylesheet" href="/static/froala/css/themes/red.css">
-  <link rel="stylesheet" href="/static/css/magnific-popup.css" />
-  <script type="text/javascript" src="/static/js/jquery.magnific-popup.min.js"></script>
+  <!-- <link rel="stylesheet" href="/static/css/magnific-popup.css" /> -->
+  <!-- <script type="text/javascript" src="/static/js/jquery.magnific-popup.min.js"></script> -->
   <!-- <script src="/static/toast/toast.min.js"></script> -->
   <!-- <link rel="stylesheet" href="/static/toast/toast.min.css"> -->
   <style type="text/css">
+  #imgmodalDialog .modal-header {
+    cursor: move;
+  }
   #modalDialog .modal-header {
     cursor: move;
   }
@@ -167,6 +170,7 @@
         </ul>
       </div>
       <div class="btn-group">
+        <!-- <button href="#" onclick="addButton()"  class="btn btn-default"><i class="fa fa-plus">&nbsp;&nbsp;单附件模式</i></button> -->
         <button {{if ne "true" .RoleDelete}} style="display:none" {{end}} type="button" data-name="deleteButton" id="deleteButton" class="btn btn-default" title="删除">
           <i class="fa fa-trash">&nbsp;&nbsp;删除</i>
         </button>
@@ -199,13 +203,12 @@
       </div>
     </div> -->
     <div class="modal fade" id="imgModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg" style="display: inline-block; width: auto;">
+      <div class="modal-dialog modal-lg" style="display: inline-block; width: auto;" id="imgmodalDialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-          &times;
+          <div class="modal-header" style="background-color: #1E90FF">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
             </button>
-            <h4 class="modal-title" id="myModalLabel"> 图片预览</h4>
+            <h4 class="modal-title" id="myModalLabel" style="color: #FFFFFF"> 图片预览</h4>
           </div>
           <div class="modal-body text-center">
             <!-- -text-cente  bootstrap子元素居中--->
@@ -228,12 +231,28 @@
       // window.open(o.src, null, "dialogHeight:500px; dialogWidth:600px; resizable:yes");
       // var img = new Image();// 创建对象 
       // img.src =url;// 改变图片的src
-      alert(o.src)
+      // alert(o.src)
       $("#imgInModalID").attr("src",o.src);
       $('#imgModal').modal({
         show: true,
         backdrop: 'static'
       });
+      
+      $('#modalattach').modal('hide')
+      // var fatherBody = $(window.top.document.body);
+      // //定义页面存放模态窗口的元素
+      // var id = 'iframeModalPages';
+      // var dialog = $('#' + id);
+      // if (dialog.length == 0) {
+      //   dialog = $('<div class="modal fade" role="dialog" id="' + id + '">'+$('#imgModal').html()+'</div>');
+      //   dialog.appendTo(fatherBody);
+      // }
+      //加载
+      // dialog.load("/project.tpl", function() {
+      //   dialog.modal({
+      //     backdrop: false
+      //   });
+      // });
     }
 
     $(function() {
@@ -630,8 +649,27 @@
     }
     //最后面弹出附件列表中用的<a href="'+value+
     function setAttachlink(value, row, index) {
-      attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
-      return attachUrl;
+      // attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
+      // return attachUrl;
+          var filename = value;
+          var index = filename.lastIndexOf(".");
+          var ext = filename.substring(index);
+          if (ext == ".dwg") {
+            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-codepen fa-lg" style="color:Black;"></i></a>';
+          } else if (ext == ".JPG"||ext ==".jpg"||ext ==".png"||ext ==".PNG"||ext ==".bmp"||ext ==".BMP") {
+            attachUrl = '<a class = "view" href="javascript:void(0)"><img style="width:70;height:30px;" src="/downloadattachment?id=' + row.Id + '" title="预览" onclick="savepic(this)"/></a>'
+          } else if (ext == ".mp4"||ext ==".MP4") {
+            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-video-o fa-lg text-info"></i></a>'
+          } else if (ext == ".doc" || ext == ".docx") {
+            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
+          } else if (ext == ".xls" || ext == ".xlsx") {
+            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
+          } else if (ext == ".ppt" || ext == ".pptx") {
+            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-powerpoint-o fa-lg" style="color:Red;"></i></a>';
+          } else {
+            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
+          }
+          return attachUrl;
     }
     //最后面弹出pdf列表中用的'&file='+value+
     function setPdflink(value, row, index) {
@@ -642,10 +680,6 @@
     // 批量上传
     // $("#addButton").click(function() {
     function addButton() {
-      // if ({{.role}}!=1){
-      //   alert("权限不够！"+{{.role}});
-      //   return;
-      // }
       if ({{.RoleAdd }} != "true") {
         alert("权限不够！");
         return;
@@ -1513,31 +1547,31 @@
       });
     })
 
-    $(function() {
-      $('.popup-gallery').magnificPopup({
-        delegate: 'a',
-        type: 'image',
-        removalDelay: 300,
-        mainClass: 'mfp-with-zoom',
-        titleSrc: 'title',
-        gallery: {
-          enabled: true
-        },
-        zoom: {
-          enabled: true, // By default it's false, so don't forget to enable it
-          duration: 300, // duration of the effect, in milliseconds
-          easing: 'ease-in-out', // CSS transition easing function
-          // The "opener" function should return the element from which popup will be zoomed in
-          // and to which popup will be scaled down
-          // By defailt it looks for an image tag:
-          opener: function(openerElement) {
-            // openerElement is the element on which popup was initialized, in this case its <a> tag
-            // you don't need to add "opener" option if this code matches your needs, it's defailt one.
-            return openerElement.is('img') ? openerElement : openerElement.find('img');
-          }
-        }
-      });
-    });
+    // $(function() {
+    //   $('.popup-gallery').magnificPopup({
+    //     delegate: 'a',
+    //     type: 'image',
+    //     removalDelay: 300,
+    //     mainClass: 'mfp-with-zoom',
+    //     titleSrc: 'title',
+    //     gallery: {
+    //       enabled: true
+    //     },
+    //     zoom: {
+    //       enabled: true, // By default it's false, so don't forget to enable it
+    //       duration: 300, // duration of the effect, in milliseconds
+    //       easing: 'ease-in-out', // CSS transition easing function
+    //       // The "opener" function should return the element from which popup will be zoomed in
+    //       // and to which popup will be scaled down
+    //       // By defailt it looks for an image tag:
+    //       opener: function(openerElement) {
+    //         // openerElement is the element on which popup was initialized, in this case its <a> tag
+    //         // you don't need to add "opener" option if this code matches your needs, it's defailt one.
+    //         return openerElement.is('img') ? openerElement : openerElement.find('img');
+    //       }
+    //     }
+    //   });
+    // });
     </script>
     <!-- 批量上传 -->
     <div class="form-horizontal">
@@ -1790,7 +1824,7 @@
                       <th data-formatter="index1">#</th>
                       <th data-field="Title" data-sortable="true">名称</th>
                       <th data-field="FileSize" data-sortable="true">大小</th>
-                      <th data-field="Link" data-formatter="setAttachlink">下载</th>
+                      <th data-field="Link" data-formatter="setAttachlink">附件</th>
                       <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
                       <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
                     </tr>
@@ -2435,6 +2469,7 @@
   }
 
   $(document).ready(function() {
+    $("#imgmodalDialog").draggable({ handle: ".modal-header" });
     $("#modalDialog").draggable({ handle: ".modal-header" }); //为模态对话框添加拖拽
     $("#modalDialog1").draggable({ handle: ".modal-header" });
     $("#modalDialog2").draggable({ handle: ".modal-header" });

@@ -12,6 +12,12 @@
   <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" />
   <script src="/static/js/jquery.mCustomScrollbar.concat.min.js"></script>
   <script src="/static/js/custom.js"></script>
+  <!-- <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script> -->
+  <!-- <style type="text/css">
+    #imgmodalDialog .modal-header {
+      cursor: move;
+    }
+  </style> -->
   <!-- <style type="text/css">
     @import 'https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css';
     
@@ -187,6 +193,10 @@
     } catch (ex) {}
   }
   window.setInterval("reinitIframe()", 200);
+
+  // $(document).ready(function() {
+  //   $("#imgmodalDialog").draggable({ handle: ".modal-header" });
+  // })
   </script>
 </body>
 
