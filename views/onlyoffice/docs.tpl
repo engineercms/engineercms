@@ -1167,7 +1167,7 @@
                 </div>
                 <div id="" class="btn-group">
                   <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="addgroups">
+                    <button type="button" id="addgroups" class="btn btn-default dropdown-toggle" data-toggle="dropdown" >
                       <span class="buttonText"><i id="dropdownMenu2" class="fa fa-eye">&nbsp;&nbsp;</i></span>
                       <span class="caret"></span>
                     </button>
@@ -1186,7 +1186,7 @@
                       </li>
                     </ul>
                   </div>
-                  <button type="button" data-name="" id="addroles" class="btn btn-default">
+                  <button type="button" id="addroles" data-name="" class="btn btn-default">
                     <i class="fa fa-plus">&nbsp;&nbsp;Add Groups</i>
                   </button>
                 </div>
@@ -1730,6 +1730,7 @@
     rolename = $.map(selectContent, function(row) {
       return row.name;
     });
+    // console.log(rolename)
     $tableLeft1.bootstrapTable('remove', {
       field: 'name',
       values: rolename

@@ -16,12 +16,11 @@ type ReplyController struct {
 
 // @Title post wx release by articleId
 // @Description post release by articleId
-// @Param id query string  true "The id of article"
 // @Param content query string  true "The content of release"
 // @Param app_version query string  false "the app_version of wx"
 // @Param avatar query string  false "The avatar of release"
 // @Param username query string  false "The username of release"
-// @Param created query string  false "The time of release"
+// @Param publish_time query string  false "The time of release"
 // @Success 200 {object} models.AddTopicReply
 // @Failure 400 Invalid page supplied
 // @Failure 404 article not found

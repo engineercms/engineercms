@@ -16,12 +16,12 @@ import (
 	// "github.com/casbin/casbin"
 )
 
-//角色表
+//角色表-20201225修改json status为role
 type Role struct {
 	Id         int64
 	Rolename   string `json:"name",orm:"unique"` //这个拼音的简写
 	Rolenumber string
-	Status     string    `json:"status",orm:"default('0');size(2)"` //,form:"Status",valid:"Range('0','1','2','3','4')"`
+	Status     string    `json:"role",orm:"default('0');size(2)"` //,form:"Status",valid:"Range('0','1','2','3','4')"`
 	Createtime time.Time `orm:"type(datetime);auto_now_add" `
 	Updated    time.Time `orm:"type(datetime);auto_now_add" `
 }

@@ -37,7 +37,7 @@ type Userrole struct {
 	Id         int64
 	Rolename   string `json:"name"`
 	Rolenumber string
-	Status     string `json:"status"`
+	Status     string `json:"status"` //20201225这里是否要修改为role
 	Level      string
 }
 

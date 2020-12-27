@@ -65,7 +65,7 @@ type UserAppreciation struct {
 // Username      string    `orm:"unique;size(32)" form:"Username"  valid:"Required;MaxSize(20);MinSize(6)"`
 // Password      string    `orm:"size(32)" form:"Password" valid:"Required;MaxSize(20);MinSize(6)"`
 
-func init() {
+func init() { //
 	orm.RegisterModel(new(User), new(UserOpenID), new(UserAvatar), new(UserAppreciation))
 }
 

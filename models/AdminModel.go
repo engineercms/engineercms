@@ -8,6 +8,8 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	// "gorm.io/driver/sqlite"
+	// "gorm.io/gorm"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -143,7 +145,7 @@ func init() {
 	switch db_type {
 	case "mysql":
 		orm.RegisterDriver("mysql", orm.DRMySQL)
-		dns = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", db_user, db_pass, db_host, db_port, db_name)
+		dns = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", db_user, db_pass, db_host, db_port, db_name)
 		// 注册xorm
 		// var err error
 		// engine, err = xorm.NewEngine(db_type, dns)
@@ -175,6 +177,7 @@ func init() {
 
 	// 注册gorm
 	_db, err = gorm.Open(db_type, dns)
+	// _db, err := gorm.Open(sqlite.Open(dns), &gorm.Config{})
 	// defer _db.Close()//20200803这个不能打开。
 	// _db.LogMode(true)
 	if err != nil {

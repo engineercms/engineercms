@@ -523,7 +523,8 @@ func (c *CheckController) Compare() {
 
 // @Title post checkin person
 // @Description post person
-// @Param username query string true "The userId for person"
+// @Param userId query string true "The userId for person"
+// @Param activityId query string true "The activityId of activity"
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
@@ -662,7 +663,7 @@ func (c *CheckController) CheckGetCheck() {
 	if err != nil {
 		beego.Error(err)
 	}
-	SelectMonth2 := SelectMonth1.AddDate(0, 1, -1)
+	SelectMonth2 := SelectMonth1.AddDate(0, 1, 0)
 
 	data, err := models.CheckGetCheck(ActivityId, UserId, SelectMonth1, SelectMonth2)
 	if err != nil {
@@ -939,7 +940,7 @@ func (c *CheckController) MonthCheck() {
 	if err != nil {
 		beego.Error(err)
 	}
-	SelectMonth2 := SelectMonth1.AddDate(0, 1, -1)
+	SelectMonth2 := SelectMonth1.AddDate(0, 1, 0)
 	//建立一个动态月日数组
 	// beego.Info(SelectMonth2.Sub(SelectMonth1))
 	days := SelectMonth2.Sub(SelectMonth1) / 24
@@ -1050,7 +1051,6 @@ func (c *CheckController) MonthCheck() {
 		// beego.Info(string(b))
 		// c.Data["json"] = string(b)
 		c.Ctx.WriteString(string(b))
-
 		// c.Data["json"] = map[string]interface{}{"rows": s, "page": 1, "total": 10}
 		// c.ServeJSON()
 	}
@@ -1110,7 +1110,7 @@ func (c *CheckController) CheckSignature() {
 // @Failure 404 articls not found
 // @router /subscribemessage [post]
 // 检验signature v1/checkin/subscribemessage
-//存储用户订阅subscribemessage
+// 存储用户订阅subscribemessage
 func (c *CheckController) SubscribeMessage() {
 	openID := c.GetSession("openID")
 	if openID == nil {

@@ -1915,8 +1915,13 @@ paths:
       operationId: CheckController.post checkin person
       parameters:
       - in: query
-        name: username
+        name: userId
         description: The userId for person
+        required: true
+        type: string
+      - in: query
+        name: activityId
+        description: The activityId of activity
         required: true
         type: string
       responses:
@@ -2736,23 +2741,75 @@ paths:
     post:
       tags:
       - wx
-      description: post business by userid
-      operationId: BusinessController.post business by userid
+      description: post business by projectid
+      operationId: BusinessController.post business by projectid
       parameters:
       - in: query
+        name: content
+        description: The content of release
+        required: true
+        type: string
+      - in: query
+        name: location
+        description: The location of business
+        required: true
+        type: string
+      - in: query
+        name: lat
+        description: The lat of location
+        type: string
+      - in: query
+        name: lng
+        description: The lng of location
+        type: string
+      - in: query
+        name: startDate
+        description: The startDate of business
+        type: string
+      - in: query
+        name: endDate
+        description: The endDate of business
+        type: string
+      - in: query
+        name: projecttitle
+        description: The projecttitle of business
+        type: string
+      - in: query
+        name: drivername
+        description: The drivername   of business
+        type: string
+      - in: query
+        name: subsidy
+        description: The subsidy      of business
+        type: string
+      - in: query
+        name: carfare
+        description: The carfare      of business
+        type: string
+      - in: query
+        name: hotelfee
+        description: The hotelfee     of business
+        type: string
+      - in: query
+        name: users
+        description: The users        of business
+        type: string
+      - in: query
+        name: articleshow
+        description: The larticleshow of business
+        type: string
+      - in: path
         name: id
-        description: The id of project
+        description: The projectid of business
         required: true
         type: string
       - in: query
         name: title
         description: The title of article
-        required: true
         type: string
       - in: query
         name: content
         description: The content of article
-        required: true
         type: string
       responses:
         "200":
@@ -3061,11 +3118,6 @@ paths:
       operationId: ReplyController.post wx release by articleId
       parameters:
       - in: query
-        name: id
-        description: The id of article
-        required: true
-        type: string
-      - in: query
         name: content
         description: The content of release
         required: true
@@ -3083,7 +3135,7 @@ paths:
         description: The username of release
         type: string
       - in: query
-        name: created
+        name: publish_time
         description: The time of release
         type: string
       responses:
@@ -3164,6 +3216,116 @@ paths:
           description: Invalid page supplied
         "404":
           description: pas not found
+  /wx/businesscheck:
+    post:
+      tags:
+      - wx
+      description: post person
+      operationId: BusinessController.post checkin person
+      parameters:
+      - in: query
+        name: userid
+        description: The userid for person
+        required: true
+        type: string
+      - in: query
+        name: businessid
+        description: The businessid for Business
+        required: true
+        type: string
+      - in: query
+        name: lat
+        description: The businessid of check
+        required: true
+        type: string
+      - in: query
+        name: lng
+        description: The businessid of check
+        required: true
+        type: string
+      - in: query
+        name: photoUrl
+        description: The photoUrl of check
+        required: true
+        type: string
+      - in: query
+        name: year
+        description: The businessid of check
+        required: true
+        type: string
+      - in: query
+        name: month
+        description: The businessid of check
+        required: true
+        type: string
+      - in: query
+        name: day
+        description: The businessid of check
+        required: true
+        type: string
+      - in: query
+        name: location
+        description: The location of check
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/businessmonthcheck:
+    get:
+      tags:
+      - wx
+      description: get businessmonthcheck
+      operationId: BusinessController.get businessmothcheckin
+      parameters:
+      - in: query
+        name: page
+        description: The page of check
+        type: string
+      - in: query
+        name: limit
+        description: The size of check
+        type: string
+      - in: query
+        name: year
+        description: The year of check
+        required: true
+        type: string
+      - in: query
+        name: month
+        description: The month of check
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/businessmonthchecksum:
+    get:
+      tags:
+      - wx
+      description: get businessmonthcheck
+      operationId: BusinessController.get businessmothcheckin
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /wx/deletewxarticle:
     post:
       tags:
@@ -3248,6 +3410,84 @@ paths:
           description: Invalid page supplied
         "404":
           description: article not found
+  /wx/getbusiness/{id}:
+    get:
+      tags:
+      - wx
+      description: get business by userid
+      operationId: BusinessController.get business by userid
+      parameters:
+      - in: path
+        name: id
+        description: The projectid of business
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetBusinessPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: business not found
+  /wx/getbusinessbyid/{id}:
+    get:
+      tags:
+      - wx
+      description: get business by businessid
+      operationId: BusinessController.get business by businessid
+      parameters:
+      - in: path
+        name: id
+        description: The id of business
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetBusinessPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: business not found
+  /wx/getbusinesscheck:
+    get:
+      tags:
+      - wx
+      description: get check
+      operationId: BusinessController.get checkin check
+      parameters:
+      - in: query
+        name: userid
+        description: The userid of check
+        required: true
+        type: string
+      - in: query
+        name: businessid
+        description: The businessid of check
+        required: true
+        type: string
+      - in: query
+        name: year
+        description: The year of check
+        required: true
+        type: string
+      - in: query
+        name: month
+        description: The month of check
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /wx/getlistarticles:
     get:
       tags:
@@ -4546,6 +4786,8 @@ definitions:
   .GetArticle:
     type: object
   .GetAttachbyId:
+    type: object
+  .GetBusinessPage:
     type: object
   .GetDiary:
     type: object

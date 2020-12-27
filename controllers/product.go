@@ -884,8 +884,13 @@ func (c *ProdController) UpdateProduct() {
 	if err != nil {
 		beego.Error(err)
 	}
+	// 根据成果id取得项目id
+	product, err := models.GetProd(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
 	//取项目本身
-	category, err := models.GetProj(idNum)
+	category, err := models.GetProj(product.ProjectId)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -915,19 +920,20 @@ func (c *ProdController) UpdateProduct() {
 		//2.取得侧栏目录路径——路由id
 		//2.1 根据id取得路由
 		var projurls string
-		proj, err := models.GetProj(idNum)
-		if err != nil {
-			beego.Error(err)
-		}
-		if proj.ParentId == 0 { //如果是项目根目录
-			projurls = "/" + strconv.FormatInt(proj.Id, 10)
+		// proj, err := models.GetProj(idNum)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		if category.ParentId == 0 { //如果是项目根目录
+			projurls = "/" + strconv.FormatInt(category.Id, 10)
 		} else {
 			// projurls = "/" + strings.Replace(proj.ParentIdPath, "-", "/", -1) + "/" + strconv.FormatInt(proj.Id, 10)
-			projurls = "/" + strings.Replace(strings.Replace(proj.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(proj.Id, 10)
+			projurls = "/" + strings.Replace(strings.Replace(category.ParentIdPath, "#", "/", -1), "$", "", -1) + strconv.FormatInt(category.Id, 10)
 		}
-
+		// beego.Info(useridstring)
 		if e.Enforce(useridstring, projurls+"/", "PUT", ".1") {
 			UpdatePermission = true
+			// beego.Info(UpdatePermission)
 		}
 	}
 	if UpdatePermission {
