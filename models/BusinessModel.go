@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	// "github.com/astaxie/beego"
 	// "gorm.io/gorm"
+	"errors"
 	"github.com/jinzhu/gorm"
 	"time"
 )
@@ -84,11 +85,30 @@ func init() {
 func CreateBusiness(business Business) (id uint, err error) {
 	db := GetDB()
 	// projectuser := ProjectUser{ProjectId: pid, UserId: uid}
-	result := db.Create(&business) // 通过数据的指针来创建
+	// 查询项目名称和时间段
+	//判断是否有重名
+	result := db.Where("projecttitle = ? AND start_date = ? AND end_date = ?", business.Projecttitle, business.StartDate, business.EndDate).First(&business)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		result = db.Create(&business) // 通过数据的指针来创建
+		return business.ID, result.Error
+	} else {
+		return 0, result.Error
+	}
 	// user.ID             // 返回插入数据的主键
 	// result.Error        // 返回 error
 	// result.RowsAffected // 返回插入记录的条数
-	return business.ID, result.Error
+}
+
+// 更新出差活动
+func UpdateBusiness(business Business) (err error) {
+	db := GetDB()
+	// projectuser := ProjectUser{ProjectId: pid, UserId: uid}
+	// db.First(&business, id)
+	result := db.Model(&business).Updates(business)
+	return result.Error
+	// user.ID             // 返回插入数据的主键
+	// result.Error        // 返回 error
+	// result.RowsAffected // 返回插入记录的条数
 }
 
 // 添加用户~出差关联表格
@@ -100,6 +120,16 @@ func CreateUserBusiness(businessuser BusinessUser) (id uint, err error) {
 	// result.Error        // 返回 error
 	// result.RowsAffected // 返回插入记录的条数
 	return businessuser.ID, result.Error
+}
+
+// 删除用户~出差关联表格
+func DeleteUserBusiness(userid int64, businessid uint) (err error) {
+	db := GetDB()
+	result := db.Where("user_id = ? AND business_id = ? ", userid, businessid).Delete(&BusinessUser{})
+	// user.ID             // 返回插入数据的主键
+	// result.Error        // 返回 error
+	// result.RowsAffected // 返回插入记录的条数
+	return result.Error
 }
 
 // 查出未过期的出差活动,与自己有关的出差活动
@@ -181,7 +211,7 @@ func BusinessCheck(businessid uint, userid int64, Lat, Lng float64, PhotoUrl, lo
 	return businesscheckin.ID, err
 }
 
-// 按月查询打卡记录
+// 按月查询打卡记录-businessid是unint，换成int64也行？
 func GetBusinessCheck(businessid, UserId int64, SelectMonth1, SelectMonth2 time.Time) (check []*BusinessCheckin, err error) {
 	db := GetDB()
 	err = db.
@@ -201,6 +231,16 @@ func GetBusinessCheckUser(selectmonth1, selectmonth2 time.Time, limit, offset in
 		Where("business.start_date <= ? AND business.end_date >= ?", selectmonth2, selectmonth1).
 		Find(&business).Error
 	return business, err
+}
+
+// 根据businessid查询关联的users
+func GetBusinessUsers(businessid uint) (users []*BusinessUser, err error) {
+	db := GetDB()
+	err = db.
+		Preload("NickNames").
+		Where("business_id = ? ", businessid).
+		Find(&users).Error
+	return users, err
 }
 
 // type CheckUser struct {

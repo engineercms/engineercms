@@ -48,7 +48,7 @@
         showRefresh: 'true',
         showToggle: 'true',
         showColumns: 'true',
-        // toolbar:'#toolbar1',
+        toolbar: '#toolbar1',
         pagination: 'true',
         sidePagination: "server",
         queryParamsType: '',
@@ -142,7 +142,7 @@
             formatter: localDateFormatter,
             align: "center",
             valign: "middle"
-          }
+          },
           // {
           //     field: 'dContMainEntity.createTime',
           //     title: '发起时间',
@@ -150,11 +150,12 @@
           //         return new Date(value).toLocaleString().substring(0,9);
           //     }
           // },
-          // {
-          //     field: 'dContMainEntity.operate',
-          //     title: '操作',
-          //     formatter: operateFormatter
-          // }
+          {
+            field: 'action',
+            title: '操作',
+            formatter: 'actionFormatter',
+            events: 'actionEvents',
+          }
         ]
       });
     });
@@ -203,6 +204,16 @@
         });
       });
     });
+
+    function actionFormatter(value, row, index) {
+      return '<button type="button" data-name="editorjsonButton" id="editorjsonButton" class="btn btn-info btn-xs"> <i class="fa fa-user">设置json数据</i></button>';
+    }
+    window.actionEvents = {
+      'click #editorjsonButton': function(e, value, row, index) {
+        // alert(row.Id);
+        window.open("/v1/admin/jsoneditor?projectid="+row.Id,"_blank");
+      },
+    };
 
     $(document).ready(function() {
       // $("#editorcateButton").click(function() {

@@ -708,7 +708,7 @@ func (c *OnlyController) OnlyOffice() {
 		// }
 		// useridstring = strconv.FormatInt(user.Id, 10)
 		myRes = e.GetPermissionsForUser(useridstring)
-		if doc.Uid == uid { //isme
+		if doc.Uid == uid || isadmin { //isme or isadmin
 			Permission = "1"
 		} else { //如果是登录用户，则设置了权限的文档根据权限查看
 			Permission = "1"

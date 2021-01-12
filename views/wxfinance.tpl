@@ -478,7 +478,7 @@ $(function (){
     }
   }
 
-  // 编辑成果信息
+  // 编辑成果信息——这个没用到
   function updateprod(){
     // var radio =$("input[type='radio']:checked").val();
     var projectid = $('#cid').val();

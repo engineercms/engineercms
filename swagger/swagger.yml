@@ -2420,6 +2420,34 @@ paths:
           description: Invalid page supplied
         "404":
           description: data not found
+  /project/getwxprojects:
+    get:
+      tags:
+      - project
+      description: get projectlist..
+      operationId: ProjController.get wx projectlist...
+      parameters:
+      - in: query
+        name: projectid
+        description: The id of project
+        type: string
+      - in: query
+        name: pageNo
+        description: The page of projectlist
+        type: string
+      - in: query
+        name: limit
+        description: The size of page
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: data not found
   /project/project/products/{id}:
     get:
       tags:
@@ -2800,7 +2828,7 @@ paths:
         type: string
       - in: path
         name: id
-        description: The projectid of business
+        description: The projectid of project
         required: true
         type: string
       - in: query
@@ -2808,7 +2836,7 @@ paths:
         description: The title of article
         type: string
       - in: query
-        name: content
+        name: articlecontent
         description: The content of article
         type: string
       responses:
@@ -3277,13 +3305,18 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
-  /wx/businessmonthcheck:
+  /wx/businessmonthcheck/{id}:
     get:
       tags:
       - wx
       description: get businessmonthcheck
       operationId: BusinessController.get businessmothcheckin
       parameters:
+      - in: path
+        name: id
+        description: The projectid of business
+        required: true
+        type: string
       - in: query
         name: page
         description: The page of check
@@ -4332,6 +4365,89 @@ paths:
           description: Invalid page supplied
         "404":
           description: articl not found
+  /wx/updatebusiness/{id}:
+    post:
+      tags:
+      - wx
+      description: post update business by businessid
+      operationId: BusinessController.post update business by businessid
+      parameters:
+      - in: query
+        name: content
+        description: The content of release
+        required: true
+        type: string
+      - in: query
+        name: location
+        description: The location of business
+        required: true
+        type: string
+      - in: query
+        name: lat
+        description: The lat of location
+        type: string
+      - in: query
+        name: lng
+        description: The lng of location
+        type: string
+      - in: query
+        name: startDate
+        description: The startDate of business
+        type: string
+      - in: query
+        name: endDate
+        description: The endDate of business
+        type: string
+      - in: query
+        name: projecttitle
+        description: The projecttitle of business
+        type: string
+      - in: query
+        name: drivername
+        description: The drivername   of business
+        type: string
+      - in: query
+        name: subsidy
+        description: The subsidy      of business
+        type: string
+      - in: query
+        name: carfare
+        description: The carfare      of business
+        type: string
+      - in: query
+        name: hotelfee
+        description: The hotelfee     of business
+        type: string
+      - in: query
+        name: users
+        description: The users        of business
+        type: string
+      - in: query
+        name: articleshow
+        description: The larticleshow of business
+        type: string
+      - in: path
+        name: id
+        description: The id of business
+        required: true
+        type: string
+      - in: query
+        name: title
+        description: The title of article
+        type: string
+      - in: query
+        name: articlecontent
+        description: The content of article
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.UpdateBusiness'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pas not found
   /wx/updatewxdiary:
     post:
       tags:
@@ -4808,6 +4924,8 @@ definitions:
   .SaveUser:
     type: object
   .Update:
+    type: object
+  .UpdateBusiness:
     type: object
   .success:
     type: object

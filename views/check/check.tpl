@@ -1,7 +1,7 @@
 <!-- 文档列表 -->
 <!DOCTYPE html>
 <head>
-  <title>考勤</title>
+  <title>打卡统计</title>
   <meta name="renderer" content="webkit">
   <!-- 加上这句，360等浏览器就会默认使用google内核，而不是IE内核 。 -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge">

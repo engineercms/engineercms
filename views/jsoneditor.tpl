@@ -112,7 +112,7 @@
   $(document).ready(function() {
     $.ajax({
       type: "get",
-      url: "v1/admin/getwxprojectconfig",
+      url: "/v1/admin/getwxprojectconfig",
       data: { projectid: {{.ProjectId}} },
       success: function(data, status) {
         // alert("添加“"+data+"”成功！(status:"+status+".)");
@@ -138,7 +138,7 @@
     var projectconfig=JSON.stringify(json)
     $.ajax({
       type: "POST",
-      url: "v1/admin/putwxprojectconfig?projectid="+{{.ProjectId}},
+      url: "/v1/admin/putwxprojectconfig?projectid="+{{.ProjectId}},
       data: JSON.stringify(json),//{ projectid: "1",projectconfig:projectconfig},
       success: function(data, status) {
         if (data.info=='SUCCESS'){

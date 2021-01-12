@@ -2,6 +2,7 @@
 package controllers
 
 import (
+	"github.com/3xxx/engineercms/controllers/utils"
 	// json "encoding/json"
 	// "fmt"
 	"github.com/astaxie/beego"
@@ -82,14 +83,32 @@ func (c *BbsController) Bbs() {
 	// }
 
 	desc := desc1 + "&#" + desc2 + "&#" + desc3 + "&#" + desc4
-
-	_, err = models.BbsBbs(UserId, desc, SelectDate)
+	// 进行敏感字符验证
+	app_version := c.Input().Get("app_version")
+	accessToken, _, _, err := utils.GetAccessToken(app_version)
 	if err != nil {
 		beego.Error(err)
-		c.Data["json"] = map[string]interface{}{"code": 2, "message": err}
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
 		c.ServeJSON()
+		return
+	}
+	errcode, errmsg, err := utils.MsgSecCheck(accessToken, desc)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+		c.ServeJSON()
+	} else if errcode != 87014 {
+		_, err = models.BbsBbs(UserId, desc, SelectDate)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"code": 2, "message": err}
+			c.ServeJSON()
+		} else {
+			c.Data["json"] = map[string]interface{}{"code": 1, "message": desc}
+			c.ServeJSON()
+		}
 	} else {
-		c.Data["json"] = map[string]interface{}{"code": 1, "message": desc}
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": errmsg}
 		c.ServeJSON()
 	}
 }

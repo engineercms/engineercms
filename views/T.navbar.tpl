@@ -202,6 +202,12 @@ a.navbar-brand {
           <li {{if .IsAttendanceCalendar}} class="active" {{end}}>
             <a href="/attendance">考勤</a>
           </li>
+          <li {{if .IsMonthCheck}}class="active"{{end}}>
+            <a href="/v1/checkin/monthchecksum">设代统计</a>
+          </li>
+          <li {{if .IsMonthCheck}}class="active"{{end}}>
+            <a href="/v1/wx/businessmonthchecksum">出差统计</a>
+          </li>
         </ul>
       </li> -->
       <li {{if .IsBook}} class="active" {{end}}>

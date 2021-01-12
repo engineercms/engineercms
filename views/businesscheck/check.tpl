@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 <head>
-  <title>考勤</title>
+  <title>出差统计</title>
   <meta name="renderer" content="webkit">
   <!-- 加上这句，360等浏览器就会默认使用google内核，而不是IE内核 。 -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -106,6 +106,16 @@
 <body>
   <div class="col-lg-12">
     <h3>考勤列表</h3>
+    <ul id="myTab" class="nav nav-tabs">
+      <li class="active">
+        <a href="#checkdate" data-toggle="tab">打卡日期</a>
+      </li>
+      <li>
+        <a href="#location" data-toggle="tab">定位情况</a>
+      </li>
+      <li><a href="#checktime" data-toggle="tab">打卡时间</a>
+      </li>
+    </ul>
     <div id="toolbar" class="btn-group">
       <span style="position: relative;z-index: 9999;">
         <input type='text' placeholder='选择月份' class='datepicker btn btn-default' id='Date' value='' />
@@ -118,7 +128,19 @@
         </select>
       </span>
     </div>
-    <table id="table"></table>
+
+    <div id="myTabContent" class="tab-content">
+      <div class="tab-pane fade in active" id="checkdate">
+        <table id="table"></table>
+      </div>
+      <div class="tab-pane fade" id="location">
+        <table id="table1"></table>
+      </div>
+      <div class="tab-pane fade" id="checktime">
+        <table id="table2"></table>
+      </div>
+    </div>
+    
     <script type="text/javascript">
     // *********日期转换*************
     //https://www.jb51.net/article/80599.htm
@@ -152,17 +174,17 @@
 
       $.ajax({
         type: "GET", //这里是否一定要用post？？？
-        url: "/v1/wx/getbusiness/25001",
-
+        // url: "/v1/wx/getbusiness/25001",
+        url: "/v1/project/getwxprojects",
         dataType: 'json', //dataType:JSON,这种是jquerylatest版本的表达方法。不支持新版jquery。
         success: function(data, status) {
-          // console.log(data)
+          console.log(data)
           $(".option").remove();
           $.each(data, function(i, d) {
             // console.log(data.processing[0])
             // console.log(i)
             // console.log(d)
-            $("#activity").append('<option class="option" value="' + data[i].id + '">' + data[i].Projecttitle + '</option>');
+            $("#activity").append('<option class="option" value="' + data[i].id + '">' + data[i].title + '</option>');
           });
           var page = $("li.page-number.active").text()
           // alert(page)
@@ -172,10 +194,10 @@
             ajax: function(request) {
               $.ajax({
                 type: "GET",
-                url: "/v1/wx/businessmonthcheck?&year=" + b + "&month=" + d,
+                url: "/v1/wx/businessmonthcheck/"+data[0].id+"?&year=" + b + "&month=" + d,
                 contentType: "application/json;charset=utf-8",
                 dataType: "json",
-                data: { page: 1, limit: 50 },
+                data: { page: 1, limit: 500 },
                 json: 'callback',
                 success: function(json) {
                   var columnsArray = [];
@@ -272,17 +294,17 @@
       // console.log(d)
       $.ajax({
         type: "GET",
-        url: "/v1/wx/businessmonthcheck?year=" + b + "&month=" + d,
+        url: "/v1/wx/businessmonthcheck/"+vs+"?year=" + b + "&month=" + d,
         contentType: "application/json;charset=utf-8",
         dataType: "json",
-        data: { page: 1, limit: 50 },
+        data: { page: 1, limit: 500 },
         json: 'callback',
         success: function(json) {
           var columnsArray = [];
           columnsArray.push({ field: "state", checkbox: true });
           if (json[0]) {
             for (var i = 0; i < (Object.keys(json[0])).length; i++) { //Object.keys(obj) 获取key名称
-              var property = (Object.keys(json[0]))[i]; //id   username
+              var property = (Object.keys(json[0]))[i]; //id username
               if (property == 0) {
                 columnsArray.push({
                   "title": "name",
@@ -360,7 +382,7 @@
       activity()
     });
 
-    function getColumns() {
+    function getColumns() {//试验
       // 加载动态表格
       $.ajax({
         url: '/v1/wx/businessmonthcheck?year=2019&month=04',

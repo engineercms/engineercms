@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/3xxx/engineercms/controllers/utils"
 	// "crypto/md5"
 	// "encoding/hex"
 	// "encoding/json"
@@ -36,17 +37,17 @@ type TodoController struct {
 func (c *TodoController) Create() {
 	var userid int64
 	openID := c.GetSession("openID")
-	if openID == nil {
-		// return false
-		userid = 0
-		//     this.SetSession("asta", int(1))
-		//     this.Data["num"] = 0
-	} else {
+	if openID != nil {
 		user, err := models.GetUserByOpenID(openID.(string))
 		if err != nil {
 			beego.Error(err)
 		}
 		userid = user.Id
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+		// user.Id = 9
 	}
 
 	name := c.Input().Get("name")
@@ -55,13 +56,32 @@ func (c *TodoController) Create() {
 	if err != nil {
 		beego.Error(err)
 	}
-	todoid, err := models.TodoCreate(ProjectId, name, userid)
+	// 进行敏感字符验证
+	app_version := c.Input().Get("app_version")
+	accessToken, _, _, err := utils.GetAccessToken(app_version)
 	if err != nil {
 		beego.Error(err)
-		c.Data["json"] = map[string]interface{}{"message": "写入数据库出错"}
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
 		c.ServeJSON()
+		return
+	}
+	errcode, errmsg, err := utils.MsgSecCheck(accessToken, name)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+		c.ServeJSON()
+	} else if errcode != 87014 {
+		todoid, err := models.TodoCreate(ProjectId, name, userid)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"message": "写入数据库出错"}
+			c.ServeJSON()
+		} else {
+			c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "message": "ok", "todoid": todoid}
+			c.ServeJSON()
+		}
 	} else {
-		c.Data["json"] = map[string]interface{}{"message": "ok", "todoid": todoid}
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": errmsg}
 		c.ServeJSON()
 	}
 }
@@ -124,14 +144,23 @@ func (c *TodoController) GetTodo() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
 // @router /updatetodo [post]
-//取出所有未完成待办
+// 更新待办状态
 func (c *TodoController) UpdateTodo() {
+	openID := c.GetSession("openID")
+	if openID != nil {
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+		// user.Id = 9
+	}
 	id := c.Input().Get("todoid")
 	//pid转成64为
 	todoid, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		beego.Error(err)
 	}
+
 	err = models.UpdateTodo(todoid)
 	if err != nil {
 		beego.Error(err)
@@ -150,7 +179,7 @@ func (c *TodoController) UpdateTodo() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
 // @router /deletetodo [post]
-//取出所有未完成待办
+// 删除待办
 func (c *TodoController) DeleteTodo() {
 	id := c.Input().Get("todoid")
 	//pid转成64为

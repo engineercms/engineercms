@@ -29,7 +29,7 @@ type Navbartruct struct {
 }
 
 type Project1 struct {
-	Id        int64
+	Id        int64 //`json:"id"`_微信小程序的项目选择里要记得修改
 	Code      string
 	Title     string
 	Label     string
@@ -101,7 +101,8 @@ func (c *ProjController) Get() {
 // @Failure 404 data not found
 // @router /getprojects [get]
 //分页提供给项目列表页的table中json数据
-//http://127.0.0.1/project/getprojects?limit=15&pageNo=1
+//http://127.0.0.1/v1/project/getprojects?limit=15&pageNo=1
+// 微信小程序里要改id等为小写
 func (c *ProjController) GetProjects() {
 	// id := c.Ctx.Input.Param(":id")
 	id := c.Input().Get("projectid")
@@ -205,6 +206,92 @@ func (c *ProjController) GetProjects() {
 		//记录结束时间差
 		// elapsed := time.Since(start)
 		// beego.Info(elapsed)
+	} else {
+		idNum, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+		//根据id查询下级
+		projects, err := models.GetProjSonbyId(idNum)
+		if err != nil {
+			beego.Error(err)
+		}
+		//取得每个项目的成果数量
+		// projects1 := make([]Project1, 0) //这里不能加*号
+		for _, v := range projects {
+			aa := make([]Project1, 1)
+			aa[0].Id = v.Id
+			aa[0].Code = v.Code
+			aa[0].Title = v.Title
+			aa[0].Label = v.Label
+			aa[0].Principal = v.Principal
+
+			aa[0].Created = v.Created
+			aa[0].Updated = v.Updated
+			projects1 = append(projects1, aa...)
+		}
+		// count, err := models.GetProjectsCount(searchText)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		count := int64(len(projects))
+		table := Tableserver{projects1, page1, count}
+
+		c.Data["json"] = table
+		c.ServeJSON()
+	}
+}
+
+// @Title get wx projectlist...
+// @Description get projectlist..
+// @Param projectid query string false "The id of project"
+// @Param pageNo query string false "The page of projectlist"
+// @Param limit query string false "The size of page"
+// @Success 200 {object} models.GetProductsPage
+// @Failure 400 Invalid page supplied
+// @Failure 404 data not found
+// @router /getwxprojects [get]
+// 取出所有项目列表，table中json数据
+//http://127.0.0.1/v1/project/getwxprojects
+func (c *ProjController) GetWxProjects() {
+	id := c.Input().Get("projectid")
+	var err error
+	var offset, limit1, page1 int64
+	limit := c.Input().Get("limit")
+	if limit == "" {
+		limit1 = 150
+	} else {
+		limit1, err = strconv.ParseInt(limit, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+	page := c.Input().Get("pageNo")
+	if page == "" {
+		page1 = 1
+	} else {
+		page1, err = strconv.ParseInt(page, 10, 64)
+		if err != nil {
+			beego.Error(err)
+		}
+	}
+
+	if page1 <= 1 {
+		offset = 0
+	} else {
+		offset = (page1 - 1) * limit1
+	}
+
+	searchText := c.Input().Get("searchText")
+	projects1 := make([]Project1, 0)
+	if id == "" {
+		//显示全部
+		projects, err := models.GetProjectsPage(limit1, offset, searchText)
+		if err != nil {
+			beego.Error(err)
+		}
+		c.Data["json"] = projects
+		c.ServeJSON()
 	} else {
 		idNum, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {

@@ -35,14 +35,14 @@ type wxuser struct {
 // @Param hotelfee     query string false "The hotelfee     of business"
 // @Param users        query string false "The users        of business"
 // @Param articleshow query string false "The larticleshow of business"
-// @Param id path string true "The projectid of business"
+// @Param id path string true "The projectid of project"
 // @Param title query string false "The title of article"
-// @Param content query string false "The content of article"
+// @Param articlecontent query string false "The content of article"
 // @Success 200 {object} models.CreateBusiness
 // @Failure 400 Invalid page supplied
 // @Failure 404 pas not found
 // @router /addbusiness/:id [post]
-//用户id打赏一个文章id
+// 添加一个活动
 func (c *BusinessController) AddBusiness() {
 	//content去验证
 	app_version := c.Input().Get("app_version")
@@ -203,11 +203,13 @@ func (c *BusinessController) AddBusiness() {
 			// Overtime:  0,
 		}
 		Id, err := models.CreateBusiness(business)
+		// beego.Info(Id)
+		// beego.Info(err)
 		if err != nil {
 			beego.Error(err)
 			c.Data["json"] = map[string]interface{}{"data": "WRONG", "info": "添加出差数据错误"}
 			c.ServeJSON()
-		} else {
+		} else if Id != 0 {
 			// 添加自己
 			var businessuser models.BusinessUser
 			businessuser.UserID = user.Id //uid
@@ -246,6 +248,228 @@ func (c *BusinessController) AddBusiness() {
 			}
 			c.Data["json"] = map[string]interface{}{"data": "OK", "info": "SUCCESS", "id": Id}
 			c.ServeJSON()
+		} else {
+			c.Data["json"] = map[string]interface{}{"data": "data already exist", "info": "数据已存在"}
+			c.ServeJSON()
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": errmsg}
+		c.ServeJSON()
+	}
+}
+
+// @Title post update business by businessid
+// @Description post update business by businessid
+// @Param content query string  true "The content of release"
+// @Param location query string true "The location of business"
+// @Param lat query string false "The lat of location"
+// @Param lng query string false "The lng of location"
+// @Param startDate query string false "The startDate of business"
+// @Param endDate query string false "The endDate of business"
+// @Param projecttitle query string false "The projecttitle of business"
+// @Param drivername   query string false "The drivername   of business"
+// @Param subsidy      query string false "The subsidy      of business"
+// @Param carfare      query string false "The carfare      of business"
+// @Param hotelfee     query string false "The hotelfee     of business"
+// @Param users        query string false "The users        of business"
+// @Param articleshow query string false "The larticleshow of business"
+// @Param id path string true "The id of business"
+// @Param title query string false "The title of article"
+// @Param articlecontent query string false "The content of article"
+// @Success 200 {object} models.UpdateBusiness
+// @Failure 400 Invalid page supplied
+// @Failure 404 pas not found
+// @router /updatebusiness/:id [post]
+// 用户修改business
+func (c *BusinessController) UpdateBusiness() {
+	//content去验证
+	app_version := c.Input().Get("app_version")
+	accessToken, _, _, err := utils.GetAccessToken(app_version)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+		c.ServeJSON()
+	}
+
+	openID := c.GetSession("openID")
+	if openID != nil {
+
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+		// user.Id = 9
+	}
+
+	bid := c.Ctx.Input.Param(":id")
+	//id转成uint为
+	businessidint, err := strconv.Atoi(bid)
+	if err != nil {
+		beego.Error(err)
+	}
+	businessid := uint(businessidint)
+
+	location := c.Input().Get("location")
+	lat := c.Input().Get("lat")
+	latfloat, err := strconv.ParseFloat(lat, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	lng := c.Input().Get("lng")
+	lngfloat, err := strconv.ParseFloat(lng, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	startdate := c.Input().Get("startDate")
+	datearray := strings.Split(startdate, "/")
+	year := datearray[0]
+	month := datearray[1]
+	if len(month) == 1 {
+		month = "0" + month
+	}
+	day := datearray[2]
+	if len(day) == 1 {
+		day = "0" + day
+	}
+	startdate = year + "-" + month + "-" + day
+	const base_format = "2006-01-02"
+	StartDate, err := time.Parse(base_format, startdate)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	enddate := c.Input().Get("endDate")
+	datearray = strings.Split(enddate, "/")
+	year = datearray[0]
+	month = datearray[1]
+	if len(month) == 1 {
+		month = "0" + month
+	}
+	day = datearray[2]
+	if len(day) == 1 {
+		day = "0" + day
+	}
+	enddate = year + "-" + month + "-" + day
+	EndDate, err := time.Parse(base_format, enddate)
+	if err != nil {
+		beego.Error(err)
+	}
+	EndDate = EndDate.AddDate(0, 0, 1) //在编辑活动的显示那里，将enddate减少一天。
+
+	projecttitle := c.Input().Get("projecttitle")
+	drivername := c.Input().Get("drivername")
+	subsidy := c.Input().Get("subsidy")
+	subsidyint, err := strconv.Atoi(subsidy)
+	if err != nil {
+		beego.Error(err)
+	}
+	carfare := c.Input().Get("carfare")
+	carfareint, err := strconv.Atoi(carfare)
+	if err != nil {
+		beego.Error(err)
+	}
+	hotelfee := c.Input().Get("hotelfee")
+	hotelfeeint, err := strconv.Atoi(hotelfee)
+	if err != nil {
+		beego.Error(err)
+	}
+	users := c.Input().Get("users")
+	m := []wxuser{}
+	err = json.Unmarshal([]byte(users), &m)
+	if err != nil {
+		beego.Error(err)
+	}
+
+	// articleshow := c.Input().Get("articleshow")
+	// 2020/11/15 17:08:02.488 [I] [business_trip.go:60] [{"index":1,"name":"6","showta
+	// g":true},{"index":2,"name":"61","showtag":true}]
+	// 进行敏感字符验证
+	content := projecttitle + drivername + users
+	errcode, errmsg, err := utils.MsgSecCheck(accessToken, content)
+	if err != nil {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+		c.ServeJSON()
+	} else if errcode != 87014 {
+		//根据项目id添加出差
+		var business models.Business
+		// 添加business
+		business = models.Business{
+			// ArticleID:    aid,
+			ID:           businessid,
+			StartDate:    StartDate,
+			EndDate:      EndDate,
+			Location:     location,
+			Lat:          latfloat,
+			Lng:          lngfloat,
+			Projecttitle: projecttitle,
+			Drivername:   drivername,
+			Subsidy:      subsidyint,
+			Carfare:      carfareint,
+			Hotelfee:     hotelfeeint,
+			// Worktime:  worktime.Hours(),
+			// Overtime:  0,
+		}
+		err := models.UpdateBusiness(business)
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"data": "WRONG", "info": "更新出差数据错误"}
+			c.ServeJSON()
+		} else {
+			// 循环添加出差同行人员与出差的关联表
+			if len(m) > 0 {
+				// 查出数据库中关联的users
+				businessusers, err := models.GetBusinessUsers(businessid)
+				if err != nil {
+					beego.Error(err)
+				}
+
+				for _, v := range m {
+					var nameisold bool
+					for _, w := range businessusers {
+						if v.Name == w.NickNames.Nickname {
+							nameisold = true
+							break
+						}
+					}
+					// beego.Info(v.Name)
+					if nameisold == false {
+						tripuser := models.GetUserByNickname(v.Name)
+						// beego.Info(tripuser.Id)
+						var businessuser models.BusinessUser
+						businessuser.UserID = tripuser.Id
+						businessuser.BusinessID = businessid
+						_, err = models.CreateUserBusiness(businessuser)
+						if err != nil {
+							beego.Error(err)
+							c.Data["json"] = map[string]interface{}{"data": "WRONG", "info": "添加同行人错误"}
+							c.ServeJSON()
+						}
+					}
+				}
+
+				for _, w := range businessusers {
+					var databasehasname bool
+					for _, v := range m {
+						if v.Name == w.NickNames.Nickname {
+							databasehasname = true
+							break
+						}
+					}
+					// beego.Info(v.Name)
+					if databasehasname == false {
+						err = models.DeleteUserBusiness(w.NickNames.Id, businessid)
+						if err != nil {
+							beego.Error(err)
+							c.Data["json"] = map[string]interface{}{"data": "WRONG", "info": "删除同行人错误"}
+							c.ServeJSON()
+						}
+					}
+				}
+			}
+			// 如果文章时打开的，则添加文章并关联到出差
+			c.Data["json"] = map[string]interface{}{"data": "OK", "info": "SUCCESS"}
+			c.ServeJSON()
 		}
 	} else {
 		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": errmsg}
@@ -260,16 +484,20 @@ func (c *BusinessController) AddBusiness() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 business not found
 // @router /getbusiness/:id [get]
-// 根据用户id列出有关的business
+// 根据项目id和用户id列出有关的business
+// 不应该过滤项目id！！
 func (c *BusinessController) GetBysiness() {
 	var user models.User
 	var err error
+	_, _, uid, isadmin, islogin := checkprodRole(c.Ctx)
 	openID := c.GetSession("openID")
 	if openID != nil {
 		user, err = models.GetUserByOpenID(openID.(string))
 		if err != nil {
 			beego.Error(err)
 		}
+	} else if isadmin || islogin {
+		user.Id = uid
 	} else {
 		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
 		c.ServeJSON()
@@ -331,6 +559,8 @@ func (c *BusinessController) GetBysinessById() {
 	if err != nil {
 		beego.Error(err)
 	}
+	// enddate要减一天
+	business.EndDate = business.EndDate.AddDate(0, 0, -1)
 	c.Data["json"] = business //map[string]interface{}{"userId": 1, "avatorUrl": "Filename"}
 	c.ServeJSON()
 }
@@ -489,6 +719,7 @@ func (c *BusinessController) BusinessMonthCheckSum() {
 
 // @Title get businessmothcheckin
 // @Description get businessmonthcheck
+// @Param id path string true "The projectid of business"
 // @Param page query string false "The page of check"
 // @Param limit query string false "The size of check"
 // @Param year query string true "The year of check"
@@ -496,14 +727,15 @@ func (c *BusinessController) BusinessMonthCheckSum() {
 // @Success 200 {object} models.GetProductsPage
 // @Failure 400 Invalid page supplied
 // @Failure 404 articls not found
-// @router /businessmonthcheck [get]
+// @router /businessmonthcheck/:id [get]
 // 月度考勤统计
 func (c *BusinessController) BusinessMonthCheck() {
+	// h, _ := time.ParseDuration("1h")
 	var offset, limit1, page1 int
 	var err error
 	limit := c.Input().Get("limit")
 	if limit == "" {
-		limit1 = 10
+		limit1 = 500
 	} else {
 		limit1, err = strconv.Atoi(limit)
 		if err != nil {
@@ -549,35 +781,47 @@ func (c *BusinessController) BusinessMonthCheck() {
 	if err != nil {
 		beego.Error(err)
 	}
-	beego.Info(SelectMonth1)
-	beego.Info(SelectMonth2)
+	// beego.Info(SelectMonth1)
+	// beego.Info(SelectMonth2)
 	// beego.Info(business)
 	// c.Data["json"] = business
 	// c.ServeJSON()
+	pid := c.Ctx.Input.Param(":id")
+	//id转成64为
+	projectid, err := strconv.ParseInt(pid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
 	s := []map[int]interface{}{}
 	//活动
 	for _, w := range business {
-		var checkmap3 = make(map[int]interface{}, dayssss+1)
-		for i := 0; i <= dayssss; i++ {
-			if i == 0 {
-				checkmap3[0] = "项目名称：" + w.Projecttitle
-			} else if i == 1 {
-				checkmap3[1] = "补贴标准：" + strconv.Itoa(w.Subsidy)
-			} else if i == 2 {
-				checkmap3[2] = "交通费：" + strconv.Itoa(w.Carfare)
-			} else if i == 3 {
-				checkmap3[3] = "住宿费：" + strconv.Itoa(w.Hotelfee)
-			} else {
-				checkmap3[i] = ""
+		// beego.Info(len(w.BusinessCheckins))
+		// c.Data["json"] = w
+		// c.ServeJSON()
+		if len(w.BusinessCheckins) > 0 && w.ProjectID == projectid {
+			var checkmap = make(map[int]interface{}, dayssss+1)
+			var checkmap3 = make(map[int]interface{}, dayssss+1)
+			for i := 0; i <= dayssss; i++ {
+				if i == 0 {
+					checkmap3[0] = "项目名称：" + w.Projecttitle
+				} else if i == 1 {
+					checkmap3[1] = "出差地点：" + w.Location
+				} else if i == 2 {
+					checkmap3[2] = "司机/车牌号：" + w.Drivername
+				} else if i == 3 {
+					checkmap3[3] = "补贴标准：" + strconv.Itoa(w.Subsidy)
+				} else if i == 4 {
+					checkmap3[4] = "交通费：" + strconv.Itoa(w.Carfare)
+				} else if i == 5 {
+					checkmap3[5] = "住宿费：" + strconv.Itoa(w.Hotelfee)
+				} else {
+					checkmap3[i] = ""
+				}
 			}
-		}
-		// 在s数组前面插入
-		s = append(s, checkmap3)
+			// 在s数组前面插入
+			s = append(s, checkmap3)
 
-		var checkmap = make(map[int]interface{}, dayssss+1)
-
-		if len(w.BusinessCheckins) > 0 {
-
+			// if len(w.BusinessCheckins) > 0 {
 			strMap := make(map[string]string)
 			for _, v := range w.BusinessCheckins {
 				strMap[v.Users.Nickname] = v.Users.Nickname
@@ -604,7 +848,7 @@ func (c *BusinessController) BusinessMonthCheck() {
 						if err != nil {
 							beego.Error(err)
 						}
-						checkmap[dayint] = "1"
+						checkmap[dayint] = "1" //vv.CheckTime.Add(8 * h) //vv.Location
 					}
 				}
 				//查出一个用户这个月的打卡记录
