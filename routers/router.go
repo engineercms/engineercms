@@ -97,7 +97,7 @@ func init() {
 					&controllers.ReplyController{},
 					&controllers.SearchController{},
 					&controllers.AttachController{},
-					&controllers.MainController{},
+					&controllers.AttachController{},
 					&controllers.StandardController{},
 					&controllers.DiaryController{},
 					&controllers.PayController{},

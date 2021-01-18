@@ -79,7 +79,7 @@
               // docEditor.downloadAs();
           } else {
               console.log("Changes are collected on document editing service");
-              // 
+              //
           }
       };
       var onDownloadAs = function (event) {
@@ -101,7 +101,7 @@
           aTag.click();
           URL.revokeObjectURL(blob);
         }
-      
+
       window.addEventListener('message',function(e){
         console.log(e.data)
         if (e.data=="downloadAs") {
@@ -109,7 +109,7 @@
         }
       },false)
 
-      $("#insertImage").click(function(event) {    
+      $("#insertImage").click(function(event) {
           console.log("ONLYOFFICE Document Editor insertImage: "+ event.data);
           docEditor.insertImage({
               "fileType": "png",
@@ -274,7 +274,7 @@
               {
                 "permissions": "Deny Access",
                 "user": "Albet Tlanp"
-              }, 
+              },
             ]
           },
           "permissions": {
@@ -413,7 +413,7 @@
           var ret_data = ""
           ret_data = result.retCode;
           alert("成功生成!");
-          //$("#fin").attr('src',"data:image/bmp;base64," + ret_data);     
+          //$("#fin").attr('src',"data:image/bmp;base64," + ret_data);
         }
       },
       error: function(result) {

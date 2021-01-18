@@ -3,7 +3,7 @@ module github.com/3xxx/engineercms
 go 1.14
 
 require (
-	github.com/3xxx/flow v0.0.0-00010101000000-000000000000
+	github.com/3xxx/flow v0.9.0
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/astaxie/beego v1.12.1
 	github.com/beego/admin v0.0.0-20171002082758-83609ddd6f2d
@@ -27,6 +27,8 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/pborman/uuid v1.2.0
 	github.com/pdfcpu/pdfcpu v0.3.2
+	github.com/russross/blackfriday v2.0.0+incompatible
+	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/tealeg/xlsx v1.0.5
@@ -34,6 +36,5 @@ require (
 	golang.org/x/text v0.3.2
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/ldap.v2 v2.5.1
-	gopkg.in/russross/blackfriday.v2 v2.0.1
 	xorm.io/xorm v1.0.1
 )

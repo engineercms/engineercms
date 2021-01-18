@@ -18,7 +18,7 @@
 
       var onAppReady = function() {
           console.log("ONLYOFFICE DocumenEditor is ready");
-      }; 
+      };
       var onCollaborativeChanges = function () {
           console.log("The document changed by collaborative user");
       };

@@ -49,7 +49,7 @@ github.com/astaxie/beego/context/param
 github.com/PuerkitoBio/goquery
 xorm.io/builder
 github.com/astaxie/beego
-gopkg.in/russross/blackfriday.v2
+github.com/russross/blackfriday/v2
 xorm.io/core
 github.com/bradfitz/gomemcache/memcache
 github.com/howeyc/fsnotify

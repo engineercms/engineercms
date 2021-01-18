@@ -16,7 +16,7 @@ import (
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
 	// "github.com/russross/blackfriday/v2"
-	"gopkg.in/russross/blackfriday.v2"
+	"github.com/russross/blackfriday/v2"
 	"html/template"
 	"image/png"
 	"net/http"

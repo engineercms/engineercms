@@ -19,7 +19,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	// "github.com/russross/blackfriday/v2"
-	"gopkg.in/russross/blackfriday.v2"
+	"github.com/russross/blackfriday/v2"
 	"io/ioutil"
 	"os"
 )
