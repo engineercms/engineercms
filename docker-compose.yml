@@ -1,0 +1,39 @@
+version: "3.7"
+
+# networks
+networks:
+  proxy:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
+  onlyoffice:
+
+# docker managed persistent volumes
+volumes:
+  engineercms_data:
+
+services:
+  # onlyoffice for engineercms
+  engineercms-onlyoffice:
+    image: ${ONLY_OFFICE_IMAGE_REPO}
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - onlyoffice
+
+  # redis container for celery tasks
+  engineercms-api:
+    image: ${ENGINEER_CMS_IMAGE_REPO}
+    restart: always
+    networks:
+      proxy:
+        ipv4_address: 172.20.0.20
+    depends_on:
+      - engineercms-onlyoffice
+    volumes:
+      - engineercms_data:/app/database
+    ports:
+      - "8000:80"
