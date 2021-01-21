@@ -8,7 +8,6 @@ networks:
       driver: default
       config:
         - subnet: 172.20.0.0/24
-  onlyoffice:
 
 # docker managed persistent volumes
 volumes:
@@ -19,10 +18,9 @@ services:
   engineercms-onlyoffice:
     image: ${ONLY_OFFICE_IMAGE_REPO}
     restart: always
-    ports:
-      - "80:80"
     networks:
-      - onlyoffice
+      proxy:
+        ipv4_address: 172.20.0.21
 
   # redis container for celery tasks
   engineercms-api:
