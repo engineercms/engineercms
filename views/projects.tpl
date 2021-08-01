@@ -11,12 +11,27 @@
 <script src="/static/js/tableExport.js"></script>
 <script type="text/javascript" src="/static/js/moment.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
+<!-- 悬浮按钮 -->
+<script type="text/javascript" src="/static/float/js/float-module.min.js"></script>
 <style type="text/css">
+/*覆盖bootstrap.min.css里的全局样式，用class+*来匹配，纯class不行，纯*号是全部改变，*/
+.fm-ul * {
+  box-sizing: content-box
+}
+
 #modalTable .modal-header {
   cursor: move;
 }
 
 #modalTable1 .modal-header {
+  cursor: move;
+}
+
+#modalTable2 .modal-header {
+  cursor: move;
+}
+
+#modalTable3 .modal-header {
   cursor: move;
 }
 </style>
@@ -76,7 +91,7 @@
         // 返回false将会终止请求。
         pageSize: 15,
         pageNumber: 1,
-        pageList: [15, 20, 50, 'All'],
+        pageList: [15, 30, 50, 'All'],
         singleSelect: "true",
         clickToSelect: "true",
         queryParams: function queryParams(params) { //设置查询参数
@@ -354,11 +369,11 @@
     window.actionEvents = {
       //大事记
       'click .memorabilia': function(e, value, row, index) {
-        window.open('/project/' + row.Id + '/gettimeline');
+        window.open('/project/gettimeline/' + row.Id );
       },
       //日志
       'click .log': function(e, value, row, index) {
-        window.open('/project/' + row.Id + '/getcalendar');
+        window.open('/project/getcalendar/' + row.Id);
       },
       //操作记录
       'click .operate': function(e, value, row, index) {
@@ -920,7 +935,7 @@
               <button type="button" class="close" data-dismiss="modal">
                 <span aria-hidden="true">&times;</span>
               </button>
-              <h3 class="modal-title">编辑项目</h3>
+              <h3 class="modal-title">编辑项目——硬盘目录需要手动修改！！</h3>
             </div>
             <div class="modal-body">
               <div class="modal-body-content">
@@ -954,11 +969,82 @@
         </div>
       </div>
     </div>
+    <!-- 检索所有项目成果 -->
+    <div class="form-horizontal">
+      <div class="modal fade" id="modalTable2">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h3 class="modal-title">检索所有项目成果</h3>
+            </div>
+            <div class="modal-body">
+              <div class="modal-body-content">
+                <!-- <div class="form-group must">
+                  <label class="col-sm-3 control-label">输入关键字</label>
+                  <div class="col-sm-7">
+                    <input type="text" class="form-control" id="projcode1" name="projcode"></div>
+                </div> -->
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="请输入关键字进行搜索" autocomplete="off" size="30" id="keyword2" onkeypress="getKey2();">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="search">
+                      <i class="glyphicon glyphicon-search"></i>
+                      Search!
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary" onclick="searchAllProjectsProduct()">检索</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 检索选定项目成果 -->
+    <div class="form-horizontal">
+      <div class="modal fade" id="modalTable3">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h3 class="modal-title">检索选定项目成果</h3>
+            </div>
+            <div class="modal-body">
+              <div class="modal-body-content">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="请输入关键字进行搜索" autocomplete="off" size="30" id="keyword3" onkeypress="getKey3();">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="search3">
+                      <i class="glyphicon glyphicon-search"></i>
+                      Search!
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary" onclick="searchProjectProduct()">检索</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <script type="text/javascript">
   $(document).ready(function() {
     $("#modalTable").draggable({ handle: ".modal-header" }); //为模态对话框添加拖拽
     $("#modalTable1").draggable({ handle: ".modal-header" });
+    $("#modalTable2").draggable({ handle: ".modal-header" });
+    $("#modalTable3").draggable({ handle: ".modal-header" });
     $("#myModal").css("overflow", "hidden"); //禁止模态对话框的半透明背景滚动
   })
   // $(function(){ 
@@ -974,6 +1060,80 @@
       c += cArray[cIndex];
     }
     return c;
+  }
+
+  // document.body.style.height = document.documentElement.clientHeight - 100 + "px";
+  var fm = new FloatModule({
+    radius: '50%',
+    theme_color: '#56b4f8',
+    theme_content_color: '#fff',
+    font_size: '18px',
+    width_height: '60px',
+    margin_screen_x: '30px',
+    margin_screen_y: '30px',
+    margin_li: '10px',
+    animation: 'slide-in',
+    position: 'right-bottom',
+    icon_css_path: '',
+    btn_config: [{
+      icon: 'fa fa-search'
+    }, {
+      icon: 'fa fa-search-plus',
+      title: '搜索所有项目',
+      click: fnSearch
+    }, {
+      icon: 'fa fa-search-minus',
+      title: '搜索选中项目',
+      click: fnSearch2
+    }]
+  });
+
+  function fnSearch() {
+    $('#modalTable2').modal({
+      show: true,
+      backdrop: 'static'
+    });
+  }
+
+  function fnSearch2() {
+    var selectRow = $('#table0').bootstrapTable('getSelections');
+    console.log(selectRow)
+    if (selectRow.length < 1) {
+      alert("请先勾选成果！");
+      return;
+    }
+    $("input#cid").remove();
+    var th1 = "<input id='cid' type='hidden' name='cid' value='" + selectRow[0].Id + "'/>";
+    $(".modal-body").append(th1); //这里是否要换名字$("p").remove();
+    $('#modalTable3').modal({
+      show: true,
+      backdrop: 'static'
+    });
+  }
+
+  // 搜索所有项目成果
+  $("#search").click(function() {
+    window.location.href="/v1/wx/searchproduct?keyword="+$("#keyword2").val()
+  });
+  function searchAllProjectsProduct(){
+    window.location.href="/v1/wx/searchproduct?keyword="+$("#keyword2").val()
+  }
+  function getKey2() {
+    if (event.keyCode == 13) {
+      window.location.href="/v1/wx/searchproduct?keyword="+$("#keyword2").val()
+    }
+  }
+  // 搜索选定项目成果
+  $("#search3").click(function() {
+    window.location.href="/v1/wx/searchprojectproduct?productid="+$("#cid").val()+"&keyword="+$("#keyword3").val()
+  });
+  function searchProjectProduct(){
+    window.location.href="/v1/wx/searchprojectproduct?productid="+$("#cid").val()+"&keyword="+$("#keyword3").val()
+  }
+  function getKey3() {
+    if (event.keyCode == 13) {
+      window.location.href="/v1/wx/searchprojectproduct?productid="+$("#cid").val()+"&keyword="+$("#keyword3").val()
+    }
   }
   </script>
   <!-- <div>

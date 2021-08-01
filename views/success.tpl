@@ -2,15 +2,13 @@
  <!DOCTYPE html>
 <html>
 <head>
- <meta charset="UTF-8">
-  <title>MeritMS</title>
-<script type="text/javascript" src="/static/js/jquery-2.1.3.min.js"></script>
- <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
- <!-- <script src="/static/js/bootstrap-treeview.js"></script> -->
-<link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css"/>
+  <meta charset="UTF-8">
+  <title>EngineerCMS</title>
+  <script type="text/javascript" src="/static/js/jquery-2.1.3.min.js"></script>
+  <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
 </head>
 
-<div class="container-fill">{{template "navbar" .}}</div>
 <body>
 <div id="content" class="col-md-8 col-md-offset-2">
     <div class="col-md-6 auth-page">

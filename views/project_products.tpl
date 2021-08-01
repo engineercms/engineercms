@@ -1,18 +1,10 @@
 <!-- 具体一个项目侧栏id下所有成果，不含子目录下的成果 -->
 <!-- office下载模式，dwg下载模式 -->
 <!DOCTYPE html>
-
 <head>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"> -->
   <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
   <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-  <!-- <script src="/static/js/bootstrap-treeview.js"></script> -->
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-table.min.css" />
   <script type="text/javascript" src="/static/js/jquery.tablesorter.min.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap-table.min.js"></script>
@@ -428,8 +420,8 @@
           var array = value[0].Relevancy.split(",")
           var relevarray = new Array()
           for (i = 0; i < array.length; i++) {
-            // relevarray[i]=array[i];
-            relevarray[i] = '<a href="javascript:gototree(' + value[i].ProjectId + ')" title="查看" target="_blank">' + value[i].Relevancy + '</a>';
+            // relevarray[i]=array[i];a href="javascript:void(0);" onclick="js_method()"
+            relevarray[i] = '<a href="javascript:void(0);" onclick="gototree(' + value[i].ProjectId + ');return false;" title="查看" target="_blank">' + value[i].Relevancy + '</a>';
           }
           return relevarray.join(",");
           // articleUrl= '<a href="'+value[0].Link+'/'+value[0].Id+'" title="查看" target="_blank"><i class="fa fa-file-text-o"></i></a>';
@@ -440,7 +432,7 @@
           var relevarray = new Array()
           for (i = 0; i < value.length; i++) {
             // relevarray[i]=value[i].Relevancy;
-            relevarray[i] = '<a href="javascript:gototree(' + value[i].ProjectId + ')" title="查看" target="_blank">' + value[i].Relevancy + '</a>';
+            relevarray[i] = '<a href="javascript:void(0);" onclick="gototree(' + value[i].ProjectId + ');return false;" title="查看" target="_blank">' + value[i].Relevancy + '</a>';
           }
           return relevarray.join(",");
           // articleUrl= "<a class='article' href='javascript:void(0)' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
@@ -457,6 +449,12 @@
       parent.gototree(e); // pClick 为父页面 js 方法
       // window.parent.document.getElementById("父窗口元素ID");
       // window.parent.document.getElementById("iframepage").src="/project/{{.Id}}/"+e;
+
+      // $("#iframepage", window.parent.document).val($val);//jQuery写法给父页面传值
+        // window.parent.document.getElementById("iframepage").setAttribute("src","/project/{{.Id}}/"+e);//原生javascript写法给父页面传值
+        // $(".clear", window.parent.document).hide();//jQuery写法控制父页面中的某个元素隐藏
+        //window.parent.document.getElementsByClassName("clear")[0].style.display = "none";//原生javascript写法控制父页面中的某个元素隐藏
+
       // var findCheckableNodess = function() {
       //   return $('#tree',parent.document).treeview('findNodes', [e, 'id']);
       // }; 
@@ -533,12 +531,18 @@
             attachUrl = '<a class = "view" href="javascript:void(0)"><img style="width:70;height:30px;" src="/downloadattachment?id=' + value[0].Id + '" title="预览" onclick="savepic(this)"/></a>'
           } else if (ext == ".mp4"||ext ==".MP4") {
             attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-video-o fa-lg text-info"></i></a>'
-          } else if (ext == ".doc" || ext == ".docx") {
-            attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
-          } else if (ext == ".xls" || ext == ".xlsx") {
-            attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
-          } else if (ext == ".ppt" || ext == ".pptx") {
-            attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-powerpoint-o fa-lg" style="color:Red;"></i></a>';
+          } else if (ext == ".doc" || ext == ".docx" || ext == ".wps") {
+            // attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
+            attachUrl = '<a href=/officeview/' + value[0].Id + ' title="协作" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
+
+          } else if (ext == ".xls" || ext == ".xlsx" || ext == ".et") {
+            // attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
+            attachUrl = '<a href=/officeview/' + value[0].Id + ' title="协作" target="_blank"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
+
+          } else if (ext == ".ppt" || ext == ".pptx" || ext == ".dps") {
+            // attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-powerpoint-o fa-lg" style="color:Red;"></i></a>';
+            attachUrl = '<a href=/officeview/' + value[0].Id + ' title="协作" target="_blank"><i class="fa fa-file-powerpoint-o fa-lg" style="color:Red;"></i></a>';
+
           } else {
             attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
           }
@@ -1535,7 +1539,11 @@
         url: "/v1/cart/createproductcart",
         data: { ids: ids },
         success: function(data, status) {
-          alert("添加“" + data.data[0].Title + "”购物车成功！(status:" + status + "！)");
+          if (data.code == "ERROR") {
+            alert(data.msg);
+          } else {
+            alert("添加“" + data.data[0].Title + "”购物车成功！(status:" + status + "！)");
+          }
           // $.toast({
           //   type: TYPES[1],
           //   title: TITLES['info'],
@@ -2206,9 +2214,9 @@
     //大屏幕
     var toolbarButtonsMD = ['bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', '|', 'fontFamily', 'fontSize', 'color', 'inlineStyle', 'paragraphStyle', '|', 'paragraphFormat', 'align', 'formatOL', 'formatUL', 'outdent', 'indent', '-', 'quote', 'insertLink', 'insertImage', 'insertVideo', 'insertFile', 'insertTable', '|', 'specialCharacters', 'insertHR', 'undo', 'redo', 'clearFormatting', '|', 'html', 'help'];
     //小屏幕'fullscreen',
-    var toolbarButtonsSM = ['bold', 'italic', 'underline', 'fontFamily', 'fontSize', 'insertLink', 'insertImage', 'insertTable', 'undo', 'redo'];
+    var toolbarButtonsSM = ['bold', 'italic', 'underline', 'fontFamily', 'fontSize', 'insertLink', 'insertImage', 'insertVideo', 'insertTable', 'undo', 'redo'];
     //手机
-    var toolbarButtonsXS = ['bold', 'italic', 'fontFamily', 'fontSize', 'undo', 'redo'];
+    var toolbarButtonsXS = ['insertImage', 'insertVideo', 'bold', 'italic', 'fontSize', 'undo', 'redo'];
     var pid = $('#pid').val();
     //编辑器初始化并赋值 
     $('#edit').froalaEditor({

@@ -222,6 +222,9 @@ a.navbar-brand {
       <li {{if .IsPhotoWipe}} class="active" {{end}}>
         <a href="http://192.168.100.37:8080/merit" title="价值" target="_blank">价值</a>
       </li>
+      <li {{if .IsMath}} class="active" {{end}}>
+        <a href="/v1/mathcad/getmath/26989" title="云计算" target="_blank">云计算</a>
+      </li>
     </ul>
     <div class="pull-right">
       <ul class="nav navbar-nav navbar-right">
@@ -235,8 +238,8 @@ a.navbar-brand {
             <li><a href="/v1/cart/getcart" title="购物车"><i class="fa fa-shopping-cart">&nbsp; 购物车</i></a></li>
             <li><a href="javascript:void(0)" id="login">重新登录</a></li>
             <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
-            <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
-            <li><a href="/project/25001/getcalendar" title="项目日历"><i class="fa fa-calendar">&nbsp; 项目日历</i></a></li>
+            <li><a href="/project/gettimeline/25001" title="大事记">大事记</a></li>
+            <li><a href="/project/getcalendar/25001" title="项目日历"><i class="fa fa-calendar">&nbsp; 项目日历</i></a></li>
             <li><a href="/calendar" title="日程安排"><i class="fa fa-calendar-plus-o">&nbsp; 日程安排</i></a></li>
             <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
           </ul>
@@ -250,8 +253,8 @@ a.navbar-brand {
             <li><a href="/user" title="用户资料">用户资料</a></li>
             <li><a href="javascript:void(0)" id="login">重新登录</a></li>
             <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
-            <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
-            <li><a href="/project/25001/getcalendar" title="项目日历"><i class="fa fa-calendar">&nbsp; 项目日历</i></a></li>
+            <li><a href="/project/gettimeline/25001" title="大事记">大事记</a></li>
+            <li><a href="/project/gettimeline/25001" title="项目日历"><i class="fa fa-calendar">&nbsp; 项目日历</i></a></li>
             <li><a href="/calendar" title="日程安排"><i class="fa fa-calendar-plus-o">&nbsp; 日程安排</i></a></li>
             <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
           </ul>
@@ -266,8 +269,8 @@ a.navbar-brand {
             <li><a href="/cms/#/flow/usertobeprocessed" title="邮箱">邮箱</a></li>
             <li><a href="javascript:void(0)" id="login">重新登录</a></li>
             <li><a href="/v1/wx/ssologin" title="单点登录">SSO单点登陆</a></li>
-            <li><a href="/project/25001/gettimeline" title="大事记">大事记</a></li>
-            <li><a href="/project/25001/getcalendar" title="项目日历">项目日历</a></li>
+            <li><a href="/project/gettimeline/25001" title="大事记">大事记</a></li>
+            <li><a href="/project/gettimeline/25001" title="项目日历">项目日历</a></li>
             <li><a href="/calendar" title="日程安排">日程安排</a></li>
             <li><a href="javascript:void(0)" onclick="logout()">退出</a></li>
           </ul>
@@ -282,6 +285,9 @@ a.navbar-brand {
         </li>
         
         {{end}}
+        <li {{if .IsChat}} class="active" {{end}}>
+          <a href="/v1/chat/chat">Chat</a>
+        </li>
         <li {{if .IsWiki}} class="active" {{end}}>
           <a href="/wiki">Wiki</a>
         </li>
@@ -391,7 +397,7 @@ function logout() {
     url: '/logout',
     data: {},
     success: function(result) {
-      if (result.islogin) {
+      if (!result.islogin) {
         // $("#status").html("登出成功");
         alert("登出成功");
         window.location.reload();

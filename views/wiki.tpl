@@ -18,7 +18,7 @@
 <div class="col-md-8">
 <div class="content">
   <div>
-  <h3 class="pull-left">欢迎来到 珠三角项目 Wiki</h3>
+  <h3 class="pull-left">欢迎来到 PSS Wiki</h3>
   <ul class="nav nav-tabs pull-right">
     <li class="active"><a href="javascript:;">最近回复</a></li>
     <li><a href="/wikis/latest">最近发布</a></li>
@@ -223,7 +223,7 @@
     <hr/>
   </div>
   <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-    <h4>Copyright © 2016-2018 EngineerCMS</h4>
+    <h4>Copyright © 2016-2021 EngineerCMS</h4>
     <p>
       网站由 <i class="user icon"></i>
       <a target="_blank" href="https://github.com/3xxx">@3xxx</a>

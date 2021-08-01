@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -1471,7 +1472,18 @@ func (c *AttachController) DownloadAttachment() {
 		beego.Error(err)
 		utils.FileLogs.Error(c.Ctx.Input.IP() + " 查询成果路径 " + err.Error())
 	}
+
 	fileext := path.Ext(attachment.FileName)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
 	switch fileext {
 	case ".JPG", ".jpg", ".png", ".PNG", ".bmp", ".BMP":
 		// c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
@@ -1572,8 +1584,9 @@ func (c *AttachController) Attachment() {
 	var useridstring string
 	_, _, uid, isadmin, islogin := checkprodRole(c.Ctx)
 	// beego.Info(uid)
-	// beego.Info(isadmin)
+	// beego.Info(islogin)
 	useridstring = strconv.FormatInt(uid, 10)
+
 	//1.url处理中文字符路径，[1:]截掉路径前面的/斜杠
 	// filePath := path.Base(c.Ctx.Request.RequestURI)
 	filePath, err := url.QueryUnescape(c.Ctx.Request.RequestURI[1:]) //attachment/SL2016测试添加成果/A/FB/1/Your First Meteor Application.pdf
@@ -1589,16 +1602,29 @@ func (c *AttachController) Attachment() {
 	fileext := path.Ext(filePath)
 	filepath1 := path.Dir(filePath)
 	array := strings.Split(filepath1, "/")
-	beego.Info(array[1])
-	if array[1] == "standard" {
+	// beego.Info(array[1])
+	// beego.Info(fileext)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
+	if array[1] == "standard" || (array[1] == "mathcad" && fileext == ".pdf") {
 		if !islogin {
+			// beego.Info(!islogin)
 			route := c.Ctx.Request.URL.String()
 			c.Data["Url"] = route
 			c.Redirect("/roleerr?url="+route, 302)
+			return
 		} else {
 			http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)
+			return
 		}
-		return
 	}
 	//查出所有项目
 	var pid int64
@@ -1674,7 +1700,9 @@ func (c *AttachController) Attachment() {
 	//这里缺少权限设置！！！！！！！！！！！
 	default:
 		if e.Enforce(useridstring, projurls+"/", c.Ctx.Request.Method, fileext) || isadmin || isme {
+			beego.Info(e.Enforce(useridstring, projurls+"/", c.Ctx.Request.Method, fileext))
 			http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath) //这样写下载的文件名称不对
+			// beego.Info(isadmin)
 			// c.Redirect(url+"/"+attachment.FileName, 302)
 			// c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
 		} else {
@@ -1716,6 +1744,19 @@ func (c *AttachController) GetCarousel() {
 	if err != nil {
 		beego.Error(err)
 	}
+
+	fileext := path.Ext(filePath)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
+
 	http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)
 }
 
@@ -2008,12 +2049,25 @@ func (c *AttachController) WxPdf() {
 				beego.Error(err)
 			}
 			fileext := path.Ext(attachment.FileName)
+			matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+			if err != nil {
+				beego.Error(err)
+			}
+			if matched {
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+				c.ServeJSON()
+				return
+			}
+
 			if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) {
 				c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
+			} else {
+				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "权限不够！"}
+				c.ServeJSON()
 			}
 		}
 	} else {
-		c.Data["json"] = "未查到openID"
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "未查到openID"}
 		c.ServeJSON()
 	}
 }
@@ -2039,6 +2093,17 @@ func (c *AttachController) GetWxPdf() {
 	if err != nil {
 		beego.Error(err)
 	}
+	fileext := path.Ext(attachment.FileName)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
 
 	product, err := models.GetProd(attachment.ProductId)
 	if err != nil {
@@ -2054,6 +2119,110 @@ func (c *AttachController) GetWxPdf() {
 	} else {
 		c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
 	}
+}
+
+// @Title dowload wx pdf
+// @Description get wx pdf by id
+// @Param pdflink query string  true "The url of pdf"
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /getwxmathpdf [get]
+// 下载mathcad pdf计算书
+func (c *AttachController) GetWxMathPdf() {
+	// 加权限判断
+	openID := c.GetSession("openID")
+	if openID != nil {
+		_, err := models.GetUserByOpenID(openID.(string))
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "获取用户名错误!"}
+			c.ServeJSON()
+			return
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "用户未登录"}
+		c.ServeJSON()
+		return
+	}
+	pdflink := c.Input().Get("pdflink")
+	beego.Info(pdflink)
+	fileext := path.Ext(pdflink)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
+	pdflink = strings.Replace(pdflink, "/attachment", "attachment", -1)
+	c.Ctx.Output.Download(pdflink)
+}
+
+// @Title dowload wx math temp pdf
+// @Description get wx math temp pdf by id
+// @Param id path string true "The url of pdf"
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /getwxtemppdf/:id [get]
+// 下载mathcad pdf计算书，不用权限判断
+func (c *AttachController) GetWxTempPdf() {
+	// 加权限判断
+	openID := c.GetSession("openID")
+	if openID != nil {
+		// beego.Info(openID.(string))
+		_, err := models.GetUserByOpenID(openID.(string))
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "获取用户名错误!"}
+			c.ServeJSON()
+			return
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "用户未登录"}
+		c.ServeJSON()
+		return
+	}
+
+	id := c.Ctx.Input.Param(":id")
+	var usertempleid uint
+	if id != "" {
+		//id转成uint为
+		idint, err := strconv.Atoi(id)
+		if err != nil {
+			beego.Error(err)
+		}
+		usertempleid = uint(idint)
+	}
+
+	usertemple, err := models.GetMathTemple(usertempleid)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(usertemple)
+	// 去除文件名
+	filepath := path.Dir(usertemple.TempPath)
+	// 文件名
+	filename := usertemple.TempTitle //path.Base(usertemple.TempPath)
+	// 文件后缀
+	filesuffix := path.Ext(filename)
+	filenameOnly := strings.TrimSuffix(filename, filesuffix) //只留下文件名，无后缀
+	// fileext := path.Ext(pdflink)
+	// matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// if matched {
+	// 	c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+	// 	c.ServeJSON()
+	// 	return
+	// }
+	pdflink := filepath + "/" + filenameOnly + ".pdf"
+	// beego.Info(pdflink)
+	c.Ctx.Output.Download(pdflink)
 }
 
 //编码转换
@@ -2090,3 +2259,15 @@ func (c *AttachController) GetWxPdf() {
 // 	//根据路由path.Dir——再转成数组strings.Split——查出项目id——加上名称——查出下级id
 // 	beego.Info(path.Dir(filePath))
 // 	beego.Info(c.Ctx.Request.RequestURI[1:])
+
+// 运算符优先级
+
+// 由上至下代表优先级由高到低
+
+// 7	^ !
+// 6	* / % << >> & &^
+// 5	+ - | ^
+// 4	== != < <= >= >
+// 3	<-
+// 2	&&
+// 1	||

@@ -788,34 +788,43 @@ Editableform is linked with one of input types, e.g. 'text', 'select' etc.
            result = [], 
            that = this;
 
-           $.each(sourceData, function(i, o) {
-               if(o.children) {
-                   result = result.concat(that.itemsByValue(value, o.children, valueProp));
-               } else {
-                   /*jslint eqeq: true*/
-                   if(isValArray) {
-                       if($.grep(value, function(v){  return v == (o && typeof o === 'object' ? valueProp(o) : o); }).length) {
-                           result.push(o); 
-                       }
-                   } else {
-                       var itemValue = (o && (typeof o === 'object')) ? valueProp(o) : o;
-                       if(value == itemValue) {
-                           result.push(o); 
-                       }
-                   }
-                   /*jslint eqeq: false*/
-               }
-           });
-           
-           return result;
-       },
-       
-       /*
-       Returns input by options: type, mode. 
-       */
-       createInput: function(options) {
-           var TypeConstructor, typeOptions, input,
-           type = options.type;
+      $.each(sourceData, function(i, o) {
+        if (o.children) {
+          result = result.concat(that.itemsByValue(value, o.children, valueProp));
+        } else {
+          /*jslint eqeq: true*/
+          if (isValArray) {
+            if ($.grep(value, function(v) { return v == (o && typeof o === 'object' ? valueProp(o) : o); }).length) {
+              result.push(o);
+            }
+          } else {
+            var itemValue = (o && (typeof o === 'object')) ? valueProp(o) : o;
+            if (value == itemValue) {
+              result.push(o);
+            }
+          }
+          /*jslint eqeq: false*/
+        }
+      });
+
+      return result;
+    },
+
+    /*
+    Returns input by options: type, mode. 
+    */
+    createInput: function(options) {
+      var TypeConstructor, typeOptions, input,
+        type = options.type;
+      // var type;秦晓川进行修改，支持type里的function
+      if ($.isFunction(options.type)) {
+        type = options.type.call(options.scope);
+        // console.log(type)
+        // this.sourceData = null;
+        //note: if function returns the same source as URL - sourceData will be taken from cahce and no extra request performed
+      } else {
+        type = options.type;
+      }
 
            //`date` is some kind of virtual type that is transformed to one of exact types
            //depending on mode and core lib

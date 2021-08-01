@@ -685,8 +685,9 @@ func (c *OnlyController) OnlyOffice() {
 	c.Data["role"] = role
 	c.Data["IsAdmin"] = isadmin
 	c.Data["IsLogin"] = islogin
-	c.Data["Uid"] = uid
+	// c.Data["Uid"] = uid
 	useridstring = strconv.FormatInt(uid, 10)
+	c.Data["Uid"] = useridstring
 	//增加admin，everyone，isme
 
 	var usersessionid string //客户端sesssionid
@@ -887,19 +888,19 @@ func (c *OnlyController) OnlyOffice() {
 
 	if path.Ext(onlyattachment.FileName) == ".docx" || path.Ext(onlyattachment.FileName) == ".DOCX" {
 		c.Data["fileType"] = "docx"
-		c.Data["documentType"] = "text"
+		c.Data["documentType"] = "text" //word
 	} else if path.Ext(onlyattachment.FileName) == ".wps" || path.Ext(onlyattachment.FileName) == ".WPS" {
 		c.Data["fileType"] = "docx"
 		c.Data["documentType"] = "text"
 	} else if path.Ext(onlyattachment.FileName) == ".XLSX" || path.Ext(onlyattachment.FileName) == ".xlsx" {
 		c.Data["fileType"] = "xlsx"
-		c.Data["documentType"] = "spreadsheet"
+		c.Data["documentType"] = "spreadsheet" //cell
 	} else if path.Ext(onlyattachment.FileName) == ".ET" || path.Ext(onlyattachment.FileName) == ".et" {
 		c.Data["fileType"] = "xlsx"
 		c.Data["documentType"] = "spreadsheet"
 	} else if path.Ext(onlyattachment.FileName) == ".pptx" || path.Ext(onlyattachment.FileName) == ".PPTX" {
 		c.Data["fileType"] = "pptx"
-		c.Data["documentType"] = "presentation"
+		c.Data["documentType"] = "presentation" //slide
 	} else if path.Ext(onlyattachment.FileName) == ".dps" || path.Ext(onlyattachment.FileName) == ".DPS" {
 		c.Data["fileType"] = "pptx"
 		c.Data["documentType"] = "presentation"
@@ -908,7 +909,7 @@ func (c *OnlyController) OnlyOffice() {
 		c.Data["documentType"] = "text"
 	} else if path.Ext(onlyattachment.FileName) == ".txt" || path.Ext(onlyattachment.FileName) == ".TXT" {
 		c.Data["fileType"] = "txt"
-		c.Data["documentType"] = "text"
+		c.Data["documentType"] = "text" //word
 	} else if path.Ext(onlyattachment.FileName) == ".XLS" || path.Ext(onlyattachment.FileName) == ".xls" {
 		c.Data["fileType"] = "xls"
 		c.Data["documentType"] = "spreadsheet"
@@ -920,7 +921,7 @@ func (c *OnlyController) OnlyOffice() {
 		c.Data["documentType"] = "presentation"
 	} else if path.Ext(onlyattachment.FileName) == ".pdf" || path.Ext(onlyattachment.FileName) == ".PDF" {
 		c.Data["fileType"] = "pdf"
-		c.Data["documentType"] = "text"
+		c.Data["documentType"] = "text" //word
 		c.Data["Mode"] = "view"
 	}
 
@@ -938,6 +939,9 @@ func (c *OnlyController) OnlyOffice() {
 		// c.TplName = "onlyoffice/onlyoffice.tpl"
 		c.Data["Type"] = "desktop"
 	}
+	c.Data["Onlyofficeapi_url"] = beego.AppConfig.String("onlyofficeapi_url")
+	c.Data["Engineercmsapi_url"] = beego.AppConfig.String("engineercmsapi_url")
+
 	c.TplName = "onlyoffice/onlyoffice.tpl"
 }
 
@@ -991,27 +995,43 @@ func (c *OnlyController) OfficeView() {
 		//服务端sessionid怎么取出
 		// v := c.GetSession("uname")
 		// beego.Info(v.(string))
-		if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) || isadmin {
+		// if e.Enforce(useridstring, projurl, c.Ctx.Request.Method, fileext) || isadmin {
+		if e.Enforce(useridstring, projurl, "POST", fileext) || e.Enforce(useridstring, projurl, "PUT", fileext) || isadmin {
 			// http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)//这样写下载的文件名称不对
 			// c.Redirect(url+"/"+attachment.FileName, 302)
 			// c.Ctx.Output.Download(fileurl + "/" + attachment.FileName)
-			c.Data["FilePath"] = fileurl + "/" + attachment.FileName
-			c.Data["Username"] = username
-			c.Data["Ip"] = c.Ctx.Input.IP()
-			c.Data["role"] = role
-			c.Data["IsAdmin"] = isadmin
-			c.Data["IsLogin"] = islogin
-			c.Data["Uid"] = uid
 			c.Data["Mode"] = "edit"
-			c.Data["Edit"] = true    //false
-			c.Data["Review"] = true  //false
-			c.Data["Comment"] = true //false
+			c.Data["Edit"] = true
+			c.Data["Review"] = true
+			c.Data["Comment"] = true
 			c.Data["Download"] = true
 			c.Data["Print"] = true
-			c.Data["Doc"] = attachment
-			c.Data["AttachId"] = idNum
-			c.Data["Key"] = strconv.FormatInt(attachment.Updated.UnixNano(), 10)
-			c.Data["Sessionid"] = usersessionid
+			c.Data["Print"] = true
+		} else if e.Enforce(useridstring, projurl, "GET", fileext) {
+			c.Data["Mode"] = "view"
+			c.Data["Edit"] = false
+			c.Data["Review"] = false
+			c.Data["Comment"] = false
+			c.Data["Download"] = false
+			c.Data["Print"] = false
+		} else {
+			route := c.Ctx.Request.URL.String()
+			c.Data["Url"] = route
+			c.Redirect("/roleerr?url="+route, 302)
+			// c.Redirect("/roleerr", 302)
+			return
+		}
+		c.Data["FilePath"] = fileurl + "/" + attachment.FileName
+		c.Data["Username"] = username
+		c.Data["Ip"] = c.Ctx.Input.IP()
+		c.Data["role"] = role
+		c.Data["IsAdmin"] = isadmin
+		c.Data["IsLogin"] = islogin
+		c.Data["Uid"] = uid
+		c.Data["Doc"] = attachment
+		c.Data["AttachId"] = idNum
+		c.Data["Key"] = strconv.FormatInt(attachment.Updated.UnixNano(), 10)
+		c.Data["Sessionid"] = usersessionid
 
 			if path.Ext(attachment.FileName) == ".docx" || path.Ext(attachment.FileName) == ".DOCX" {
 				c.Data["fileType"] = "docx"
@@ -1052,28 +1072,24 @@ func (c *OnlyController) OfficeView() {
 				c.Data["Mode"] = "view"
 			}
 
-			u := c.Ctx.Input.UserAgent()
-			matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
-			if err != nil {
-				beego.Error(err)
-			}
-			if matched == true {
-				// beego.Info("移动端~")
-				// c.TplName = "onlyoffice/onlyoffice.tpl"
-				c.Data["Type"] = "mobile"
-			} else {
-				// beego.Info("电脑端！")
-				// c.TplName = "onlyoffice/onlyoffice.tpl"
-				c.Data["Type"] = "desktop"
-			}
-			c.TplName = "onlyoffice/officeview.tpl"
-		} else {
-			route := c.Ctx.Request.URL.String()
-			c.Data["Url"] = route
-			c.Redirect("/roleerr?url="+route, 302)
-			// c.Redirect("/roleerr", 302)
-			return
+		u := c.Ctx.Input.UserAgent()
+		matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+		if err != nil {
+			beego.Error(err)
 		}
+		if matched == true {
+			// beego.Info("移动端~")
+			// c.TplName = "onlyoffice/onlyoffice.tpl"
+			c.Data["Type"] = "mobile"
+		} else {
+			// beego.Info("电脑端！")
+			// c.TplName = "onlyoffice/onlyoffice.tpl"
+			c.Data["Type"] = "desktop"
+		}
+		c.Data["Onlyofficeapi_url"] = beego.AppConfig.String("onlyofficeapi_url")
+		c.Data["Engineercmsapi_url"] = beego.AppConfig.String("engineercmsapi_url")
+
+		c.TplName = "onlyoffice/officeview.tpl"
 	} else {
 		route := c.Ctx.Request.URL.String()
 		c.Data["Url"] = route
@@ -1105,7 +1121,7 @@ func (c *OnlyController) UrltoCallback() {
 	json.Unmarshal(c.Ctx.Input.RequestBody, &callback)
 	// beego.Info(string(c.Ctx.Input.RequestBody))
 	beego.Info(callback.Status)
-	beego.Info(callback.Forcesavetype)
+	// beego.Info(callback.Forcesavetype)
 	if callback.Status == 1 || callback.Status == 4 {
 		//•	1 - document is being edited,
 		//•	4 - document is closed with no changes,
@@ -1257,8 +1273,11 @@ func (c *OnlyController) UrltoCallback() {
 
 		c.Data["json"] = map[string]interface{}{"error": 0}
 		c.ServeJSON()
-	} else if callback.Status == 6 && callback.Forcesavetype == 1 || callback.Forcesavetype == 0 {
+	} else if callback.Status == 6 && callback.Forcesavetype == 1 {
 		//•	6 - document is being edited, but the current document state is saved,
+		// 0 - the force saving request is performed to the command service,
+		// 1 - the force saving request is performed each time the saving is done (e.g. the Save button is clicked), which is only available when the forcesave option is set to true.
+		// 2 - the force saving request is performed by timer with the settings from the server config.
 		resp, err := http.Get(callback.Url)
 		if err != nil {
 			beego.Error(err)
@@ -1633,6 +1652,19 @@ func (c *OnlyController) DownloadDoc() {
 		beego.Info(filePath)
 	}
 	filename := filepath.Base(filePath)
+
+	fileext := path.Ext(filename)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
+
 	downloadfile, err = models.GetOnlyAttachbyName(filename)
 	if err != nil {
 		beego.Error(err)
@@ -1640,7 +1672,7 @@ func (c *OnlyController) DownloadDoc() {
 
 	//1.管理员或者没有设置权限的文档直接可以下载。
 	police := e.GetFilteredPolicy(1, "/onlyoffice/"+strconv.FormatInt(downloadfile.Id, 10))
-	beego.Info(police)
+	// beego.Info(police)
 	if isadmin || len(police) == 0 {
 		// c.Ctx.Output.Download(filePath) //这个能保证下载文件名称正确
 		http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, filePath)
@@ -1649,7 +1681,7 @@ func (c *OnlyController) DownloadDoc() {
 
 	//2.取得用户权限
 	police = e.GetFilteredPolicy(0, strconv.FormatInt(uid, 10), "/onlyoffice/"+strconv.FormatInt(downloadfile.Id, 10))
-	beego.Info(police)
+	// beego.Info(police)
 	for _, v2 := range police {
 		beego.Info(v2)
 		v2int, err := strconv.ParseInt(v2[2], 10, 64)
@@ -1666,14 +1698,14 @@ func (c *OnlyController) DownloadDoc() {
 
 	//3.取得用户角色——取得角色的权限
 	userroles := e.GetRolesForUser(strconv.FormatInt(uid, 10))
-	beego.Info(userroles)
+	// beego.Info(userroles)
 	// userrole := make([]Userrole, 0)
 	// var canidown bool
 	for _, v1 := range userroles {
 		police := e.GetFilteredPolicy(0, v1, "/onlyoffice/"+strconv.FormatInt(downloadfile.Id, 10))
-		beego.Info(police)
+		// beego.Info(police)
 		for _, v2 := range police {
-			beego.Info(v2)
+			// beego.Info(v2)
 			v2int, err := strconv.ParseInt(v2[2], 10, 64)
 			if err != nil {
 				beego.Error(err)
@@ -1799,6 +1831,19 @@ func (c *OnlyController) Download() {
 		c.ServeJSON()
 		return
 	}
+
+	fileext := path.Ext(attachments[0].FileName)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
+
 	filePath := "attachment/onlyoffice/" + attachments[0].FileName
 	//管理员或者没有设置权限的文档直接可以下载。
 	police := e.GetFilteredPolicy(1, "/onlyoffice/"+docid)

@@ -10,7 +10,7 @@
 
 	4. 运行engineercms-win64/win32.exe即可在chrome浏览器中输入本地ip（127.0.0.1）和前面设置的端口号（假设是80或8080）进行访问。如果是80端口，则端口号可省略，如http://127.0.0.1。如果运行后闪退，则可能是端口号被占用了，请修改端口号再运行；也可能是runmode=dev开发者模式，应该改为prod产品模式，当然，你去cmd窗口里，进入engineercms所在目录下，在命令行里键入可执行文件名，不会闪退，可以看到出错的提示了。运行后不要关闭窗口，它是服务。IE浏览器支持不好，推荐使用chrome，可以使用firefox、opra。加入开机启动请自行设置。
 
-	5. linux系统请将执行文件engineercms下载到engineercms目录下（前文1中解压的文件夹下），输入命令 nohup ./engineercms & 即可运行系统。如果linux系统提示Permission denied，说明要修改一下文件权限，执行命令：chmod +x engineercms
+	5. linux系统：请将执行文件engineercms下载到engineercms目录下（前文1中解压的文件夹下），swagger文件夹下的swagger.json和swagger.yml两个文件拷贝到engineercms目录里（前文1中解压的文件夹下）的swagger文件夹里。输入命令 nohup ./engineercms & 即可运行系统。如果linux系统提示Permission denied，说明要修改一下文件权限，执行命令：chmod +x engineercms
 
 	6. 如果使用mysql数据库，请设置conf文件夹内的app.conf文件。
 
@@ -50,7 +50,7 @@
 
 	18.admin页——用户—权限：（该功能未提供）点击勾选用户；点击勾选权限；点击项目，出现项目目录，勾选赋予权限的目录，保存。
 
-*************前台使用***********************
+*************前端使用***********************
 
 	19.项目——项目列表页——添加：分级目录就是后台admin页上文第6点定义的。新建项目除了建立数据表中的目录，还在cms系统文件夹attachment中建立目录文件夹，以后所有上传的成果附件都放在这些文件夹中。
 
@@ -87,7 +87,7 @@
 
 	如果是升级，请：
 	备份自己修改的文件，然后解压覆盖其他文件。
-	默认不会覆盖app.conf以及数据文件engineercms.db。
+	用beyond compare对比新旧文件的区别，小心覆盖旧文件。
 
 *************其他注意***********************
 
@@ -115,6 +115,22 @@
 
 *************flow事务流程********************
 
-	36.请看网盘里的文档[https://pan.baidu.com/s/1gf0ucuR](https://pan.baidu.com/s/1gf0ucuR)《20190922 engineercms怎样做流程设置 flow nginx node mysql》，flow只支持mysql数据库。
+	36.请看网盘里的文档[链接：https://pan.baidu.com/s/1MDJ-QfCmv_LiychDSLn8jw 提取码：nhar ](https://pan.baidu.com/s/1MDJ-QfCmv_LiychDSLn8jw)《20190922 engineercms怎样做流程设置 flow nginx node mysql》，flow只支持mysql数据库。
+
+	*************mindoc创作书籍********************
+
+	37.管理员用户名为admin，密码为123456。
+
+	38.它的验证码不是很清晰，很难输入准确。所以用sqlite expert professional先打开sqlite数据库，将md_options表中的“是否启用验证码”的option_value填上false。
+
+
+	更换域名记录
+	购买域名，只要在.net那个域名里购买，填写hotqin即可，默认就是www.hotqin.net
+	上传身份证进行备案
+
+
+	更换域名：
+	engineercms的app里小程序的服务地址要修改成新的域名
+	申请SSL证书：打开远程桌面，打开beyond compare，再点击证书的文件验证，快速拷贝到本机engineercms的static里的download目录里的txt文件里，远程进行文件更新，回到云里，点击验证，3分钟内完成的话，马上就可以扫描到。
 
 

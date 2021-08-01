@@ -4,16 +4,15 @@
 <title>项目详细-EngiCMS</title>
 <script src="/static/js/bootstrap-treeview.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-treeview.css" />
-
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css">
-  <link rel="stylesheet" href="/static/css/jquery.mCustomScrollbar.min.css">
-  <link rel="stylesheet" href="/static/css/custom.css">
-  <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" />
-  <script src="/static/js/jquery.mCustomScrollbar.concat.min.js"></script>
-  <script src="/static/js/custom.js"></script>
-  <!-- <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script> -->
-  <!-- <style type="text/css">
+<meta charset="utf-8">
+<!-- <link rel="stylesheet" href="https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css"> -->
+<link rel="stylesheet" href="/static/css/jquery.mCustomScrollbar.min.css">
+<link rel="stylesheet" href="/static/css/custom.css">
+<link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" />
+<script src="/static/js/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/static/js/custom.js"></script>
+<!-- <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script> -->
+<!-- <style type="text/css">
     #imgmodalDialog .modal-header {
       cursor: move;
     }

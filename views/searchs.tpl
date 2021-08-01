@@ -1,4 +1,4 @@
-<!-- 首页右侧的frame -->
+<!-- 显示特定项目的搜索页面 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,27 +18,72 @@
 
 <div class="container-fill">{{template "navbar" .}}</div>
 <body>
-<div class="bs-example">
-
-<div id="details">
-<h3 id="rowtitle">搜索结果</h3>
-
-<table id="table1"></table>
-</div>
-
-</div>  
-
-<script type="text/javascript">
-  $(function () {
+  <div class="bs-example">
+    <div id="details">
+      <h3 id="rowtitle">搜索结果</h3>
+      <div id="toolbar1" class="btn-toolbar" role="toolbar" aria-label="...">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="添加资料">
+            <i class="fa fa-plus">&nbsp;&nbsp;添加</i>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="">
+            <li>
+              <a href="#" onclick="addButton()"><i class="fa fa-plus">&nbsp;&nbsp;单附件模式</i></a>
+            </li>
+            <li>
+              <a href="#" onclick="addButton1()"><i class="fa fa-plus-square-o">&nbsp;&nbsp;多附件模式</i></a>
+            </li>
+            <li>
+              <a href="#" onclick="addButton2()"><i class="fa fa-plus-square">&nbsp;&nbsp;文章模式</i></a>
+            </li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="编辑">
+            <i class="fa fa-edit">&nbsp;&nbsp;编辑</i>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="">
+            <li>
+              <a href="#" onclick="editorProdButton()"><i class="fa fa-pencil">&nbsp;&nbsp;编辑成果信息</i></a>
+            </li>
+            <li>
+              <a href="#" onclick="editorAttachButton()"><i class="fa fa-edit">&nbsp;&nbsp;编辑成果附件</i></a>
+            </li>
+          </ul>
+        </div>
+        <div class="btn-group">
+          <button type="button" data-name="deleteButton" id="deleteButton" class="btn btn-default" title="删除">
+            <i class="fa fa-trash">&nbsp;&nbsp;删除</i>
+          </button>
+          <button type="button" data-name="shareButton" id="shareButton" class="btn btn-default" title="分享文件">
+            <i class="fa fa-share">&nbsp;&nbsp;分享</i>
+          </button>
+          <button type="button" data-name="flowButton" id="flowButton" class="btn btn-default" title="流程、状态">
+            <i class="fa fa-share-alt">&nbsp;&nbsp;Flow</i>
+          </button>
+        </div>
+        <div class="btn-group">
+          <button type="button" data-name="cartButton" id="cartButton" class="btn btn-default" title="购物车">
+            <i class="fa fa-shopping-cart">&nbsp;&nbsp;Cart</i>
+          </button>
+        </div>
+      </div>
+      <table id="table1"></table>
+    </div>
+  </div>
+  <script type="text/javascript">
+  $(function() {
     // 初始化【未接受】工作流表格
     $("#table1").bootstrapTable({
-      url : '/project/product/search?keyword={{.Key}}&productid={{.Pid}}',
+      url: '/v1/wx/searchprojectproductdata?keyword={{.Key}}&productid={{.Pid}}',
       method: 'get',
-      search:'true',
-      showRefresh:'true',
-      showToggle:'true',
-      showColumns:'true',
-      // toolbar:'#toolbar1',
+      search: 'true',
+      showRefresh: 'true',
+      showToggle: 'true',
+      showColumns: 'true',
+      toolbar:'#toolbar1',
       pagination: 'true',
       sidePagination: "server",
       queryParamsType:'',
@@ -177,32 +222,32 @@
      });
   });
 
-  $(document).ready(function(){
-    $("#search").click(function(){//这里应该用button的id来区分按钮的哪一个,因为本页有好几个button
-      var radio =$("input[type='radio']:checked").val();
-      $.ajax({
-        type:"post",//这里是否一定要用post，是的，因为get会缓存？？
-        url:"/index/searchproduct",
-        data: {keyword: $("#keyword").val(),radiostring:radio},
-        success:function(data,status){//数据提交成功时返回数据
-          //显示结果表
-          $("#rowtitle").html("搜寻结果");
-          $("#details").show();
-          $('#table1').bootstrapTable('append', data);
-          $('#table1').bootstrapTable('scrollTo', 'bottom');
-        }       
-      });              
+  // $(document).ready(function(){
+  $("#search").click(function() { //这里应该用button的id来区分按钮的哪一个,因为本页有好几个button
+    var radio = $("input[type='radio']:checked").val();
+    $.ajax({
+      type: "post", //这里是否一定要用post，是的，因为get会缓存？？
+      url: "/v1/wx/searchprojectproductdata",
+      data: { keyword: $("#keyword").val(), radiostring: radio },
+      success: function(data, status) { //数据提交成功时返回数据
+        //显示结果表
+        $("#rowtitle").html("搜寻结果");
+        $("#details").show();
+        $('#table1').bootstrapTable('append', data);
+        $('#table1').bootstrapTable('scrollTo', 'bottom');
+      }
     });
   });
+  // });
 
   function getKey(){  
     if(event.keyCode==13){  
      var radio =$("input[type='radio']:checked").val();
       $.ajax({
-        type:"post",//这里是否一定要用post，是的，因为get会缓存？？
-        url:"/index/searchproduct",
-        data: {keyword: $("#keyword").val(),radiostring:radio},
-        success:function(data,status){//数据提交成功时返回数据
+        type: "post", //这里是否一定要用post，是的，因为get会缓存？？
+        url: "/v1/wx/searchprojectproductdata",
+        data: { keyword: $("#keyword").val(), radiostring: radio },
+        success: function(data, status) { //数据提交成功时返回数据
 
           //显示结果表
           $("#rowtitle").html("搜寻结果");
@@ -211,8 +256,60 @@
           $('#table1').bootstrapTable('scrollTo', 'bottom');
         }       
       });
-    }     
-  } 
+    }
+  }
+
+  // 成果添加到购物车
+  $("#cartButton").click(function() {
+    var selectRow = $('#table1').bootstrapTable('getSelections');
+    if (selectRow.length <= 0) {
+      alert("请先勾选成果！");
+      return false;
+    }
+    if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
+      var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+    }
+    if (selectRow[0].Articlecontent[0]) {
+      var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+    }
+    if (selectRow[0].Pdflink[0]) {
+      var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+    }
+    if (site) {
+      alert("同步成果不允许！");
+      return;
+    }
+    var title = $.map(selectRow, function(row) {
+      return row.Title;
+    })
+    var ids = "";
+    for (var i = 0; i < selectRow.length; i++) {
+      if (i == 0) {
+        ids = selectRow[i].Id;
+      } else {
+        ids = ids + "," + selectRow[i].Id;
+      }
+    }
+    $.ajax({
+      type: "post",
+      url: "/v1/cart/createproductcart",
+      data: { ids: ids },
+      success: function(data, status) {
+        if (data.code == "ERROR") {
+          alert(data.msg);
+        } else {
+          alert("添加“" + data.data[0].Title + "”购物车成功！(status:" + status + "！)");
+        }
+        // $.toast({
+        //   type: TYPES[1],
+        //   title: TITLES['info'],
+        //   subtitle: '11 mins ago',
+        //   content: CONTENT['info'],
+        //   delay: 5000
+        // });
+      }
+    });
+  })
 
   function index1(value,row,index){
   // alert( "Data Loaded: " + index );
@@ -286,10 +383,10 @@
     }
   }
 
-  function setAttachment(value,row,index){
-    if (value){
-      if (value.length==1){
-        attachUrl= '<a href="'+value[0].Link+'/'+value[0].Title+'" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
+  function setAttachment(value, row, index) {
+    if (value) {
+      if (value.length == 1) {
+        attachUrl = '<a href="/' + value[0].Link + '/' + value[0].Title + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
         return attachUrl;
       }else if(value.length==0){
                     
@@ -300,10 +397,10 @@
     }
   }
 
-  function setPdf(value,row,index){
-    if (value){
-      if (value.length==1){
-        pdfUrl= '<a href="'+value[0].Link+'/'+value[0].Title+'" title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o"></i></a>';
+  function setPdf(value, row, index) {
+    if (value) {
+      if (value.length == 1) {
+        pdfUrl = '<a href="/pdf?id=' + value[0].Id + '" title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o"></i></a>';
         return pdfUrl;
       }else if(value.length==0){
                     

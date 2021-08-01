@@ -1,5 +1,8 @@
                        EngineerCMS revision history
 		       
+24,engineercms 1.17 (Jun 9, 2021)
+	+) Add businesscheck
+
 23,engineercms 1.16 (Aug 9, 2020)
 	+) Add cart,user gorm join
 	+) Add article_pie.tpl user gorm group count

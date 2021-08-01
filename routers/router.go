@@ -11,30 +11,70 @@ import (
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/plugins/cors"
 	// "github.com/3xxx/engineercms/controllers"
+	// "github.com/3xxx/engineercms/controllers/utils"
+	// "github.com/3xxx/engineercms/models"
+	// "strconv"
 )
 
 // var FilterFunc = func(ctx *context.Context) {
-// 	userName := ctx.Input.Session("userName")
-// 	if userName == nil {
-// 		ctx.Redirect()
-// 	}
+// 	// userName := ctx.Input.Session("userName")
+// 	// if userName == nil {
+// 	// 	ctx.Redirect()
+// 	// }
 // 	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的数据??。
 // 	// beego.Info(v)                          //qin.xc
 // 	var user models.User
+// 	var role string
+// 	var uid int64
 // 	var err error
 // 	if v != nil { //如果登录了
-// 		uname = v.(string)
+// 		uname := v.(string)
 // 		user, err = models.GetUserByUsername(uname)
 // 		if err != nil {
 // 			beego.Error(err)
 // 		} else {
-// 			uid = user.Id
+// 			uid := user.Id
 // 			role = user.Role
 // 		}
 // 	} else { //如果没登录
 // 		role = "anonymous"
 // 	}
 // }
+
+// var FilterAdmin = func(ctx *context.Context) {
+// 	// userName := ctx.Input.Session("userName")
+// 	// if userName == nil {
+// 	// 	ctx.Redirect()
+// 	// }
+// 	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的数据??。
+// 	// beego.Info(v)                          //qin.xc
+// 	var user models.User
+// 	var err error
+// 	if v != nil { //如果登录了
+// 		uname := v.(string)
+// 		user, err = models.GetUserByUsername(uname)
+// 		if err != nil {
+// 			beego.Error(err)
+// 		} else {
+// 			role, err := models.GetRoleByRolename("admin")
+// 			if err != nil {
+// 				beego.Error(err)
+// 			}
+// 			userid := strconv.FormatInt(user.Id, 10)
+// 			roleid := strconv.FormatInt(role.Id, 10)
+// 			isadmin = e.HasRoleForUser(userid, "role_"+roleid)
+// 		}
+// 	} else { //如果没登录
+// 		role = "anonymous"
+// 	}
+// }
+
+var FilterAdmin = func(ctx *context.Context) {
+	_, _, _, isadmin, _ := controllers.CheckprodRole(ctx)
+	if !isadmin {
+		ctx.Redirect(301, "/login")
+	}
+}
 
 func init() {
 	//运行跨域请求
@@ -64,30 +104,42 @@ func init() {
 	// 		console.log(“errr==”)
 	// 	}
 	// });
-	var FilterUser = func(ctx *context.Context) {
-		// v := ctx.Input.CruSession.Get("uname")
-		v := ctx.Input.Session("uname")
-		// uname = v.(string)//uid---v.(int)
-		if v == nil {
-			ctx.Redirect(302, "/login")
-		}
-	}
+
+	// var FilterUser = func(ctx *context.Context) {
+	// 	// v := ctx.Input.CruSession.Get("uname")
+	// 	// v := ctx.Input.Session("uname")
+	// 	authString := ctx.GetCookie("token")
+	// 	if authString == "" {
+	// 		authString = ctx.Input.Query("token")
+	// 		beego.Info(authString)
+	// 	}
+	// 	username, err := utils.CheckToken(authString)
+	// 	beego.Info(username)
+	// 	// uname = v.(string)//uid---v.(int)
+	// 	// if v == nil {
+	// 	site := ctx.Input.Site() + ":" + strconv.Itoa(ctx.Input.Port())
+	// 	if err != nil {
+	// 		ctx.Redirect(302, "http://localhost:8080/v1/sso/ssologin?service="+site+ctx.Request.URL.String())
+	// 	}
+	// }
 
 	//自动化文档
 	ns :=
 		beego.NewNamespace("/v1",
 			// beego.NSBefore(FilterFunc),
-			// beego.NSBefore(auth),
 			beego.NSNamespace("/admin",
+				// beego.NSBefore(FilterAdmin),20210724把admin都调整过来
 				beego.NSInclude(
 					&controllers.AdminController{},
 					&controllers.FlowController{},
+					// &controllers.UserController{},
 					// &controllers.AttachController{},20200626调整
 					// &controllers.LoginController{},
 					// &controllers.CustomerCookieCheckerController{},
 				),
 			),
 			beego.NSNamespace("/wx",
+				// beego.NSBefore(FilterUser), //20210501
 				beego.NSInclude(
 					&controllers.ArticleController{},
 					&controllers.FroalaController{},
@@ -97,13 +149,14 @@ func init() {
 					&controllers.ReplyController{},
 					&controllers.SearchController{},
 					&controllers.AttachController{},
-					&controllers.AttachController{},
+					&controllers.MainController{},
 					&controllers.StandardController{},
 					&controllers.DiaryController{},
 					&controllers.PayController{},
 					&controllers.FinanceController{},
 					&controllers.VideoController{},
 					&controllers.BusinessController{},
+					&controllers.LocationController{},
 				),
 			),
 			beego.NSNamespace("/share",
@@ -148,7 +201,7 @@ func init() {
 				),
 			),
 			beego.NSNamespace("/pdfcpu",
-				beego.NSBefore(FilterUser),
+				// beego.NSBefore(FilterUser),
 				beego.NSInclude(
 					&controllers.PdfCpuController{},
 				),
@@ -165,11 +218,17 @@ func init() {
 					&controllers.CartController{},
 				),
 			),
-			// beego.NSNamespace("/cms",
-			// 	beego.NSInclude(
-			// 		&controllers.CMSController{},
-			// 	),
-			// ),
+			beego.NSNamespace("/mathcad",
+				// beego.NSBefore(FilterUser),
+				beego.NSInclude(
+					&controllers.MathcadController{},
+				),
+			),
+			beego.NSNamespace("/chat",
+				beego.NSInclude(
+					&controllers.ChatController{},
+				),
+			),
 			// beego.NSNamespace("/suggest",
 			// 	beego.NSInclude(
 			// 		&controllers.SearchController{},
@@ -230,7 +289,7 @@ func init() {
 
 	beego.Router("/role/test", &controllers.RoleController{}, "*:Test")
 	beego.Router("/1/slide", &controllers.MainController{}, "*:Slide")
-	beego.Router("/postdata", &controllers.MainController{}, "*:Postdata")
+	// beego.Router("/postdata", &controllers.MainController{}, "*:Postdata")
 	//文档
 	beego.Router("/doc/ecms", &controllers.MainController{}, "get:Getecmsdoc")
 	beego.Router("/doc/meritms", &controllers.MainController{}, "get:Getmeritmsdoc")
@@ -264,7 +323,7 @@ func init() {
 
 	//首页搜索项目或成果
 	beego.Router("/index/searchproject", &controllers.SearchController{}, "*:SearchProject")
-	beego.Router("/index/searchproduct", &controllers.SearchController{}, "*:SearchProduct")
+	// beego.Router("/index/searchproduct", &controllers.SearchController{}, "*:SearchProduct")
 
 	//后台
 	beego.Router("/admin", &controllers.AdminController{})
@@ -350,16 +409,16 @@ func init() {
 	beego.Router("/jsoneditor", &controllers.AdminController{}, "get:Jsoneditor")
 
 	//如果后面不带id，则显示所有用户
-	beego.Router("/admin/user/?:id:string", &controllers.UserController{}, "*:User")
-	//添加用户
-	beego.Router("/admin/user/adduser", &controllers.UserController{}, "*:AddUser")
-	//导入用户
-	beego.Router("/admin/user/importusers", &controllers.UserController{}, "*:ImportUsers")
+	// beego.Router("/admin/user/?:id:string", &controllers.UserController{}, "*:User")
+	// //添加用户
+	// beego.Router("/admin/user/adduser", &controllers.UserController{}, "*:AddUser")
+	// //导入用户
+	// beego.Router("/admin/user/importusers", &controllers.UserController{}, "*:ImportUsers")
 
-	//修改用户
-	beego.Router("/admin/user/updateuser", &controllers.UserController{}, "*:UpdateUser")
-	//删除用户
-	beego.Router("/admin/user/deleteuser", &controllers.UserController{}, "*:DeleteUser")
+	// //修改用户
+	// beego.Router("/admin/user/updateuser", &controllers.UserController{}, "*:UpdateUser")
+	// //删除用户
+	// beego.Router("/admin/user/deleteuser", &controllers.UserController{}, "*:DeleteUser")
 
 	//新建角色
 	beego.Router("/admin/role/post", &controllers.RoleController{}, "post:Post")
@@ -429,17 +488,17 @@ func init() {
 	//删除项目
 	beego.Router("/project/deleteproject", &controllers.ProjController{}, "*:DeleteProject")
 	//项目时间轴
-	beego.Router("/project/:id([0-9]+)/gettimeline", &controllers.ProjController{}, "get:ProjectTimeline")
-	beego.Router("/project/:id([0-9]+)/timeline", &controllers.ProjController{}, "get:Timeline")
+	beego.Router("/project/gettimeline/:id([0-9]+)", &controllers.ProjController{}, "get:ProjectTimeline")
+	beego.Router("/project/timeline/:id([0-9]+)", &controllers.ProjController{}, "get:Timeline")
 
 	//根据项目id进入一个具体项目的侧栏
 	beego.Router("/project/:id([0-9]+)", &controllers.ProjController{}, "*:GetProject")
 	//进入项目日历
-	beego.Router("/project/:id([0-9]+)/getcalendar", &controllers.ProjController{}, "*:GetCalendar")
+	beego.Router("/project/getcalendar/:id([0-9]+)", &controllers.ProjController{}, "*:GetCalendar")
 	//取得日历数据
-	beego.Router("/project/:id([0-9]+)/calendar", &controllers.ProjController{}, "*:Calendar")
+	beego.Router("/project/calendar/:id([0-9]+)", &controllers.ProjController{}, "*:Calendar")
 	//添加日历
-	beego.Router("/project/:id([0-9]+)/calendar/addcalendar", &controllers.ProjController{}, "*:AddCalendar")
+	beego.Router("/project/calendar/addcalendar/:id([0-9]+)", &controllers.ProjController{}, "*:AddCalendar")
 	//修改
 	beego.Router("/project/calendar/updatecalendar", &controllers.ProjController{}, "*:UpdateCalendar")
 	//删除
@@ -529,8 +588,8 @@ func init() {
 	//向侧栏下添加文章
 	beego.Router("/project/product/addarticle", &controllers.ArticleController{}, "post:AddArticle")
 	//在某个项目里搜索成果
-	beego.Router("/search", &controllers.SearchController{}, "get:Get")
-	beego.Router("/project/product/search", &controllers.SearchController{}, "get:SearchProjProducts")
+	// beego.Router("/search", &controllers.SearchController{}, "get:Get")
+	// beego.Router("/project/product/search", &controllers.SearchController{}, "get:SearchProjProducts")
 	//搜索某个项目——没意义
 	beego.Router("/projects/search", &controllers.SearchController{}, "get:SearchProjects")
 
@@ -674,7 +733,7 @@ func init() {
 	beego.Router("/mindoc", &controllers.HomeController{}, "*:Index")
 
 	beego.Router("/mindoclogin", &controllers.AccountController{}, "*:Login")
-	beego.Router("/logout", &controllers.AccountController{}, "*:Logout")
+	beego.Router("/mindoclogout", &controllers.AccountController{}, "*:Logout")
 	beego.Router("/register", &controllers.AccountController{}, "*:Register")
 	beego.Router("/find_password", &controllers.AccountController{}, "*:FindPassword")
 	beego.Router("/valid_email", &controllers.AccountController{}, "post:ValidEmail")

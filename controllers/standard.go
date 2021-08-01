@@ -6,6 +6,8 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/tealeg/xlsx"
 	"os"
+	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -73,8 +75,17 @@ func (c *StandardController) UpdateStandard() {
 	number := c.Input().Get("number")
 	title := c.Input().Get("title")
 	route := c.Input().Get("route")
-	// uname := c.Input().Get("uname")
-	err = models.UpdateStandard(idNum, number, title, route)
+	uname := c.Input().Get("uname")
+	var uid int64
+	// uname查询出uid
+	if uname != "" {
+		user, err := models.GetUserByUsername(uname)
+		if err != nil {
+			beego.Error(err)
+		}
+		uid = user.Id
+	}
+	err = models.UpdateStandard(idNum, uid, number, title, route)
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = "修改出错"
@@ -125,10 +136,23 @@ func (c *StandardController) DeleteStandard() {
 }
 
 func (c *StandardController) Index() { //
-	c.Data["IsStandard"] = true //
-	c.TplName = "standard.tpl"
-	// c.Data["IsLogin"] = checkAccount(c.Ctx)
-	// uname, _, _ := checkRoleread(c.Ctx) //login里的
+	c.Data["IsStandard"] = true
+	u := c.Ctx.Input.UserAgent()
+	// re := regexp.MustCompile("Trident")
+	// loc := re.FindStringIndex(u)
+	// loc[0] > 1
+	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	if err != nil {
+		beego.Error(err)
+	}
+	if matched == true {
+		// beego.Info("移动端~")
+		c.TplName = "mobile/mstandard.tpl"
+	} else {
+		// beego.Info("电脑端！")
+		c.TplName = "standard.tpl"
+	}
+
 	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
 	// rolename, _ = strconv.Atoi(role)
 	// c.Data["Uname"] = uname
@@ -275,6 +299,26 @@ func (c *StandardController) Search() { //search用的是post方法
 	// }
 }
 
+// @Title get standardpdf
+// @Description get standardpdf
+// @Param file query string true "The link of standardpdf"
+// @Success 200 {object} models.Create
+// @Failure 400 Invalid page supplied
+// @Failure 404 cart not found
+// @router /standardpdf [get]
+func (c *StandardController) StandardPdf() { //search用的是post方法
+	_, _, _, isadmin, islogin := checkprodRole(c.Ctx)
+	if !isadmin && !islogin {
+		// beego.Info(!islogin)
+		route := c.Ctx.Request.URL.String()
+		c.Data["Url"] = route
+		c.Redirect("/login?url="+route, 302)
+	}
+	pdflink := c.Input().Get("file")
+	c.Data["PdfLink"] = pdflink
+	c.TplName = "web/viewer.html"
+}
+
 // @Title get wx standards list
 // @Description get standards by page
 // @Param keyword query string  true "The keyword of standards"
@@ -389,6 +433,20 @@ func (c *StandardController) WxStandardPdf() {
 	// beego.Info(standard.Route)
 	fileurl := strings.Replace(standard.Route, "/attachment/", "attachment/", -1)
 	// http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, standard.Route)
+
+	filename := path.Base(fileurl)
+	fileext := path.Ext(filename)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
+
 	c.Ctx.Output.Download(fileurl)
 }
 

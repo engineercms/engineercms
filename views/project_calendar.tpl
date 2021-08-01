@@ -193,7 +193,7 @@ $(document).ready(function() {
       //      		'/feed2.php'  
       //  		]
 			events: {  
-        		url: '/project/'+{{.ProjectId}}+'/calendar',  
+      url: '/project/calendar/'+ {{.ProjectId }},
         		type: 'post'  
     		},
 			// events: {
@@ -414,7 +414,7 @@ $(document).ready(function() {
       if (title){  
             $.ajax({
                 type:"post",
-                url:"/project/"+{{.ProjectId}}+"/calendar/addcalendar",
+      url: "/project/calendar/addcalendar/"+ {{.ProjectId }},
                 data: {projectid:projectid,title:title,content:content,allday:allday,public:public,memorabilia:memorabilia,start:start,end:end,color:rgbToHex(currColor),url:url},
                 success:function(data,status){
                   alert("添加“"+data+"”成功！(status:"+status+".)");
@@ -574,8 +574,8 @@ $(document).ready(function() {
                 <label class="col-sm-3 control-label">是否作为大事记</label>
                 <div class="col-sm-7 checkbox">
                   <label>
-                  <input type="checkbox" value="true" id="ismemorabilia"></label>
-                    <!-- <form method="post" id="form1" action="/admin/user/importusers" enctype="multipart/form-data">
+                    <input type="checkbox" value="true" id="ismemorabilia"></label>
+                  <!-- <form method="post" id="form1" action="/v1/wx/importusers" enctype="multipart/form-data">
                         <label>选择图片：
                         <input type="file" class="form-control" name="photo" id="photo"/> </label>
                     </form> -->

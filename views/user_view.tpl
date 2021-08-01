@@ -195,69 +195,69 @@
             field: 'Nickname',
             title: '昵称',
             editable: {
-                type: 'text',
-                pk: 1,
-                url: '/admin/user/updateuser',
-                title: 'Enter ProjectName'  
+              type: 'text',
+              pk: 1,
+              url: '/v1/wx/updateuser',
+              title: 'Enter ProjectName'
             }
           },{
             field: 'Password',
             title: '密码',
             editable: {
               type: 'text',
-                // type: 'select',
-                // source: ["规划", "项目建议书", "可行性研究", "初步设计", "招标设计", "施工图"],
-                pk: 1,
-                url: '/admin/user/updateuser',
-                title: 'Enter Password'  
+              // type: 'select',
+              // source: ["规划", "项目建议书", "可行性研究", "初步设计", "招标设计", "施工图"],
+              pk: 1,
+              url: '/v1/wx/updateuser',
+              title: 'Enter Password'
             }
           },{
             field: 'Email',
             title: '邮箱',
             // sortable:'true',
             editable: {
-                type: 'text',
-                pk: 1,
-                url: '/admin/user/updateuser',
-                title: 'Enter Email'  
+              type: 'text',
+              pk: 1,
+              url: '/v1/wx/updateuser',
+              title: 'Enter Email'
             }
           },{
             field: 'Department',
             title: '部门',
             editable: {
-                type: 'text',
-                pk: 1,
-                url: '/admin/user/updateuser',
-                title: 'Enter Department'  
+              type: 'text',
+              pk: 1,
+              url: '/v1/wx/updateuser',
+              title: 'Enter Department'
             }
           },{
             field: 'Secoffice',
             title: '科室',
             sortable:'true',
             editable: {
-                type: 'text',
-                // source: {{.Select2}},//["$1", "$2", "$3"],
-                pk: 1,
-                url: '/admin/user/updateuser',
-                title: 'Enter Category' 
+              type: 'text',
+              // source: {{.Select2}},//["$1", "$2", "$3"],
+              pk: 1,
+              url: '/v1/wx/updateuser',
+              title: 'Enter Category'
             }
           },{
             field: 'Ip',
             title: 'IP',
             editable: {
-                type: 'text',
-                pk: 1,
-                url: '/admin/user/updateuser',
-                title: 'Enter Count'  
+              type: 'text',
+              pk: 1,
+              url: '/v1/wx/updateuser',
+              title: 'Enter Count'
             }
           },{
             field: 'Port',
             title: '端口号',
             editable: {
-                type: 'text',
-                pk: 1,
-                url: '/admin/user/updateuser',
-                title: 'Enter port'  
+              type: 'text',
+              pk: 1,
+              url: '/v1/wx/updateuser',
+              title: 'Enter port'
             }
           },{
             field: 'Status',
@@ -278,8 +278,8 @@
             //     // multiple: true
             //   },//'/regist/getuname1',//这里用get方法，所以要换一个
             //   pk: 1,
-            //   url: '/admin/user/updateuser',
-              // title: 'Enter Status'  
+            //   url: '/v1/wx/updateuser',
+            // title: 'Enter Status'  
             // }
           },{
             field: 'Lastlogintime',
@@ -308,7 +308,7 @@
             //     // multiple: true
             //   },//'/regist/getuname1',//这里用get方法，所以要换一个
             //   pk: 1,
-            //   url: '/admin/user/updateuser',
+            //   url: '/v1/wx/updateuser',
             //   title: 'Enter Status'  
             // }
           }

@@ -137,7 +137,7 @@
         </button> -->
     </div>
     <!--data-click-to-select="true" -->
-    <table id="table0" data-toggle="table" data-url="/onlyoffice/getdata" data-search="true" data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-toolbar="#toolbar1" data-query-params="queryParams" data-sort-name="Code" data-sort-order="desc" data-page-size="15" data-page-list="[10,15, 50, 100, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-single-select="true" data-click-to-select="true" data-show-export="true">
+    <table id="table0" data-toggle="table" data-url="/onlyoffice/getdata" data-search="true" data-show-search-clear-button="true" data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-toolbar="#toolbar1" data-query-params="queryParams" data-sort-name="Code" data-sort-order="desc" data-page-size="15" data-page-list="[10,15, 50, 100, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-single-select="true" data-click-to-select="true" data-show-export="true">
       <thead>
         <tr>
           <!-- radiobox data-checkbox="true" data-formatter="setCode" data-formatter="setTitle"-->
@@ -251,7 +251,7 @@
             if (value[0].Permission == "4") {
               pdfUrl = '<a href=# title="拒绝访问"><i class="fa fa-file-pdf-o fa-lg" style="color:Brown;"></i></a>';
             } else {
-              pdfUrl = '<a href=/v1/pdfcpu/onlypdf/' + value[0].Id + ' title="协作" target="_blank"><i class="fa fa-file-pdf-o fa-lg" style="color:Brown;"></i></a>';
+              pdfUrl = '<a href=/onlyoffice/' + value[0].Id + ' title="协作" target="_blank"><i class="fa fa-file-pdf-o fa-lg" style="color:Brown;"></i></a>';//或者用pdf.js打开：<a href=/v1/pdfcpu/onlypdf/
             }
             return pdfUrl;
           } else if (value[0].Suffix == "txt") {
@@ -978,11 +978,8 @@
     function generate() {
       var a = $('input:radio:checked').val();
       alert(a)
-
       $("input[type='radio']:checked").val();
-
       $("input[name='rd']:checked").val();
-
     }
     </script>
     <!-- 批量上传 -->
@@ -1141,10 +1138,10 @@
             <div class="modal-body">
               <div class="modal-body-content">
                 <div id="" class="btn-group">
-                  <button type="button" id="addusers" class="btn btn-default"><i class="fa fa-plus">&nbsp;&nbsp;Add Users</i>
+                  <button type="button" id="addusers" class="btn btn-default">
+                    <i class="fa fa-plus">&nbsp;&nbsp;Add Users</i>
                   </button>
-
-                  <div class="btn-group">
+                  <!-- <div class="btn-group"> -->
                     <button class="btn btn-default dropdown-toggle" type="button" id="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                       <i id="dropdownMenu1" class="fa fa-eye">&nbsp;&nbsp;</i>
                       <span class="caret"></span>
@@ -1163,14 +1160,17 @@
                         <a href="#" onclick="shows($(this).text())"><i class="fa fa-eye-slash">&nbsp;&nbsp;Deny Access</i></a>
                       </li>
                     </ul>
-                  </div>
+                  <!-- </div> -->
                 </div>
                 <div id="" class="btn-group">
                   <div class="btn-group">
+                    <button type="button" id="addroles" data-name="" class="btn btn-default">
+                      <i class="fa fa-plus">&nbsp;&nbsp;Add Groups</i>
+                    </button>
                     <button type="button" id="addgroups" class="btn btn-default dropdown-toggle" data-toggle="dropdown" >
                       <span class="buttonText"><i id="dropdownMenu2" class="fa fa-eye">&nbsp;&nbsp;</i></span>
                       <span class="caret"></span>
-                    </button>
+                  </button>
                     <ul class="dropdown-menu" role="menu">
                       <li>
                         <a href="#" onclick="shows1($(this).text())"><i class="fa fa-pencil">&nbsp;&nbsp;Full Access</i></a>
@@ -1186,9 +1186,6 @@
                       </li>
                     </ul>
                   </div>
-                  <button type="button" id="addroles" data-name="" class="btn btn-default">
-                    <i class="fa fa-plus">&nbsp;&nbsp;Add Groups</i>
-                  </button>
                 </div>
                 <table id="tableusers1" data-search="true" data-toolbar="" data-page-size="5" data-page-list="[5, 25, 50, All]" data-unique-id="name" data-pagination="true" data-side-pagination="client" data-click-to-select="false">
                 </table>
@@ -1532,20 +1529,23 @@
           editable: {
             type: 'select2',
             source: [
-              { id: '1', text: '  Full Access', value: 1 },
-              { id: '2', text: '  Review', value: 2 },
-              { id: '3', text: '  Read Only', value: 3 },
-              { id: '4', text: '  Deny Access', value: 4 }
+              { id: '1', text: '  Full Access', value: '1' },
+              { id: '2', text: '  Review', value: '2' },
+              { id: '3', text: '  Read Only', value: '3' },
+              { id: '4', text: '  Deny Access', value: '4' }
             ],
 
             select2: {
               allowClear: true,
               width: '150px',
               placeholder: '请选择权限',
+              id: function (item) {
+                  return item.id;
+              },
               // multiple: true
             },
             pk: 1,
-            // url: '/admin/user/updateuser',
+            // url: '/v1/wx/updateuser',
             title: 'Enter Status'
           }
 
@@ -1598,7 +1598,7 @@
               placeholder: '请选择权限',
             },
             pk: 1,
-            title: 'Enter Status'
+            title: 'Enter Permission'
           }
         }
       ]
@@ -1633,7 +1633,7 @@
           // editable: {
           // type: 'text',
           // pk: 1,
-          // url: '/admin/user/updateuser',
+          // url: '/v1/wx/updateuser',
           // title: 'Enter ProjectNumber' 
           // }
         }, {
@@ -1658,8 +1658,8 @@
               // multiple: true
             },
             pk: 1,
-            // url: '/admin/user/updateuser',
-            title: 'Enter Status'
+            // url: '/v1/wx/updateuser',
+            title: 'Enter Permission'
           }
         }, {
           field: 'action',
@@ -1742,19 +1742,17 @@
     var now = new Date();
     myDate = new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate();
     $("#Date").val(myDate);
-
     //弹出添加用户模态框
     $("#addusers").click(function() {
       if ($("#dropdownMenu1").hasClass("fa fa-pencil")) {
-        $tableLeft.bootstrapTable('refresh', { url: '/admin/user?role=1' });
+        $tableLeft.bootstrapTable('refresh', { url: '/v1/wx/user/0?role=1' });
       } else if ($("#dropdownMenu1").hasClass("fa fa-commenting-o")) {
-        $tableLeft.bootstrapTable('refresh', { url: '/admin/user?role=2' });
+        $tableLeft.bootstrapTable('refresh', { url: '/v1/wx/user/0?role=2' });
       } else if ($("#dropdownMenu1").hasClass("fa fa-eye")) {
-        $tableLeft.bootstrapTable('refresh', { url: '/admin/user?role=3' });
+        $tableLeft.bootstrapTable('refresh', { url: '/v1/wx/user/0?role=3' });
       } else if ($("#dropdownMenu1").hasClass("fa fa-eye-slash")) {
-        $tableLeft.bootstrapTable('refresh', { url: '/admin/user?role=4' });
+        $tableLeft.bootstrapTable('refresh', { url: '/v1/wx/user/0?role=4' });
       }
-
       $('#users').modal({
         show: true,
         backdrop: 'static'

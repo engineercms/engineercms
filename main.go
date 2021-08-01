@@ -62,6 +62,18 @@ func main() {
 		toolbox.StartTask()
 		defer toolbox.StopTask()
 	}
+	// 上传文件给zsj.itdos
+	// time2 := "0 30 23 * * *"
+	// tk2 := toolbox.NewTask("tk2", time2, func() error { controllers.Postdata(); return nil })
+	// toolbox.AddTask("tk2", tk2)
+	// toolbox.StartTask()
+	// defer toolbox.StopTask()
+	// 备份数据库文件,controllers里必须有postdata()2个方法
+	// time3 := "0 30 23 * * *" //每天晚上23:30执行
+	// tk3 := toolbox.NewTask("tk3", time3, func() error { controllers.Postdata(); return nil })
+	// toolbox.AddTask("tk3", tk3)
+	// toolbox.StartTask()
+	// defer toolbox.StopTask()
 	// ********mindoc*********
 	// if len(os.Args) >= 3 && os.Args[1] == "service" {
 	// 	if os.Args[2] == "install" {
@@ -94,6 +106,10 @@ func main() {
 	// ********mindoc*********
 
 	beego.Run()
+	// 开启pprof，监听请求,无效
+	// go func() {
+	// 	log.Println(http.ListenAndServe("127.0.0.1:6060", nil))
+	// }()
 }
 
 //显示页面加载时间

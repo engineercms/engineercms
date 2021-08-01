@@ -32,10 +32,10 @@
       <input id="referrer" type="text" name="referrer" class="form-control" style="display:none;">
       <form action="" method="POST" id="login-form">
         <p>
-          <span></span><input type="text" id="uname" placeholder="请输入用户名/警号" value="admin" />
+          <span></span><input type="text" id="uname" placeholder="请输入用户名/警号" value="" />
         </p>
         <p>
-          <span></span><input type="password" id="pwd" placeholder="请输入密码" value="admin" onkeypress="getKey()"/>
+          <span></span><input type="password" id="pwd" placeholder="请输入密码" value="" onkeypress="getKey()"/>
         </p>
         <div id="warn"><span>!</span><span id="warnText"></span></div>
         <div class="submit" onclick="return login();">登录</div>
@@ -162,7 +162,7 @@ function loginback() {
         if (data.islogin == 0) {
           // console.log(data.service)
           // alert("onkeydown")
-          location.href = "/onlyoffice";
+          location.href = "/index";
           // window.location.reload();
         } else if(data.islogin == 1){
           ShowMsg("用户名或密码错误！");
