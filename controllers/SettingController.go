@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/controllers/utils"
-	"github.com/3xxx/engineercms/graphics"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego/logs"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/controllers/utils"
+	"github.com/engineercms/engineercms/graphics"
+	"github.com/engineercms/engineercms/models"
 )
 
 type SettingController struct {

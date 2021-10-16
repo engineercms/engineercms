@@ -2,7 +2,7 @@
 package controllers
 
 import (
-	"github.com/3xxx/engineercms/controllers/utils"
+	"github.com/engineercms/engineercms/controllers/utils"
 	// json "encoding/json"
 	// "fmt"
 	"github.com/astaxie/beego"
@@ -10,7 +10,7 @@ import (
 	// "github.com/bitly/go-simplejson"
 	// "io/ioutil"
 	// "github.com/astaxie/beego/logs"
-	"github.com/3xxx/engineercms/models"
+	"github.com/engineercms/engineercms/models"
 	// "sort"
 	"strconv"
 	"strings"
@@ -35,6 +35,15 @@ type BbsController struct {
 // @router /bbs [post]
 // 新增公告写入数据库
 func (c *BbsController) Bbs() {
+	// var user models.User
+	// var err error
+	openID := c.GetSession("openID")
+	if openID == nil {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+	}
+
 	userid := c.Input().Get("userId")
 	desc1 := c.Input().Get("desc1")
 	desc2 := c.Input().Get("desc2")
@@ -92,7 +101,7 @@ func (c *BbsController) Bbs() {
 		c.ServeJSON()
 		return
 	}
-	errcode, errmsg, err := utils.MsgSecCheck(accessToken, desc)
+	errcode, errmsg, err := utils.MsgSecCheck(2, 2, accessToken, openID.(string), desc)
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}

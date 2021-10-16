@@ -4,15 +4,18 @@ import (
 	"encoding/json"
 	// "encoding/xml"
 	// "errors"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/cache"
-	// "io/ioutil"
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/cache"
+	"io"
+	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	// "strconv"
 	"strings"
 	"time"
 )
@@ -139,20 +142,43 @@ func requestToken(appid, secret string) (accessToken string, errcode float64, er
 	}
 }
 
+type MsgInput struct {
+	Openid  string `json:"openid"`
+	Scene   int    `json:"scene"`
+	Version int    `json:"version"`
+	Content string `json:"content"`
+}
+
 // 文本敏感字符检测
-func MsgSecCheck(access_token, content string) (errcode float64, errmsg string, err error) {
+func MsgSecCheck(scene, version int, access_token, openid, content string) (errcode float64, errmsg string, err error) {
 	// access_token = data["access_token"].(string)
 	// https://api.weixin.qq.com/wxa/msg_sec_check?access_token=ACCESS_TOKEN
 	requestUrl := "https://api.weixin.qq.com/wxa/msg_sec_check?access_token=" + access_token
 	// 对于 POST 请求，部分参数需以 QueryString 的形式写在 URL 中（一般只有 access_token，如有额外参数会在文档里的 URL 中体现），其他参数如无特殊说明均以 JSON 字符串格式写在 POST 请求的 body 中。
 	// "content":content
-	b, err := json.Marshal(map[string]string{
-		"content": content,
-	})
+	// content = "特3456书yuuo莞6543李zxcz蒜7782法fgnv级"
+	// utf := strconv.QuoteToASCII(content)
+	// content = utf[1 : len(utf)-1]
+
+	msg := MsgInput{
+		Openid:  openid,
+		Scene:   scene,
+		Version: version,
+		Content: content,
+	}
+	// b, err := json.Marshal(map[string]string{
+	// 	"openid":  openid,
+	// 	"scene":   scene,
+	// 	"version": version,
+	// 	"content": content,
+	// })
+	b, err := json.Marshal(msg)
 	if err != nil {
 		beego.Error(err)
 		return 0, "json转换错误", err
 	}
+	beego.Info(string(b))
+
 	resp, err := http.Post(requestUrl, "application/x-www-form-urlencoded", bytes.NewBuffer(b)) //注意，这里是post
 	if err != nil {
 		beego.Error(err)
@@ -174,6 +200,92 @@ func MsgSecCheck(access_token, content string) (errcode float64, errmsg string, 
 		// beego.Info(errcode)
 		errmsg := data["errmsg"].(string)
 		return errcode, errmsg, nil
+	}
+}
+
+// 图片检测
+
+// type ReqImgCheck struct {
+// 	Media *multipart.FileHeader `json:"media"`
+// }
+
+//图片检测
+// header设置为"Content-Type","application/octet-stream"
+// func ImgCheck(media *multipart.FileHeader) error {
+// 	req.Media = media
+// 	url := fmt.Sprintf("https://api.weixin.qq.com/wxa/img_sec_check?access_token=%s", ak)
+// 	bt, err := json.Marshal(req)
+// 	if err != nil {
+
+// 	}
+// 	body, err := util.PostCurl(url, bt, util.JSONHeader)
+// 	if err != nil {
+
+// 	}
+// }
+
+func ImgSecCheck(bts []byte, accessToken string) (errcode float64, errmsg string, err error) {
+	beego.Info(accessToken)
+	var bufReader bytes.Buffer
+	//	"mime/multipart" 可以将上传文件封装
+	mpWriter := multipart.NewWriter(&bufReader)
+	//文件名无所谓
+	fileName := "detect"
+	//字段名必须为media
+	writer, err := mpWriter.CreateFormFile("media", fileName)
+	if err != nil {
+		beego.Error(err)
+		return 0, "建立media错误", err
+	}
+	reader := bytes.NewReader(bts)
+	io.Copy(writer, reader)
+	//关闭了才能把内容写入
+	mpWriter.Close()
+
+	client := http.DefaultClient
+	destURL := "https://api.weixin.qq.com/wxa/img_sec_check?access_token=" + accessToken
+	req, _ := http.NewRequest("POST", destURL, &bufReader)
+	//从mpWriter中获取content-Type
+	req.Header.Set("Content-Type", mpWriter.FormDataContentType())
+	req.Header.Set("Content-Type", "application/octet-stream")
+	// request.addHeader("Content-Type", "application/octet-stream");
+	// InputStream inputStream = multipartFile.getInputStream();
+	// byte[] byt = new byte[inputStream.available()];
+	// inputStream.read(byt);
+	// request.setEntity(new ByteArrayEntity(byt, ContentType.create("image/jpg")));
+	// response = httpclient.execute(request);
+	// HttpEntity httpEntity = response.getEntity();
+	// String result = EntityUtils.toString(httpEntity, "UTF-8");// 转成string
+	// JSONObject jsonObject = JSONObject.parseObject(result);
+	// return jsonObject;
+
+	resp, err := client.Do(req)
+	if err != nil {
+		beego.Error(err)
+		return 0, "请求错误", err
+	}
+	defer resp.Body.Close()
+
+	vs := make(map[string]interface{})
+	result, _ := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		// return false
+		beego.Error(err)
+		return 0, "读取返回值错误", err
+	}
+	err = json.Unmarshal(result, &vs)
+	if err != nil {
+		// return false
+		beego.Error(err)
+		return 0, "解析json错误", err
+	}
+	//errcode 存在，且为0，返回通过，87014有风险
+	// errmsg "ok","risky content"
+	if _, ok := vs["errcode"]; ok {
+		// return true
+		return vs["errcode"].(float64), vs["errmsg"].(string), nil
+	} else {
+		return 0, "无返回code", nil
 	}
 }
 
@@ -321,7 +433,7 @@ func testmain() {
 
 	timeoutDuration := 10000000 * time.Second
 
-	err = cache_conn.Put("wilson1231111", "xu", timeoutDuration)
+	err = cache_conn.Put("wilson1231111", "xu", timeoutDuration*time.Second)
 	if err != nil {
 		fmt.Println("数据读取出错，错误为：", err)
 	} else {

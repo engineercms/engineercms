@@ -33,10 +33,12 @@
       <input id="referrer" type="text" name="referrer" class="form-control" style="display:none;">
       <form action="" method="POST" id="login-form">
         <p>
-          <span style="background-image: url(/static/images/ftp.png);"></span><input type="text" id="uname" placeholder="请输入充值数额" value="" />
+          <span style="background-image: url(/static/images/ftp.png);"></span>
+          <input type="text" id="uname" placeholder="请输入充值数额" value="" />
         </p>
         <p>
-          <span></span><input type="password" id="pwd" placeholder="请输入密码" value="" onkeypress="getKey()" />
+          <span></span>
+          <input type="password" id="pwd" placeholder="请输入密码" value="" onkeypress="getKey()" />
         </p>
         <div id="warn"><span>!</span><span id="warnText"></span></div>
         <div class="submit" onclick="return login();">充值申请</div>

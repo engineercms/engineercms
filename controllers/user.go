@@ -5,10 +5,11 @@ import (
 	// "github.com/astaxie/beego/orm"
 	"crypto/md5"
 	"encoding/hex"
-	m "github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	m "github.com/engineercms/engineercms/models"
 	// "github.com/astaxie/beego/logs"
 	"github.com/tealeg/xlsx"
+	"html/template"
 	"os"
 	"strconv"
 	"strings"
@@ -122,6 +123,14 @@ func (c *UserController) Index() {
 	}
 }
 
+// @Title get user
+// @Description get user by userid
+// @Param id path string false "The id of user"
+// @Param role query string false "The role of user"
+// @Success 200 {object} models.User
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /user/:id [get]
 //如果不带id则取到所有用户
 //如果带id，则取一个用户
 func (c *UserController) User() {
@@ -129,7 +138,11 @@ func (c *UserController) User() {
 	c.Data["Id"] = id
 	c.Data["Ip"] = c.Ctx.Input.IP()
 	// var categories []*models.AdminCategory
-	if id == "" { //如果id为空，则查询类别
+	if id == "0" { //如果id为空，则查询类别
+		_, _, _, isadmin, _ := CheckprodRole(c.Ctx)
+		if !isadmin {
+			c.Redirect("/login", 301)
+		}
 		users, err := m.GetUsers()
 		if err != nil {
 			beego.Error(err)
@@ -184,6 +197,22 @@ func (c *UserController) View() {
 	c.TplName = "admin_user_view.tpl"
 }
 
+// @Title add user
+// @Description add user
+// @Param username query string false "The name of user"
+// @Param nickname query string false "The nickname of user"
+// @Param password query string false "The password of user"
+// @Param email query string false "The email of user"
+// @Param department query string false "The department of user"
+// @Param secoffice query string false "The secoffice of user"
+// @Param ip query string false "The ip of user"
+// @Param port query string false "The port of user"
+// @Param status query string false "The status of user"
+// @Param role query string false "The role of user"
+// @Success 200 {object} models.User
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /adduser [post]
 //添加用户
 func (c *UserController) AddUser() {
 	var user m.User
@@ -358,6 +387,15 @@ func (c *UserController) UpdateWxUser() {
 	}
 }
 
+// @Title update user
+// @Description add user
+// @Param pk query string false "The pk of user"
+// @Param name query string false "The name of user"
+// @Param value query string false "The value of user"
+// @Success 200 {object} models.User
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /updateuser [post]
 //在线修改保存某个字段
 func (c *UserController) UpdateUser() {
 	//进行权限判断isme or isadmin
@@ -370,6 +408,7 @@ func (c *UserController) UpdateUser() {
 	if isadmin || uid == id {
 		name := c.Input().Get("name")
 		value := c.Input().Get("value")
+		value = template.HTMLEscapeString(value) //过滤xss攻击
 		err = m.UpdateUser(id, name, value)
 		if err != nil {
 			beego.Error(err)
@@ -423,6 +462,13 @@ func (c *UserController) UpdateUser() {
 // 	}
 // }
 
+// @Title delete user
+// @Description delete user
+// @Param ids query string false "The ids of user"
+// @Success 200 {object} models.User
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /deleteuser [post]
 //删除用户
 func (c *UserController) DeleteUser() {
 	ids := c.GetString("ids")
@@ -443,6 +489,12 @@ func (c *UserController) DeleteUser() {
 	}
 }
 
+// @Title get user
+// @Description get user
+// @Success 200 {object} models.User
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /getuserbyusername [get]
 //用户查看自己，修改密码等
 func (c *UserController) GetUserByUsername() {
 	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
@@ -461,6 +513,12 @@ func (c *UserController) GetUserByUsername() {
 	c.TplName = "user_view.tpl"
 }
 
+// @Title get usermyself
+// @Description get usermyself
+// @Success 200 {object} models.User
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /usermyself [get]
 //用户个人数据，填充table，以便编辑
 func (c *UserController) Usermyself() {
 	// 	_, role := checkprodRole(c.Ctx)
@@ -512,6 +570,12 @@ func (c *UserController) Usermyself() {
 	c.ServeJSON()
 }
 
+// @Title import users
+// @Description import users
+// @Success 200 {object} models.User
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /importusers [post]
 //上传excel文件，导入到数据库
 //引用来自category的查看成果类型里的成果
 func (c *UserController) ImportUsers() {

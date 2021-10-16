@@ -3,8 +3,8 @@ package models
 import (
 	"strings"
 
-	"github.com/3xxx/engineercms/controllers/utils/filetil"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/controllers/utils/filetil"
 )
 
 type AttachmentResult struct {

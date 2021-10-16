@@ -1726,6 +1726,57 @@ paths:
           description: Invalid page supplied
         "404":
           description: cart not found
+  /chat/avatar/{text}:
+    get:
+      tags:
+      - chat
+      description: get avatar
+      operationId: ChatController.get avatar
+      parameters:
+      - in: path
+        name: text
+        description: The text
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Avatar'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: Page not found
+  /chat/chat:
+    get:
+      tags:
+      - chat
+      description: get chat
+      operationId: ChatController.get chat
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.UserTemple'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: Page not found
+  /chat/wschat:
+    get:
+      tags:
+      - chat
+      description: get wschat
+      operationId: ChatController.get wschat
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetChat'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: Page not found
   /checkin/activity/actInfo:
     post:
       tags:
@@ -2502,6 +2553,41 @@ paths:
           description: Invalid page supplied
         "404":
           description: project not found
+  /project/quickaddwxproject:
+    post:
+      tags:
+      - project
+      description: post quickaddproject..
+      operationId: ProjController.post wx quickaddproject...
+      parameters:
+      - in: query
+        name: projectcode
+        description: The projectcode of project
+        required: true
+        type: string
+      - in: query
+        name: projecttitle
+        description: The projecttitle of project
+        required: true
+        type: string
+      - in: query
+        name: tempprojid
+        description: The tempprojid of project
+        required: true
+        type: string
+      - in: query
+        name: istemppermission
+        description: The permission of project
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: data not found
   /project/userprojecteditortree:
     get:
       tags:
@@ -2765,6 +2851,32 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
+  /wx/addapplyrecharge/{id}:
+    post:
+      tags:
+      - wx
+      description: get user recharge
+      operationId: PayController.post user recharge
+      parameters:
+      - in: path
+        name: id
+        description: The id of user
+        required: true
+        type: string
+      - in: query
+        name: amount
+        description: The amount of money
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Recharge'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: recharge not found
   /wx/addbusiness/{id}:
     post:
       tags:
@@ -2848,6 +2960,203 @@ paths:
           description: Invalid page supplied
         "404":
           description: pas not found
+  /wx/addlocationnavigate/{id}:
+    post:
+      tags:
+      - wx
+      description: post locationnavigate by locationid
+      operationId: LocationController.post locationnavigate by locationid
+      parameters:
+      - in: query
+        name: title
+        description: The title of location
+        required: true
+        type: string
+      - in: query
+        name: label
+        description: The label of locationnavigate
+        required: true
+        type: string
+      - in: query
+        name: location
+        description: The location of location
+        required: true
+        type: string
+      - in: query
+        name: address
+        description: The address of location
+        type: string
+      - in: query
+        name: lat
+        description: The lat of location
+        type: string
+      - in: query
+        name: lng
+        description: The lng of location
+        type: string
+      - in: path
+        name: id
+        description: The locationid of location
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.CreateLocation'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pas not found
+  /wx/addlocationpart/{id}:
+    post:
+      tags:
+      - wx
+      description: post location by projectid
+      operationId: LocationController.post location by projectid
+      parameters:
+      - in: query
+        name: title
+        description: The title of locationpart
+        required: true
+        type: string
+      - in: query
+        name: describe
+        description: The describe of locationpart
+        required: true
+        type: string
+      - in: query
+        name: sort
+        description: The sort of locationpart
+        required: true
+        type: string
+      - in: query
+        name: userid
+        description: The userid of location
+        required: true
+        type: string
+      - in: path
+        name: id
+        description: The projectid of project
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.CreateLocation'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pas not found
+  /wx/adduser:
+    post:
+      tags:
+      - wx
+      description: add user
+      operationId: UserController.add user
+      parameters:
+      - in: query
+        name: username
+        description: The name of user
+        type: string
+      - in: query
+        name: nickname
+        description: The nickname of user
+        type: string
+      - in: query
+        name: password
+        description: The password of user
+        type: string
+      - in: query
+        name: email
+        description: The email of user
+        type: string
+      - in: query
+        name: department
+        description: The department of user
+        type: string
+      - in: query
+        name: secoffice
+        description: The secoffice of user
+        type: string
+      - in: query
+        name: ip
+        description: The ip of user
+        type: string
+      - in: query
+        name: port
+        description: The port of user
+        type: string
+      - in: query
+        name: status
+        description: The status of user
+        type: string
+      - in: query
+        name: role
+        description: The role of user
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.User'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
+  /wx/adduserpays:
+    post:
+      tags:
+      - wx
+      description: post userpay by mathtempid
+      operationId: PayController.post userpay by mathtempleid
+      parameters:
+      - in: query
+        name: usertempleid
+        description: The id of mathtemple
+        required: true
+        type: string
+      - in: query
+        name: amount
+        description: The amout of pays
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Pay'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: pas not found
+  /wx/adduserrecharge/{id}:
+    post:
+      tags:
+      - wx
+      description: get users recharge
+      operationId: PayController.post users recharge
+      parameters:
+      - in: path
+        name: id
+        description: The id of recharge
+        required: true
+        type: string
+      - in: query
+        name: amount
+        description: The amount of money
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Recharge'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: recharge not found
   /wx/addwxarticle:
     post:
       tags:
@@ -3244,6 +3553,21 @@ paths:
           description: Invalid page supplied
         "404":
           description: pas not found
+  /wx/applyrecharge:
+    get:
+      tags:
+      - wx
+      description: get user recharge
+      operationId: PayController.get user recharge
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Recharge'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: recharge not found
   /wx/businesscheck:
     post:
       tags:
@@ -3359,6 +3683,26 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
+  /wx/deleteuser:
+    post:
+      tags:
+      - wx
+      description: delete user
+      operationId: UserController.delete user
+      parameters:
+      - in: query
+        name: ids
+        description: The ids of user
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.User'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
   /wx/deletewxarticle:
     post:
       tags:
@@ -3443,6 +3787,45 @@ paths:
           description: Invalid page supplied
         "404":
           description: article not found
+  /wx/getapplyrecharge:
+    get:
+      tags:
+      - wx
+      description: get user recharge
+      operationId: PayController.get user recharge
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Recharge'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getapplyrechargedata:
+    get:
+      tags:
+      - wx
+      description: get user rechargedata
+      operationId: PayController.get user rechargedata
+      parameters:
+      - in: query
+        name: page
+        description: The page of recharges
+        type: string
+      - in: query
+        name: limit
+        description: The size of recharges
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Recharge'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /wx/getbusiness/{id}:
     get:
       tags:
@@ -3547,6 +3930,63 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
+  /wx/getlocation/{id}:
+    get:
+      tags:
+      - wx
+      description: get location by userid
+      operationId: LocationController.get location by userid
+      parameters:
+      - in: path
+        name: id
+        description: The projectid of location
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetLocationPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: location not found
+  /wx/getlocationbyid/{id}:
+    get:
+      tags:
+      - wx
+      description: get location by locationid
+      operationId: LocationController.get location by locationid
+      parameters:
+      - in: path
+        name: id
+        description: The id of location
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetLocationPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: location not found
+  /wx/getpay:
+    get:
+      tags:
+      - wx
+      description: get pay by page
+      operationId: PayController.get pay list
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /wx/getuserarticle:
     get:
       tags:
@@ -3562,6 +4002,122 @@ paths:
           description: Invalid page supplied
         "404":
           description: articles not found
+  /wx/getuserbyusername:
+    get:
+      tags:
+      - wx
+      description: get user
+      operationId: UserController.get user
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.User'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
+  /wx/getusergetappreciations:
+    get:
+      tags:
+      - wx
+      description: get userappreciation by page
+      operationId: PayController.get userappreciations list
+      parameters:
+      - in: query
+        name: page
+        description: The page for myappreciation list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getusermoney:
+    get:
+      tags:
+      - wx
+      description: get user money
+      operationId: PayController.get user money
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetUserMoney'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getuserpay:
+    get:
+      tags:
+      - wx
+      description: get pay by page
+      operationId: PayController.get pay list
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getuserpayappreciations:
+    get:
+      tags:
+      - wx
+      description: get userappreciation by page
+      operationId: PayController.get userappreciations list
+      parameters:
+      - in: query
+        name: page
+        description: The page for myappreciation list
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
+  /wx/getuserpaylist:
+    get:
+      tags:
+      - wx
+      description: get userpay by page
+      operationId: PayController.get userpays list
+      parameters:
+      - in: query
+        name: page
+        description: The page for mymoney list
+        required: true
+        type: string
+      - in: query
+        name: page
+        description: The page of projproducts
+        type: string
+      - in: query
+        name: limit
+        description: The size of page
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.GetProductsPage'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: articls not found
   /wx/getuservideo/{id}:
     get:
       tags:
@@ -4119,6 +4675,21 @@ paths:
           description: Invalid page supplied
         "404":
           description: articls not found
+  /wx/importusers:
+    post:
+      tags:
+      - wx
+      description: import users
+      operationId: UserController.import users
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.User'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
   /wx/islogin:
     get:
       tags:
@@ -4365,6 +4936,27 @@ paths:
           description: Invalid page supplied
         "404":
           description: articl not found
+  /wx/standardpdf:
+    get:
+      tags:
+      - wx
+      description: get standardpdf
+      operationId: StandardController.get standardpdf
+      parameters:
+      - in: query
+        name: file
+        description: The link of standardpdf
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.Create'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: cart not found
   /wx/updatebusiness/{id}:
     post:
       tags:
@@ -4448,6 +5040,34 @@ paths:
           description: Invalid page supplied
         "404":
           description: pas not found
+  /wx/updateuser:
+    post:
+      tags:
+      - wx
+      description: add user
+      operationId: UserController.update user
+      parameters:
+      - in: query
+        name: pk
+        description: The pk of user
+        type: string
+      - in: query
+        name: name
+        description: The name of user
+        type: string
+      - in: query
+        name: value
+        description: The value of user
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.User'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
   /wx/updatewxdiary:
     post:
       tags:
@@ -4730,6 +5350,30 @@ paths:
           description: Invalid page supplied
         "404":
           description: article not found
+  /wx/user/{id}:
+    get:
+      tags:
+      - wx
+      description: get user by userid
+      operationId: UserController.get user
+      parameters:
+      - in: path
+        name: id
+        description: The id of user
+        type: string
+      - in: query
+        name: role
+        description: The role of user
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.User'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
   /wx/usermanage:
     get:
       tags:
@@ -4745,6 +5389,21 @@ paths:
           description: Invalid page supplied
         "404":
           description: pdf not found
+  /wx/usermyself:
+    get:
+      tags:
+      - wx
+      description: get usermyself
+      operationId: UserController.get usermyself
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.User'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
   /wx/wxhassession:
     get:
       tags:
@@ -4807,6 +5466,42 @@ paths:
           description: Invalid page supplied
         "404":
           description: pdf not found
+  /wx/wxregion:
+    post:
+      tags:
+      - wx
+      description: post wx region
+      operationId: RegistController.post wx region
+      parameters:
+      - in: query
+        name: uname
+        description: The username of user
+        required: true
+        type: string
+      - in: query
+        name: password
+        description: The password of account
+        required: true
+        type: string
+      - in: query
+        name: code
+        description: The code of wx
+        required: true
+        type: string
+      - in: query
+        name: app_version
+        description: The app_version of wx
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/.SaveUser'
+        "400":
+          description: Invalid page supplied
+        "404":
+          description: user not found
   /wx/wxregist:
     post:
       tags:
@@ -4889,9 +5584,13 @@ definitions:
     type: object
   .Attachment:
     type: object
+  .Avatar:
+    type: object
   .Create:
     type: object
   .CreateBusiness:
+    type: object
+  .CreateLocation:
     type: object
   .DeleteTopicReply:
     type: object
@@ -4905,9 +5604,13 @@ definitions:
     type: object
   .GetBusinessPage:
     type: object
+  .GetChat:
+    type: object
   .GetDiary:
     type: object
   .GetFinance:
+    type: object
+  .GetLocationPage:
     type: object
   .GetOnlyPdf:
     type: object
@@ -4919,6 +5622,10 @@ definitions:
     type: object
   .Gettest:
     type: object
+  .Pay:
+    type: object
+  .Recharge:
+    type: object
   .SUCCESS:
     type: object
   .SaveUser:
@@ -4926,6 +5633,10 @@ definitions:
   .Update:
     type: object
   .UpdateBusiness:
+    type: object
+  .User:
+    type: object
+  .UserTemple:
     type: object
   .success:
     type: object

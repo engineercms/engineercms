@@ -2,18 +2,18 @@ package main
 
 import (
 	// "github.com/3xxx/engineercms/commands"
-	"github.com/3xxx/engineercms/commands/daemon"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/controllers"
-	_ "github.com/3xxx/engineercms/controllers/version"
-	"github.com/3xxx/engineercms/models"
-	_ "github.com/3xxx/engineercms/routers"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/astaxie/beego/session/memcache"
 	_ "github.com/astaxie/beego/session/mysql"
 	_ "github.com/astaxie/beego/session/redis"
 	"github.com/astaxie/beego/toolbox"
+	"github.com/engineercms/engineercms/commands/daemon"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/controllers"
+	_ "github.com/engineercms/engineercms/controllers/version"
+	"github.com/engineercms/engineercms/models"
+	_ "github.com/engineercms/engineercms/routers"
 	"github.com/kardianos/service"
 	_ "github.com/mattn/go-sqlite3"
 	// "github.com/go-xorm/xorm"
@@ -29,7 +29,7 @@ import (
 	"path"
 	"strings"
 	"time"
-	// _ "github.com/3xxx/engineercms/routers"
+	// _ "github.com/engineercms/engineercms/routers"
 )
 
 func main() {

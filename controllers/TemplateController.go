@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"errors"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/models"
 	"strings"
 )
 

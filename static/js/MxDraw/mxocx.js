@@ -9,7 +9,7 @@ function LoadMxDrawX(dwgfile,cabpath,msipath) {
     document.write("<!-- 因为微软的ActiveX新机制，需要一个外部引入的js-->   "),
     document.write('<object id="MxDrawXCtrl" classid="clsid:' + classid + '" '),
 	//document.write('width="85%" height="85%" align="left">   '),
-    document.write('codebase=" ' + cabpath + 'width="100%" height="100%" align="left">'),
+    document.write('codebase=" ' + cabpath + 'width="85%" height="85%" align="left">   '),
     document.write('<param name="_Version" value="65536">  '),
     document.write('<param name="_ExtentX" value="24262">  '),
     document.write('<param name="_ExtentY" value="16219">  '),
@@ -24,12 +24,12 @@ function LoadMxDrawX(dwgfile,cabpath,msipath) {
     document.write('<param name="ToolBarFiles" value="">'),
     document.write('<param name="ShowMenuBar" value="1">'),
     document.write('<param name="EnableUndo" value="1">'),
-    // document.write('<param name="ShowPropertyWindow" value="1">'),
+    document.write('<param name="ShowPropertyWindow" value="1">'),
     document.write('<SPAN STYLE="color:red">不能装载文档控件。请在检查浏览器的选项中检查浏览器的安全设置。请点击<a href=' + msipath + '>安装控件</a></SPAN>'),
     document.write('</object>')) :
 
     Sys.chrome ? (document.write('<object id="MxDrawXCtrl" clsid="{' + classid + '}" '),
-    document.write('type="application/mxdraw-activex" width="100%" height="100%" align="left" '),
+    document.write('type="application/mxdraw-activex" width="85%" height="85%" align="left" '),
     document.write('<param name="_Version" value="65536">  '),
     document.write('<param name="_ExtentX" value="24262">  '),
     document.write('<param name="_ExtentY" value="16219">  '),
@@ -46,7 +46,7 @@ function LoadMxDrawX(dwgfile,cabpath,msipath) {
     document.write('<param name="EnableUndo" value="1">'),
     document.write('<param name="ShowPropertyWindow" value="1">'),
     document.write('<param name="Event_ImplementCommandEvent" value="DoCommandEventFunc">'),
-    document.write('<SPAN STYLE="color:red">chrome不能装载文档控件。请在检查浏览器的选项中检查浏览器的安全设置。请点击<a href=' + msipath + '>安装控件</a></SPAN>'),
+    document.write('<SPAN STYLE="color:red">不能装载文档控件。请在检查浏览器的选项中检查浏览器的安全设置。请点击<a href=' + msipath + '>安装控件</a></SPAN>'),
     document.write('</object>')) :
 
     Sys.firefox ? (document.write("<!-- 需要安装ieTab插件才能使用-->   "),

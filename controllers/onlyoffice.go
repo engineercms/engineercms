@@ -3,8 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"encoding/xml"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/models"
 	// "github.com/astaxie/beego/orm"
 	// "github.com/casbin/beego-orm-adapter"
 	// "baliance.com/gooxml/document"
@@ -1033,44 +1033,44 @@ func (c *OnlyController) OfficeView() {
 		c.Data["Key"] = strconv.FormatInt(attachment.Updated.UnixNano(), 10)
 		c.Data["Sessionid"] = usersessionid
 
-			if path.Ext(attachment.FileName) == ".docx" || path.Ext(attachment.FileName) == ".DOCX" {
-				c.Data["fileType"] = "docx"
-				c.Data["documentType"] = "text"
-			} else if path.Ext(attachment.FileName) == ".wps" || path.Ext(attachment.FileName) == ".WPS" {
-				c.Data["fileType"] = "docx"
-				c.Data["documentType"] = "text"
-			} else if path.Ext(attachment.FileName) == ".XLSX" || path.Ext(attachment.FileName) == ".xlsx" {
-				c.Data["fileType"] = "xlsx"
-				c.Data["documentType"] = "spreadsheet"
-			} else if path.Ext(attachment.FileName) == ".ET" || path.Ext(attachment.FileName) == ".et" {
-				c.Data["fileType"] = "xlsx"
-				c.Data["documentType"] = "spreadsheet"
-			} else if path.Ext(attachment.FileName) == ".pptx" || path.Ext(attachment.FileName) == ".PPTX" {
-				c.Data["fileType"] = "pptx"
-				c.Data["documentType"] = "presentation"
-			} else if path.Ext(attachment.FileName) == ".dps" || path.Ext(attachment.FileName) == ".DPS" {
-				c.Data["fileType"] = "pptx"
-				c.Data["documentType"] = "presentation"
-			} else if path.Ext(attachment.FileName) == ".doc" || path.Ext(attachment.FileName) == ".DOC" {
-				c.Data["fileType"] = "doc"
-				c.Data["documentType"] = "text"
-			} else if path.Ext(attachment.FileName) == ".txt" || path.Ext(attachment.FileName) == ".TXT" {
-				c.Data["fileType"] = "txt"
-				c.Data["documentType"] = "text"
-			} else if path.Ext(attachment.FileName) == ".XLS" || path.Ext(attachment.FileName) == ".xls" {
-				c.Data["fileType"] = "xls"
-				c.Data["documentType"] = "spreadsheet"
-			} else if path.Ext(attachment.FileName) == ".csv" || path.Ext(attachment.FileName) == ".CSV" {
-				c.Data["fileType"] = "csv"
-				c.Data["documentType"] = "spreadsheet"
-			} else if path.Ext(attachment.FileName) == ".ppt" || path.Ext(attachment.FileName) == ".PPT" {
-				c.Data["fileType"] = "ppt"
-				c.Data["documentType"] = "presentation"
-			} else if path.Ext(attachment.FileName) == ".pdf" || path.Ext(attachment.FileName) == ".PDF" {
-				c.Data["fileType"] = "pdf"
-				c.Data["documentType"] = "text"
-				c.Data["Mode"] = "view"
-			}
+		if path.Ext(attachment.FileName) == ".docx" || path.Ext(attachment.FileName) == ".DOCX" {
+			c.Data["fileType"] = "docx"
+			c.Data["documentType"] = "text"
+		} else if path.Ext(attachment.FileName) == ".wps" || path.Ext(attachment.FileName) == ".WPS" {
+			c.Data["fileType"] = "docx"
+			c.Data["documentType"] = "text"
+		} else if path.Ext(attachment.FileName) == ".XLSX" || path.Ext(attachment.FileName) == ".xlsx" {
+			c.Data["fileType"] = "xlsx"
+			c.Data["documentType"] = "spreadsheet"
+		} else if path.Ext(attachment.FileName) == ".ET" || path.Ext(attachment.FileName) == ".et" {
+			c.Data["fileType"] = "xlsx"
+			c.Data["documentType"] = "spreadsheet"
+		} else if path.Ext(attachment.FileName) == ".pptx" || path.Ext(attachment.FileName) == ".PPTX" {
+			c.Data["fileType"] = "pptx"
+			c.Data["documentType"] = "presentation"
+		} else if path.Ext(attachment.FileName) == ".dps" || path.Ext(attachment.FileName) == ".DPS" {
+			c.Data["fileType"] = "pptx"
+			c.Data["documentType"] = "presentation"
+		} else if path.Ext(attachment.FileName) == ".doc" || path.Ext(attachment.FileName) == ".DOC" {
+			c.Data["fileType"] = "doc"
+			c.Data["documentType"] = "text"
+		} else if path.Ext(attachment.FileName) == ".txt" || path.Ext(attachment.FileName) == ".TXT" {
+			c.Data["fileType"] = "txt"
+			c.Data["documentType"] = "text"
+		} else if path.Ext(attachment.FileName) == ".XLS" || path.Ext(attachment.FileName) == ".xls" {
+			c.Data["fileType"] = "xls"
+			c.Data["documentType"] = "spreadsheet"
+		} else if path.Ext(attachment.FileName) == ".csv" || path.Ext(attachment.FileName) == ".CSV" {
+			c.Data["fileType"] = "csv"
+			c.Data["documentType"] = "spreadsheet"
+		} else if path.Ext(attachment.FileName) == ".ppt" || path.Ext(attachment.FileName) == ".PPT" {
+			c.Data["fileType"] = "ppt"
+			c.Data["documentType"] = "presentation"
+		} else if path.Ext(attachment.FileName) == ".pdf" || path.Ext(attachment.FileName) == ".PDF" {
+			c.Data["fileType"] = "pdf"
+			c.Data["documentType"] = "text"
+			c.Data["Mode"] = "view"
+		}
 
 		u := c.Ctx.Input.UserAgent()
 		matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)

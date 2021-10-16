@@ -2,15 +2,15 @@ package controllers
 
 import (
 	// "encoding/json"
-	"crypto/md5"
-	"encoding/hex"
+	// "crypto/md5"
+	// "encoding/hex"
 	"fmt"
-	m "github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"github.com/casbin/beego-orm-adapter"
 	"github.com/casbin/casbin"
 	"github.com/casbin/xorm-adapter"
+	m "github.com/engineercms/engineercms/models"
 	_ "github.com/mattn/go-sqlite3"
 	"path"
 	"regexp"
@@ -136,111 +136,108 @@ func init() {
 	// e.AddPolicy("role_everyone", "/login", "*", ".*")
 	// e.AddPolicy("role_member", "/logout", "*", ".*")
 	// e.AddPolicy("role_member", "/member", "*", ".*")
-	beego.Info("insert user ...")
-	// u := new(User)
-	var u m.User
-	u.Username = "admin"
-	u.Nickname = "Hotqin888"
-	Pwd1 := "admin"
-	md5Ctx := md5.New()
-	md5Ctx.Write([]byte(Pwd1))
-	cipherStr := md5Ctx.Sum(nil)
-	u.Password = hex.EncodeToString(cipherStr)
-	// u.Password = Pwdhash("admin")
-	u.Email = "504284@qq.com"
-	u.Remark = "I'm admin"
-	u.Status = 1
-	u.Role = "1"
-	id, err := m.SaveUser(u)
-	// o = orm.NewOrm()
-	// o.Insert(u)
-	// fmt.Println("insert user end")
-	if err == nil && id > 0 {
-		beego.Info("insert user end")
-	} else {
-		beego.Info(err)
-	}
 
-	beego.Info("insert role ...")
-	// r := new(Role)
-	var r m.Role
-	r.Rolename = "admin"
-	r.Rolenumber = "1"
-	r.Status = "0"
+	// 不能先再controllers里用ini涉及数据库表，此刻数据表还没自动建立吧？？？
+	// beego.Info("insert user ...")
+	// var u m.User
+	// u.Username = "admin"
+	// u.Nickname = "Hotqin888"
+	// Pwd1 := "admin"
+	// md5Ctx := md5.New()
+	// md5Ctx.Write([]byte(Pwd1))
+	// cipherStr := md5Ctx.Sum(nil)
+	// u.Password = hex.EncodeToString(cipherStr)
+	// u.Email = "504284@qq.com"
+	// u.Remark = "I'm admin"
+	// u.Status = 1
+	// u.Role = "1"
+	// id, err := m.SaveUser(u)
+	// if err == nil && id > 0 {
+	// 	beego.Info("insert user end")
+	// } else {
+	// 	beego.Info(err)
+	// }
 
-	id, err = m.SaveRole(r)
-	if err == nil && id > 0 {
-		beego.Info("insert role end")
-	} else {
-		beego.Error(err)
-		//重新获取roleid
-		role, err := m.GetRoleByRolename("admin")
-		if err != nil {
-			beego.Error(err)
-		} else {
-			id = role.Id
-		}
-	}
-	user_admin, err := m.GetUserByUsername("admin")
+	// beego.Info("insert role ...")
+	// var r m.Role
+	// r.Rolename = "admin"
+	// r.Rolenumber = "1"
+	// r.Status = "0"
+
+	// id, err = m.SaveRole(r)
+	// if err == nil && id > 0 {
+	// 	beego.Info("insert role end")
+	// } else {
+	// 	beego.Error(err)
+	// 	//重新获取roleid
+	// 	role, err := m.GetRoleByRolename("admin")
+	// 	if err != nil {
+	// 		beego.Error(err)
+	// 	} else {
+	// 		id = role.Id
+	// 	}
+	// }
+	// user_admin, err := m.GetUserByUsername("admin")
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// //将用户admin加入到角色admin里
+	// e.AddGroupingPolicy(strconv.FormatInt(user_admin.Id, 10), "role_"+strconv.FormatInt(id, 10))
+	// //添加admin角色的权限/*
+	// e.AddPolicy("role_"+strconv.FormatInt(id, 10), "/*", "*", ".*")
+
+	// //匿名用户角色
+	// r.Rolename = "anonymous"
+	// r.Rolenumber = "5"
+	// r.Status = "0"
+	// id, err = m.SaveRole(r)
+	// if err == nil && id > 0 {
+	// 	beego.Info("insert role end")
+	// } else {
+	// 	beego.Error(err)
+	// 	//重新获取roleid
+	// 	role, err := m.GetRoleByRolename("anonymous")
+	// 	if err != nil {
+	// 		beego.Error(err)
+	// 	} else {
+	// 		id = role.Id
+	// 	}
+	// }
+	// //添加anonymous角色的权限/*
+	// e.AddPolicy("role_"+strconv.FormatInt(id, 10), "/login", "*", ".*")
+
+	// r.Rolename = "everyone"
+	// r.Rolenumber = "5"
+	// r.Status = "0"
+	// id, err = m.SaveRole(r)
+	// if err == nil && id > 0 {
+	// 	beego.Info("insert role end")
+	// } else {
+	// 	beego.Error(err)
+	// }
+
+	// r.Rolename = "isme"
+	// r.Rolenumber = "4"
+	// r.Status = "0"
+	// id, err = m.SaveRole(r)
+	// if err == nil && id > 0 {
+	// 	beego.Info("insert role end")
+	// } else {
+	// 	beego.Error(err)
+	// }
+	role, err := m.GetRoleByRolename("admin")
 	if err != nil {
 		beego.Error(err)
+		return
 	}
-	//将用户admin加入到角色admin里
-	e.AddGroupingPolicy(strconv.FormatInt(user_admin.Id, 10), "role_"+strconv.FormatInt(id, 10))
-	//添加admin角色的权限/*
-	e.AddPolicy("role_"+strconv.FormatInt(id, 10), "/*", "*", ".*")
-
-	//匿名用户角色
-	r.Rolename = "anonymous"
-	r.Rolenumber = "5"
-	r.Status = "0"
-	// r.Remark = "I'm a admin role"
-	// r.Status = 2
-	// r.Title = "Admin role"
-	// o.Insert(r)
-	id, err = m.SaveRole(r)
-	if err == nil && id > 0 {
-		beego.Info("insert role end")
-	} else {
+	user, err := m.GetUserByUsername("admin")
+	if err != nil {
 		beego.Error(err)
-		//重新获取roleid
-		role, err := m.GetRoleByRolename("anonymous")
-		if err != nil {
-			beego.Error(err)
-		} else {
-			id = role.Id
-		}
-	}
-	//添加anonymous角色的权限/*
-	e.AddPolicy("role_"+strconv.FormatInt(id, 10), "/login", "*", ".*")
-
-	r.Rolename = "everyone"
-	r.Rolenumber = "5"
-	r.Status = "0"
-	// r.Remark = "I'm a admin role"
-	// r.Status = 2
-	// r.Title = "Admin role"
-	// o.Insert(r)
-	id, err = m.SaveRole(r)
-	if err == nil && id > 0 {
-		beego.Info("insert role end")
-	} else {
-		beego.Error(err)
+		return
 	}
 
-	r.Rolename = "isme"
-	r.Rolenumber = "4"
-	r.Status = "0"
-	// r.Remark = "I'm a admin role"
-	// r.Status = 2
-	// r.Title = "Admin role"
-	// o.Insert(r)
-	id, err = m.SaveRole(r)
-	if err == nil && id > 0 {
-		beego.Info("insert role end")
-	} else {
-		beego.Error(err)
-	}
+	// 将用户admin加入到角色admin里
+	e.AddGroupingPolicy(strconv.FormatInt(user.Id, 10), "role_"+strconv.FormatInt(role.Id, 10))
 }
 
 func (c *RoleController) Test() {
@@ -367,6 +364,7 @@ func (c *RoleController) Test() {
 // 	c.ServeJSON()
 // }
 
+// 显示用户具备的角色
 func (c *RoleController) Get() {
 	id := c.Ctx.Input.Param(":id")
 	c.Data["Id"] = id

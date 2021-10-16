@@ -1,6 +1,9 @@
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" data-placeholder-focus="false">
+<!DOCTYPE html>
 
-<head profile="http://gmpg.org/xfn/11">
+<head>
+  <!-- 下面这行导致移动端字体不变小 -->
+  <meta name="HandheldFriendly" content="True">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" href="/static/wordpress/header.css" type="text/css">
   <link rel="stylesheet" href="/static/wordpress/style(1).css" type="text/css" media="screen">
   <link rel="stylesheet" type="text/css" href="/static/wordpress/style.css" media="screen">
@@ -149,6 +152,63 @@
     /*考虑浏览器兼容性：兼容 Chrome, Safari, Opera */
     filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, .5));
   }
+
+    .next_article{
+      list-style: none;
+    }
+    .prev_article{
+      list-style: none;
+    }
+
+    #post-41687 .article_next_prev span {
+      width: 51px;
+      height: 26px;
+      line-height: 26px;
+      /*display: inline-block;*/
+      color: #fff;
+      padding-left: 27px;
+      margin-right: 7px;
+      background: #999;
+    }
+    #post-41687 .article_next_prev a {
+      text-decoration: none;
+      color: #333;
+    }
+    #post-41687 .article_next_prev .prev_article {
+      margin-bottom: 3px;
+    }
+
+    #post-41687 .article_next_prev .prev_article span {
+      background-image: url("/static/img/skin-type-icon.png");
+      background-repeat: no-repeat;
+      background-position: 8px -111px;
+      margin-right: 7px;
+    }
+    #post-41687 .article_next_prev .next_article span {
+      background-image: url("/static/img/skin-type-icon.png");
+      background-repeat: no-repeat;
+      background-position: 8px -140px;
+      margin-right: 7px;
+    }
+    #post-41687 .article_next_prev li:hover span {
+      background-color: #3d84b0;
+    }
+    #post-41687 .article_next_prev li:hover a {
+      color: #3d84b0;
+    }
+
+    #post-41687 .article_next_prev li:hover span {
+      background-color: #c88326;
+    }
+    #post-41687 .article_next_prev li:hover a {
+      color: #c88326;
+    }
+    #post-41687 .article_next_prev #btnDigg {
+      background: #f90;
+    }
+    #post-41687 .article_next_prev #btnBury {
+      background: #ff7900;
+    }
   </style>
   <style id="wp-block-library-inline-css">
   .has-text-align-justify {
@@ -206,9 +266,9 @@
   <div id="wrapper" class="en-wrapper">
     <div id="content" class="widecolumn single">
       <style type="text/css">
-      #post-focus.has-header-img {
-        background-image: url("/static/wordpress/anthony-delanoix-hzgs56ze49s-unsplash.jpg?w=2000");
-      }
+        #post-focus.has-header-img {
+          background-image: url("/static/wordpress/anthony-delanoix-hzgs56ze49s-unsplash.jpg?w=2000");
+        }
       </style>
       <div id="blog-header" class="single has-header-img">
         <div class="inner">
@@ -240,108 +300,123 @@
           <p class="post-author-name">{{.product.Principal}}</p>
         </div>
         <div class="entrytext">
-          {{str2html .article.Content}}
+          <div class="fr-view">
+            {{str2html .article.Content}}
+          </div>
         </div>
+        <ul class="article_next_prev">
+          {{if .Pre}}
+          <li class="prev_article">
+            <span>上一篇：</span>
+            <a href="/project/product/article/{{.PreArticleId}}" onclick="">{{.PreArticleTitle}}</a>
+          </li>
+          {{end}}
+          {{if .Next}}
+          <li class="next_article">
+            <span>下一篇：</span>
+            <a href="/project/product/article/{{.NextArticleId}}" onclick="">{{.NextArticleTitle}}</a>
+          </li>
+          {{end}}
+        </ul>
         <div id="entry-comments">
           <h3 id="comments" class="commentsheader">26 Comments</h3>
           <p class="nocomments"><span>Comments are closed.</span></p>
-          <div class="commentnav">
+    <!--   <div class="commentnav">
             <div class="alignleft"></div>
             <div class="alignright"></div>
           </div>
-          <!-- <ol class="commentlist">
-                        <li class="comment byuser comment-author-partylovin even thread-even depth-1 highlander-comment" id="comment-412460">
-                            <cite class="comment-author"> <img alt="" src="/static/wordpress/1147531e08420de0f09cb2dc7344219c.png" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-1147531e08420de0f09cb2dc7344219c-0"> <a href="http://partylovin.com/" rel="external nofollow ugc" class="url">Ana</a></cite>
-                            <small class="commentmetadata">
-                                <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412460" title="">
-                                    Nov 12th at 5:14 pm</a>
-                            </small>
-                            <div class="contenttext">
-                                <p>Thank you for sharing this! Very helpful!</p>
-                                <p id="comment-like-412460" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412460&amp;_wpnonce=cfb6593f54" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412460" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="11">11 people</a></span></p>
-                            </div>
-                            <ul class="comment-actions">
-                            </ul>
-                        </li> 
-                        <li class="comment byuser comment-author-elenaramirez odd alt thread-odd thread-alt depth-1 highlander-comment" id="comment-412462">
-                            <cite class="comment-author"> <img alt="" src="/static/wordpress/ec051d1490cb5121ad3333a5e4b0fefa.jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-ec051d1490cb5121ad3333a5e4b0fefa-0"> <a href="http://elenasjustmythoughts.wordpress.com/" rel="external nofollow ugc" class="url">elenaramirez</a></cite>
-                            <small class="commentmetadata">
-                                <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412462" title="">
-                                    Nov 12th at 6:51 pm</a>
-                            </small>
-                            <div class="contenttext">
-                                <p>I have a question please…. this sounds like a great idea. But I don’t want to make it mandatory, for all my subscribers to pay. Can it be just a contribution at their discretion? For those who might want to give?</p>
-                                <p id="comment-like-412462" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412462&amp;_wpnonce=028dc29fa8" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412462" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="16">16 people</a></span></p>
-                            </div>
-                            <ul class="comment-actions">
-                            </ul>
-                        </li>
-                        <ul class="children">
-                            <li class="comment byuser comment-author-arturpiszek bypostauthor even depth-2 author-comment highlander-comment" id="comment-412475">
-                                <cite class="comment-author"> <img alt="" src="/static/wordpress/c88872d732506446e8b44b677a6a20e0(1).jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-c88872d732506446e8b44b677a6a20e0-1"> <a href="https://deliber.at/" rel="external nofollow ugc" class="url">Artur Piszek</a></cite>
-                                <small class="commentmetadata">
-                                    <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412475" title="">
-                                        Nov 13th at 5:10 am</a>
-                                </small>
-                                <div class="contenttext">
-                                    <p>That is indeed the best way to collect donations – and this is precisely how it works! On Longreads.com we use this feature as a “recurring donation” so that the visitors can become supporters if they choose so, but this is not mandatory.</p>
-                                    <p id="comment-like-412475" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412475&amp;_wpnonce=3ef9224f63" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412475" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="11">11 people</a></span></p>
-                                </div>
-                                <ul class="comment-actions">
-                                </ul>
-                            </li> 
-                        </ul>
-
-                        <li class="comment byuser comment-author-zandymae odd alt thread-even depth-1 highlander-comment" id="comment-412471">
-                            <cite class="comment-author"> <img alt="" src="/static/wordpress/6c7a5a509333037870ba8bdbadb62c28.jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-6c7a5a509333037870ba8bdbadb62c28-0"> <a href="http://findrealtalk.com/" rel="external nofollow ugc" class="url">Zandra L.</a></cite>
-                            <small class="commentmetadata">
-                                <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412471" title="">
-                                    Nov 12th at 10:34 pm</a>
-                            </small>
-                            <div class="contenttext">
-                                <p>But I guess, it would work best for those who already have thousands followers. In my opine, it might shoo people if they are just trying to understand what do you blog most. Well, these are just my perceptions. Thanks for writing, anyway. <img draggable="false" role="img" class="emoji" alt="☺" src="/static/wordpress/263a.svg"></p>
-                                <p id="comment-like-412471" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412471&amp;_wpnonce=fc5b4522b6" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412471" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="8">8 people</a></span></p>
-                            </div>
-                            <ul class="comment-actions">
-                            </ul>
-                        </li>
-                        <ul class="children">
-                            <li class="comment byuser comment-author-arturpiszek bypostauthor even depth-2 author-comment highlander-comment" id="comment-412476">
-                                <cite class="comment-author"> <img alt="" src="/static/wordpress/c88872d732506446e8b44b677a6a20e0(1).jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-c88872d732506446e8b44b677a6a20e0-2"> <a href="https://deliber.at/" rel="external nofollow ugc" class="url">Artur Piszek</a></cite>
-                                <small class="commentmetadata">
-                                    <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412476" title="">
-                                        Nov 13th at 5:12 am</a>
-                                </small>
-                                <div class="contenttext">
-                                    <p>You are right! Developing trust and relationships with your readers is necessary for Recurring Payments to be useful.<br>
-                                        If you want to learn more on how to blog effectively, I recommend the free “Blogging University” course:<br>
-                                        <a href="https://dailypost.wordpress.com/blogging-university/" rel="nofollow ugc">https://dailypost.wordpress.com/blogging-university/</a></p>
-                                    <p id="comment-like-412476" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412476&amp;_wpnonce=4a7c18027f" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412476" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="7">7 people</a></span></p>
-                                </div>
-                                <ul class="comment-actions">
-                                </ul>
-                            </li>
-                            <ul class="children">
-                                <li class="comment byuser comment-author-zandymae odd alt depth-3 highlander-comment" id="comment-412479">
-                                    <cite class="comment-author"> <img alt="" src="/static/wordpress/6c7a5a509333037870ba8bdbadb62c28.jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-6c7a5a509333037870ba8bdbadb62c28-1"> <a href="http://findrealtalk.com/" rel="external nofollow ugc" class="url">Zandra L.</a></cite>
-                                    <small class="commentmetadata">
-                                        <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412479" title="">
-                                            Nov 13th at 5:34 am</a>
-                                    </small>
-                                    <div class="contenttext">
-                                        <p>Thanks for your recommendation, Dear! <img draggable="false" role="img" class="emoji" alt="😘" src="/static/wordpress/1f618.svg"></p>
-                                        <p id="comment-like-412479" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412479&amp;_wpnonce=c154e587a7" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412479" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="1">1 person</a></span></p>
-                                    </div>
-                                    <ul class="comment-actions">
-                                    </ul>
-                                </li>
-                            </ul>
-                        </ul>
-                    </ol> -->
+          <ol class="commentlist">
+            <li class="comment byuser comment-author-partylovin even thread-even depth-1 highlander-comment" id="comment-412460">
+              <cite class="comment-author"> <img alt="" src="/static/wordpress/1147531e08420de0f09cb2dc7344219c.png" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-1147531e08420de0f09cb2dc7344219c-0"> <a href="http://partylovin.com/" rel="external nofollow ugc" class="url">Ana</a></cite>
+              <small class="commentmetadata">
+                <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412460" title="">
+                  Nov 12th at 5:14 pm</a>
+              </small>
+              <div class="contenttext">
+                <p>Thank you for sharing this! Very helpful!</p>
+                <p id="comment-like-412460" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412460&amp;_wpnonce=cfb6593f54" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412460" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="11">11 people</a></span></p>
+              </div>
+              <ul class="comment-actions">
+              </ul>
+            </li>
+            <li class="comment byuser comment-author-elenaramirez odd alt thread-odd thread-alt depth-1 highlander-comment" id="comment-412462">
+              <cite class="comment-author"> <img alt="" src="/static/wordpress/ec051d1490cb5121ad3333a5e4b0fefa.jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-ec051d1490cb5121ad3333a5e4b0fefa-0"> <a href="http://elenasjustmythoughts.wordpress.com/" rel="external nofollow ugc" class="url">elenaramirez</a></cite>
+              <small class="commentmetadata">
+                <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412462" title="">
+                  Nov 12th at 6:51 pm</a>
+              </small>
+              <div class="contenttext">
+                <p>I have a question please…. this sounds like a great idea. But I don’t want to make it mandatory, for all my subscribers to pay. Can it be just a contribution at their discretion? For those who might want to give?</p>
+                <p id="comment-like-412462" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412462&amp;_wpnonce=028dc29fa8" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412462" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="16">16 people</a></span></p>
+              </div>
+              <ul class="comment-actions">
+              </ul>
+            </li>
+            <ul class="children">
+              <li class="comment byuser comment-author-arturpiszek bypostauthor even depth-2 author-comment highlander-comment" id="comment-412475">
+                <cite class="comment-author"> <img alt="" src="/static/wordpress/c88872d732506446e8b44b677a6a20e0(1).jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-c88872d732506446e8b44b677a6a20e0-1"> <a href="https://deliber.at/" rel="external nofollow ugc" class="url">Artur Piszek</a></cite>
+                <small class="commentmetadata">
+                  <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412475" title="">
+                    Nov 13th at 5:10 am</a>
+                </small>
+                <div class="contenttext">
+                  <p>That is indeed the best way to collect donations – and this is precisely how it works! On Longreads.com we use this feature as a “recurring donation” so that the visitors can become supporters if they choose so, but this is not mandatory.</p>
+                  <p id="comment-like-412475" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412475&amp;_wpnonce=3ef9224f63" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412475" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="11">11 people</a></span></p>
+                </div>
+                <ul class="comment-actions">
+                </ul>
+              </li>
+            </ul>
+            <li class="comment byuser comment-author-zandymae odd alt thread-even depth-1 highlander-comment" id="comment-412471">
+              <cite class="comment-author"> <img alt="" src="/static/wordpress/6c7a5a509333037870ba8bdbadb62c28.jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-6c7a5a509333037870ba8bdbadb62c28-0"> <a href="http://findrealtalk.com/" rel="external nofollow ugc" class="url">Zandra L.</a></cite>
+              <small class="commentmetadata">
+                <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412471" title="">
+                  Nov 12th at 10:34 pm</a>
+              </small>
+              <div class="contenttext">
+                <p>But I guess, it would work best for those who already have thousands followers. In my opine, it might shoo people if they are just trying to understand what do you blog most. Well, these are just my perceptions. Thanks for writing, anyway. <img draggable="false" role="img" class="emoji" alt="☺" src="/static/wordpress/263a.svg"></p>
+                <p id="comment-like-412471" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412471&amp;_wpnonce=fc5b4522b6" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412471" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="8">8 people</a></span></p>
+              </div>
+              <ul class="comment-actions">
+              </ul>
+            </li>
+            <ul class="children">
+              <li class="comment byuser comment-author-arturpiszek bypostauthor even depth-2 author-comment highlander-comment" id="comment-412476">
+                <cite class="comment-author"> <img alt="" src="/static/wordpress/c88872d732506446e8b44b677a6a20e0(1).jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-c88872d732506446e8b44b677a6a20e0-2"> <a href="https://deliber.at/" rel="external nofollow ugc" class="url">Artur Piszek</a></cite>
+                <small class="commentmetadata">
+                  <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412476" title="">
+                    Nov 13th at 5:12 am</a>
+                </small>
+                <div class="contenttext">
+                  <p>You are right! Developing trust and relationships with your readers is necessary for Recurring Payments to be useful.<br>
+                    If you want to learn more on how to blog effectively, I recommend the free “Blogging University” course:<br>
+                    <a href="https://dailypost.wordpress.com/blogging-university/" rel="nofollow ugc">https://dailypost.wordpress.com/blogging-university/</a></p>
+                  <p id="comment-like-412476" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412476&amp;_wpnonce=4a7c18027f" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412476" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="7">7 people</a></span></p>
+                </div>
+                <ul class="comment-actions">
+                </ul>
+              </li>
+              <ul class="children">
+                <li class="comment byuser comment-author-zandymae odd alt depth-3 highlander-comment" id="comment-412479">
+                  <cite class="comment-author"> <img alt="" src="/static/wordpress/6c7a5a509333037870ba8bdbadb62c28.jpeg" class="avatar avatar-32 grav-hashed grav-hijack" height="32" width="32" id="grav-6c7a5a509333037870ba8bdbadb62c28-1"> <a href="http://findrealtalk.com/" rel="external nofollow ugc" class="url">Zandra L.</a></cite>
+                  <small class="commentmetadata">
+                    <a href="file:///C:/Users/Administrator/Desktop/3.html#comment-412479" title="">
+                      Nov 13th at 5:34 am</a>
+                  </small>
+                  <div class="contenttext">
+                    <p>Thanks for your recommendation, Dear! <img draggable="false" role="img" class="emoji" alt="😘" src="/static/wordpress/1f618.svg"></p>
+                    <p id="comment-like-412479" data-liked="comment-not-liked" class="comment-likes comment-not-liked"><a href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/?like_comment=412479&amp;_wpnonce=c154e587a7" class="comment-like-link needs-login" rel="nofollow" data-blog="3584907"><span>Like</span></a><span id="comment-like-count-412479" class="comment-like-feedback">Liked by <a href="file:///C:/Users/Administrator/Desktop/3.html#" class="view-likers" data-like-count="1">1 person</a></span></p>
+                  </div>
+                  <ul class="comment-actions">
+                  </ul>
+                </li>
+              </ul>
+            </ul>
+          </ol>
           <div class="commentnav">
             <div class="alignleft"></div>
             <div class="alignright"></div>
-          </div>
+          </div> -->
           <div style="clear: both; margin-top: 15px;"></div>
         </div>
       </div>

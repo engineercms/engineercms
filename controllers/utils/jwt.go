@@ -120,6 +120,53 @@ func CheckToken(tokenString string) (userName string, err error) {
 	return userName, err
 }
 
+// 校验token是否有效 返回参数
+func LubanCheckToken(tokenString string) (userId, userName, userNickname string, err error) {
+	// tokenString = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJleHAiOjE1MDAwLCJpc3MiOiJ0ZXN0In0.HE7fK0xOQwFEr4WDgRWj4teRPZ6i3GLwD5YCm6Pwu_c"
+	mySignKey := beego.AppConfig.String("LubanTokenSecrets") //坑：密钥必须要长，要达到这个位数，26个英文字母是不行的。！！！！
+	// beego.Info(secret)
+	// mySignKey := "whatthefuck123weishenmebuneng123" //密钥，同java代码，
+	// mySignKeyBytes, err := base64.URLEncoding.DecodeString(mySignKey) //需要用和加密时同样的方式转化成对应的字节数组
+	mySignKeyBytes, err := base64.RawStdEncoding.DecodeString(mySignKey)
+	if err != nil {
+		fmt.Println("base64 decodeString failed.", err)
+		return "", "", "", err
+	}
+
+	// 原文链接：https://blog.csdn.net/qiang527052/article/details/80748700
+
+	// secret = "AllYourBase"
+	// userName := ""
+	// tokenString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkb3VibGVzIn0.cBDFVLuQZV2B7J76kk17LE2hmni_3RbzTBzIH_OsriE"
+	// tokenString = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI4OCIsInN1YiI6IuWwj-eZvSIsImlhdCI6MTYzMzAxNjU0OSwiY29tcGFueUlkIjoiOTk5OTk5OSIsImNvbXBhbnlOYW1lIjoi6bKB54-tIn0.W9p52lAzo9EcNSb_Uwf7MK9Lw-vNvG_8HHI-piMkNpY"
+	tokenString = SubString(tokenString, 4, len(tokenString))
+	beego.Info(tokenString)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		// return []byte(mySignKey), nil
+		return mySignKeyBytes, nil
+	})
+	if err != nil {
+		beego.Error(err)
+		return "", "", "", err
+	}
+	beego.Info(token)
+	// token.Valid里已经包含了过期判断
+	if token != nil { //&& token.Valid
+		beego.Info("You look nice today")
+		claims, _ := token.Claims.(jwt.MapClaims)
+		userId = claims["userId"].(string)
+		userName = claims["userName"].(string)
+		userNickname = claims["nickname"].(string)
+		// companyName = claims["companyName"].(string)
+	}
+	return userId, userName, userNickname, err
+}
+
 // func AuthenticateUserForLogin(loginname, password string) (*models.User, error) {
 // 	if len(password) == 0 || len(loginname) == 0 {
 // 		return nil, errors.New("Error: 用户名或密码为空")
@@ -462,6 +509,26 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func getHeaderTokenValue(tokenString string) string {
 	//Authorization: Bearer <token>
 	return fmt.Sprintf("Bearer %s", tokenString)
+}
+
+//如果不够length，返回全部长度范围
+func SubString(str string, begin, length int) (substr string) {
+	// 将字符串的转换成[]rune
+	rs := []rune(str)
+	lth := len(rs)
+	// 简单的越界判断
+	if begin < 0 {
+		begin = 0
+	}
+	if begin >= lth {
+		begin = lth
+	}
+	end := begin + length
+	if end > lth {
+		end = lth
+	}
+	// 返回子串
+	return string(rs[begin:end])
 }
 
 // 下一步我们给beego添加一个过滤器，假定：login接口返回给client 一个token，后续所有的请求都会带上这个token：

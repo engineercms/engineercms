@@ -4,8 +4,8 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	// "encoding/json"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/models"
 	// "github.com/astaxie/beego/httplib"
 	// "github.com/astaxie/beego/logs"
 	// "github.com/bitly/go-simplejson"
@@ -177,7 +177,7 @@ func (c *PdfCpuController) AddWatermarks() {
 	}
 	desc = "pos: br, off: " + offsetdx + " " + offsetdy + ", s:" + scale + " a, rot:0"
 	onTop := true
-	wm, err := pdfcpu.ParseImageWatermarkDetails(imagefilenamepath, desc, onTop)
+	wm, err := pdfcpu.ParseImageWatermarkDetails(imagefilenamepath, desc, onTop, 1)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -210,7 +210,7 @@ func (c *PdfCpuController) AddWatermarks() {
 // @Failure 404 pdf not found
 // @router /onlypdf/:id [get]
 func (c *PdfCpuController) OnlyPdf() {
-	
+
 	id := c.Ctx.Input.Param(":id")
 	beego.Info(id)
 	// id := c.Input().Get("id")

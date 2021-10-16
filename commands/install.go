@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"flag"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/controllers/utils"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/controllers/utils"
+	"github.com/engineercms/engineercms/models"
 )
 
 //系统安装.

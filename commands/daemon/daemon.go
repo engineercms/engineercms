@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/3xxx/engineercms/commands"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/controllers"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/commands"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/controllers"
 	"github.com/kardianos/service"
 	"path/filepath"
 )

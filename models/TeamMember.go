@@ -2,9 +2,9 @@ package models
 
 import (
 	"errors"
-	"github.com/3xxx/engineercms/conf"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/conf"
 )
 
 type TeamMember struct {
@@ -205,10 +205,10 @@ func (m *TeamMember) FindNotJoinMemberByAccount(teamId int, account string, limi
 	o := orm.NewOrm()
 
 	sql := `select member.member_id,member.account,team.team_member_id
-from md_members as member 
+from md_members as member
   left join md_team_member as team on team.team_id = ? and member.member_id = team.member_id
   where member.account like ? AND team_member_id IS NULL
-  order by member.member_id desc 
+  order by member.member_id desc
 limit ?;`
 
 	members := make([]*Member, 0)
@@ -241,7 +241,7 @@ func (m *TeamMember) FindByBookIdAndMemberId(bookId, memberId int) (*TeamMember,
 	//一个用户可能在多个团队中，且一个项目可能有多个团队参与。因此需要查询用户最大权限。
 	sql := `select *
 from md_team_member as team
-where team.team_id in (select rel.team_id from md_team_relationship as rel where rel.book_id = ?) 
+where team.team_id in (select rel.team_id from md_team_relationship as rel where rel.book_id = ?)
 and team.member_id = ? order by team.role_id asc limit 1;`
 
 	o := orm.NewOrm()

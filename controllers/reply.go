@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/3xxx/engineercms/controllers/utils"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/controllers/utils"
+	"github.com/engineercms/engineercms/models"
 	"net/http"
 	"os"
 	"strconv"
@@ -37,7 +37,14 @@ func (c *ReplyController) AddWxRelease() {
 	}
 	// beego.Info(accessToken)
 	content := c.Input().Get("content")
-	errcode, errmsg, err := utils.MsgSecCheck(accessToken, content)
+	// errcode, errmsg, err := utils.MsgSecCheck(accessToken, content)
+	openID := c.GetSession("openID")
+	if openID == nil {
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return
+	}
+	errcode, errmsg, err := utils.MsgSecCheck(2, 2, accessToken, openID.(string), content)
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}

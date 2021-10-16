@@ -3,10 +3,10 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
-	"github.com/3xxx/engineercms/models"
 	"github.com/3xxx/flow"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/models"
 	_ "github.com/go-sql-driver/mysql"
 	"io"
 	"log"
@@ -1299,22 +1299,26 @@ func (c *FlowController) FlowUserGroup() {
 	var tx *sql.Tx
 	// uid := c.Input().Get("uid")
 	// beego.Info(uid)
-	uid := make([]string, 0, 2)
-	c.Ctx.Input.Bind(&uid, "uid") //ul ==[str array]
-	// uid := c.GetStrings("uid")
-	beego.Info(uid)
-	uID, err := strconv.ParseInt(uid[0], 10, 64)
-	if err != nil {
-		beego.Error(err)
-	}
 	gid := c.Input().Get("gid")
 	//pid转成64为
 	gID, err := strconv.ParseInt(gid, 10, 64)
 	if err != nil {
 		beego.Error(err)
 	}
+	uid := make([]string, 0, 10)
+	c.Ctx.Input.Bind(&uid, "uid") //ul ==[str array]
+	// uid := c.GetStrings("uid")
+	beego.Info(uid)
 
-	err = flow.Groups.AddUser(tx, flow.GroupID(gID), flow.UserID(uID))
+	for i, v := range uid {
+		if v != "" {
+			uID, err := strconv.ParseInt(uid[i], 10, 64)
+			if err != nil {
+				beego.Error(err)
+			}
+			err = flow.Groups.AddUser(tx, flow.GroupID(gID), flow.UserID(uID))
+		}
+	}
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = map[string]interface{}{"err": err, "data": "写入失败!"}
@@ -2647,7 +2651,7 @@ func (c *FlowController) FlowNext() {
 
 	var uID int64
 	username, _, _, _, _ := checkprodRole(c.Ctx)
-	// beego.Info(username)
+	beego.Info(username)
 	// beego.Info(uid)
 	// if err != nil {
 	// 	beego.Error(err)

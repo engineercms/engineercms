@@ -7,8 +7,8 @@ import (
 	// "encoding/json"
 	// "errors"
 	// "github.com/3xxx/engineercms/controllers/utils"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/models"
 	// "github.com/astaxie/beego/context"
 	// "io"
 	// "io/ioutil"
@@ -42,14 +42,23 @@ func (c *CartController) CreateProductCart() {
 	ids := c.Input().Get("ids")
 	if ids == "" {
 		beego.Error("matterUuids cannot be null")
+		c.Data["json"] = map[string]interface{}{"code": "ERROR", "msg": "matterUuids cannot be null"}
+		c.ServeJSON()
+		return
 	}
 
 	Array := strings.Split(ids, ",")
 
 	if len(Array) == 0 {
 		beego.Error("share at least one file")
+		c.Data["json"] = map[string]interface{}{"code": "ERROR", "msg": "share at least one file"}
+		c.ServeJSON()
+		return
 	} else if len(Array) > SHARE_MAX_NUM {
 		beego.Error("ShareNumExceedLimit")
+		c.Data["json"] = map[string]interface{}{"code": "ERROR", "msg": "ShareNumExceedLimit"}
+		c.ServeJSON()
+		return
 	}
 
 	v := c.GetSession("uname")
@@ -61,6 +70,8 @@ func (c *CartController) CreateProductCart() {
 			beego.Error(err)
 		}
 	} else {
+		c.Data["json"] = map[string]interface{}{"code": "ERROR", "msg": "用户未登录"}
+		c.ServeJSON()
 		return
 	}
 	// beego.Info(user)
@@ -88,7 +99,6 @@ func (c *CartController) CreateProductCart() {
 	// 	UserId:   user.Id,
 	// 	Username: user.Username,
 	// }
-
 	c.Data["json"] = map[string]interface{}{"code": "OK", "msg": "", "data": products}
 	c.ServeJSON()
 }
@@ -200,7 +210,7 @@ func (c *CartController) GetApprovalCart() {
 		offset = (page1 - 1) * limit1
 	}
 	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
-	beego.Info(isadmin)
+	// beego.Info(isadmin)
 	carts, err := models.GetApprovalCart(user.Id, limit1, offset, status1, searchText, isadmin)
 	if err != nil {
 		beego.Error(err)

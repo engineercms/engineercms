@@ -5,7 +5,7 @@
 package routers
 
 import (
-	"github.com/3xxx/engineercms/controllers"
+	"github.com/engineercms/engineercms/controllers"
 	// "githsub.com/3xxx/engineercms/controllers/checkin"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -218,17 +218,17 @@ func init() {
 					&controllers.CartController{},
 				),
 			),
-			beego.NSNamespace("/mathcad",
-				// beego.NSBefore(FilterUser),
-				beego.NSInclude(
-					&controllers.MathcadController{},
-				),
-			),
 			beego.NSNamespace("/chat",
 				beego.NSInclude(
 					&controllers.ChatController{},
 				),
 			),
+			//beego.NSNamespace("/mathcad",
+			//	// beego.NSBefore(FilterUser),
+			//	beego.NSInclude(
+			//		&controllers.MathcadController{},
+			//	),
+			//),
 			// beego.NSNamespace("/suggest",
 			// 	beego.NSInclude(
 			// 		&controllers.SearchController{},

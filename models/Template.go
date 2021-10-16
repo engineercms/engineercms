@@ -2,10 +2,10 @@ package models
 
 import (
 	"errors"
-	"github.com/3xxx/engineercms/conf"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/conf"
 	"time"
 )
 

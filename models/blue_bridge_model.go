@@ -3,7 +3,7 @@ package models
 import (
 	// "github.com/astaxie/beego/orm"
 	// "github.com/jinzhu/gorm"
-	"github.com/3xxx/engineercms/controllers/tool/result"
+	"github.com/engineercms/engineercms/controllers/tool/result"
 	"github.com/nu7hatch/gouuid"
 	"time"
 )

@@ -6,8 +6,9 @@ import (
 	"github.com/astaxie/beego"
 	// "github.com/bitly/go-simplejson"
 	"encoding/json"
-	"github.com/3xxx/engineercms/models"
+	"github.com/engineercms/engineercms/models"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -22,7 +23,18 @@ type RegistController struct {
 }
 
 func (this *RegistController) Get() {
-	this.TplName = "regist.tpl"
+	u := this.Ctx.Input.UserAgent()
+	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	if err != nil {
+		beego.Error(err)
+	}
+	if matched == true {
+		// beego.Info("移动端~")
+		this.TplName = "mobile/mregister.tpl"
+	} else {
+		// beego.Info("电脑端！")
+		this.TplName = "regist.tpl"
+	}
 }
 
 func (this *RegistController) RegistErr() {
@@ -48,12 +60,12 @@ func (this *RegistController) CheckUname() {
 //提交注册名称
 func (this *RegistController) Post() {
 	var user models.User //这里修改
-	inputs := this.Input()
-	beego.Info(inputs)
-	user.Username = inputs.Get("uname")
-	user.Email = inputs.Get("email")
-	user.Nickname = inputs.Get("nickname")
-	Pwd1 := inputs.Get("pwd")
+	// inputs := this.Input()
+	// beego.Info(inputs)
+	user.Username = this.Input().Get("uname")
+	user.Email = this.Input().Get("email")
+	user.Nickname = this.Input().Get("nickname")
+	Pwd1 := this.Input().Get("pwd")
 
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(Pwd1))
@@ -65,15 +77,40 @@ func (this *RegistController) Post() {
 	user.Lastlogintime = time.Now()
 	user.Status = 1
 	user.Role = "4"
-	_, err := models.SaveUser(user) //这里修改
+	_, err2 := models.SaveUser(user) //这里修改
 
 	// _, err = models.AddRoleUser(4, uid)
-	if err == nil {
-		this.TplName = "success.tpl"
-	} else {
-		// fmt.Println(err)
-		this.TplName = "registerr.tpl"
+	u := this.Ctx.Input.UserAgent()
+	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	if err != nil {
+		beego.Error(err)
 	}
+	if matched == true {
+		// beego.Info("移动端~")
+		if err2 == nil {
+			// this.TplName = "success.tpl"
+			// this.Data["json"] = map[string]interface{}{"islogin": 0}
+			// this.ServeJSON()
+			this.Redirect("/login", 301)
+		} else {
+			// fmt.Println(err)
+			// this.TplName = "registerr.tpl"
+			// this.Data["json"] = map[string]interface{}{"islogin": 1}
+			// this.ServeJSON()
+			this.Redirect("/regist", 301)
+		}
+	} else {
+		// beego.Info("电脑端！")
+		if err2 == nil {
+			// this.TplName = "success.tpl"
+			this.Redirect("/login", 301)
+		} else {
+			// fmt.Println(err)
+			// this.TplName = "registerr.tpl"
+			this.Redirect("/regist", 301)
+		}
+	}
+
 }
 
 // @Title post wx regist
@@ -86,7 +123,9 @@ func (this *RegistController) Post() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /wxregist [post]
-//添加微信小程序珠三角设代阅览版注册
+// 微信小程序根据用户输入的用户名和密码后，将openid存到用户名对应的数据表中，
+// 方便下次自动根据openid匹配用户后自动登录wxlogin
+// 这个不是真正的注册。另见WxRegion()
 func (c *RegistController) WxRegist() {
 	var user models.User
 	var uid string
@@ -138,6 +177,7 @@ func (c *RegistController) WxRegist() {
 			// beego.Info(errcode)
 			errmsg := data["errmsg"].(string)
 			c.Data["json"] = map[string]interface{}{"errNo": errcode, "msg": errmsg, "data": "session_key 不存在"}
+			c.ServeJSON()
 		} else {
 			openID = data["openid"].(string)
 			// beego.Info(openID)
@@ -205,15 +245,170 @@ func (c *RegistController) WxRegist() {
 
 			if err != nil {
 				beego.Error(err)
-				c.Data["json"] = map[string]interface{}{"info": "已经注册", "data": ""}
+				c.Data["json"] = map[string]interface{}{"info": "已经注册", "data": "已经注册"}
 				c.ServeJSON()
 			} else {
-				c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "userId": uid, "isAdmin": isAdmin, "sessionId": sessionId, "photo": photo, "appreciationphoto": appreciationphoto}
+				c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "userId": uid, "userName": user.Username, "userNickname": user.Nickname, "isAdmin": isAdmin, "sessionId": sessionId, "photo": photo, "appreciationphoto": appreciationphoto}
 				c.ServeJSON()
 			}
 		}
 	} else {
 		c.Data["json"] = map[string]interface{}{"info": "用户名或密码错误", "data": ""}
+		c.ServeJSON()
+	}
+}
+
+// @Title post wx region
+// @Description post wx region
+// @Param uname query string  true "The username of user"
+// @Param password query string  true "The password of account"
+// @Param code query string  true "The code of wx"
+// @Param app_version query string  true "The app_version of wx"
+// @Success 200 {object} models.SaveUser
+// @Failure 400 Invalid page supplied
+// @Failure 404 user not found
+// @router /wxregion [post]
+// 将用户名和密码存入数据表，openid也存入数据表
+func (c *RegistController) WxRegion() {
+	var user models.User
+	// var uid string
+	// var isAdmin bool
+	isAdmin := false
+	user.Username = c.Input().Get("uname")
+	Pwd1 := c.Input().Get("password") //注意这里用的是全称password，不是pwd
+	// autoLogin := c.Input().Get("autoLogin") == "on"
+	md5Ctx := md5.New()
+	md5Ctx.Write([]byte(Pwd1))
+	cipherStr := md5Ctx.Sum(nil)
+	user.Password = hex.EncodeToString(cipherStr)
+	beego.Info(user.Password)
+	beego.Info(user.Username)
+	err := models.CheckUname(user)
+	if err != nil {
+		beego.Error(err)
+	} else { //用户存在
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "用户名已存在！"}
+		c.ServeJSON()
+		return
+	}
+	uid, err := models.SaveUser(user)
+	if err == nil {
+		// JSCODE := c.Input().Get("code")
+		openID := c.Input().Get("openID")
+		// beego.Info(JSCODE)
+		// var APPID, SECRET string
+		// app_version := c.Input().Get("app_version")
+		// if app_version == "1" {
+		// 	APPID = beego.AppConfig.String("wxAPPID")
+		// 	SECRET = beego.AppConfig.String("wxSECRET")
+		// } else {
+		// 	appstring := "wxAPPID" + app_version
+		// 	APPID = beego.AppConfig.String(appstring)
+		// 	secretstring := "wxSECRET" + app_version
+		// 	SECRET = beego.AppConfig.String(secretstring)
+		// }
+		// requestUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + JSCODE + "&grant_type=authorization_code"
+		// resp, err := http.Get(requestUrl)
+		// beego.Info(resp)
+		// if err != nil {
+		// 	beego.Error(err)
+		// 	// return
+		// }
+		// defer resp.Body.Close()
+		// if resp.StatusCode != 200 {
+		// 	beego.Error(err)
+		// }
+		// var data map[string]interface{}
+		// err = json.NewDecoder(resp.Body).Decode(&data)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// beego.Info(data)
+		// // var sessionKey string
+		// if _, ok := data["session_key"]; !ok {
+		// 	errcode := data["errcode"]
+		// 	beego.Info(errcode)
+		// 	errmsg := data["errmsg"].(string)
+		// 	c.Data["json"] = map[string]interface{}{"info": "ERROR", "errNo": errcode, "msg": errmsg, "data": "session_key 不存在"}
+		// 	c.ServeJSON()
+		// } else {
+		// openID = data["openid"].(string)
+		beego.Info(openID)
+		//将openid写入数据库
+		// user, err = models.GetUserByUsername(user.Username)
+		// if err != nil {
+		// 	beego.Error(err)
+		// } else {
+		// 	uid = strconv.FormatInt(user.Id, 10)
+		// }
+		_, err = models.AddUserOpenID(uid, openID)
+		if err != nil {
+			beego.Error(err)
+		}
+		//根据userid取出user和avatorUrl
+		useravatar, err := models.GetUserAvatorUrl(user.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		var photo string
+		wxsite := beego.AppConfig.String("wxreqeustsite")
+		if len(useravatar) != 0 {
+			photo = wxsite + useravatar[0].UserAvatar.AvatarUrl
+			// beego.Info(photo)
+		}
+		//根据userid取出appreciation赞赏码
+		userappreciation, err := models.GetUserAppreciationUrl(user.Id)
+		if err != nil {
+			beego.Error(err)
+		}
+		var appreciationphoto string
+		if len(userappreciation) != 0 {
+			appreciationphoto = wxsite + userappreciation[0].UserAppreciation.AppreciationUrl
+		}
+		// roles, err := models.GetRolenameByUserId(user.Id)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// var isAdmin bool
+		// for _, v := range roles {
+		// 	if v.Rolename == "admin" {
+		// 		isAdmin = true
+		// 	}
+		// }
+		//bug:下面这句是取得角色admin，如果用户未设置角色admin，则出错20191224。
+		//因此，必须有系统默认设置admin角色才行。
+		// role, err := models.GetRoleByRolename("admin")
+		// if err != nil {
+		// 	beego.Error(err)
+		// } else {
+		// 	roleid := strconv.FormatInt(role.Id, 10)
+		// 	isAdmin = e.HasRoleForUser(uid, "role_"+roleid)
+		// }
+
+		//用户登录后，存储openid在服务端的session里，下次用户通过hotqinsessionid来取得openid
+		c.SetSession("openID", openID)
+		// c.SetSession("sessionKey", sessionKey) //这个没用
+		// https://blog.csdn.net/yelin042/article/details/71773636
+		// c.SetSession("skey", skey) //这个没用
+		//为何有这个hotqinsessionid?
+		//用户小程序register后，只是存入服务器数据库中的openid和用户名对应
+		//用户小程序login的时候，即这里，将openid存入session
+		//下次用户请求携带hotqinsessionid即可取到session-openid（key字段）了。
+		//这一步是取得session名称为hotqinsessionid的session，前端请求携带这个后，服务端可用session中的key字段（如uname、openID）取得值
+		sessionId := c.Ctx.Input.Cookie("hotqinsessionid")
+
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"info": "已经注册", "data": "已经注册"}
+			c.ServeJSON()
+		} else {
+			c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "userId": uid, "isAdmin": isAdmin, "sessionId": sessionId, "photo": photo, "appreciationphoto": appreciationphoto}
+			c.ServeJSON()
+		}
+		// }
+	} else {
+		beego.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "保存用户出错！"}
 		c.ServeJSON()
 	}
 }

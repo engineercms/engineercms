@@ -2,10 +2,10 @@ package routers
 
 import (
 	"encoding/json"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/models"
 	"net/url"
 	"regexp"
 )

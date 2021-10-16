@@ -2,11 +2,11 @@ package models
 
 import (
 	"errors"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/controllers/utils"
-	"github.com/3xxx/engineercms/controllers/utils/cryptil"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/controllers/utils"
+	"github.com/engineercms/engineercms/controllers/utils/cryptil"
 	"strings"
 	"time"
 )
@@ -239,11 +239,11 @@ WHERE book.item_id = ? AND (book.privately_owned = 0 or rel.role_id >= 0 or team
 			left join (select book_id,min(role_id) as role_id from (select book_id,role_id
                    	from md_team_relationship as mtr
 					left join md_team_member as mtm on mtm.team_id=mtr.team_id and mtm.member_id=? order by role_id desc )
-as t group by book_id) as team 
+as t group by book_id) as team
 					on team.book_id = book.book_id
 			LEFT JOIN md_relationship AS rel1 ON rel1.book_id = book.book_id AND rel1.role_id = 0
 			LEFT JOIN md_members AS member ON rel1.member_id = member.member_id
-			WHERE book.item_id = ? AND (book.privately_owned = 0 or rel.role_id >= 0 or team.role_id >= 0) 
+			WHERE book.item_id = ? AND (book.privately_owned = 0 or rel.role_id >= 0 or team.role_id >= 0)
 			ORDER BY order_index desc,book.book_id DESC LIMIT ?,?`
 
 		_, err = o.Raw(sql2, memberId, memberId, item.ItemId, offset, pageSize).QueryRows(&books)

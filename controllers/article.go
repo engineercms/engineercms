@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+	"github.com/engineercms/engineercms/models"
 	"time"
 	// "os"
 	"github.com/PuerkitoBio/goquery"
@@ -13,7 +13,7 @@ import (
 	"database/sql"
 	"github.com/3xxx/flow"
 	"path"
-	"regexp"
+	// "regexp"
 	"strconv"
 	"strings"
 )
@@ -279,18 +279,18 @@ func (c *ArticleController) GetArticle() {
 		c.Data["RoleDelete"] = false
 	}
 	// c.Data["productid"] = prod.Uid//文章作者id
-	u := c.Ctx.Input.UserAgent()
-	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
-	if err != nil {
-		beego.Error(err)
-	}
-	if matched == true {
-		// beego.Info("移动端~")
-		c.TplName = "marticle.tpl"
-	} else {
-		// beego.Info("电脑端！")
-		c.TplName = "article.tpl"
-	}
+	// u := c.Ctx.Input.UserAgent()
+	// matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// if matched == true {
+	// beego.Info("移动端~")
+	// c.TplName = "marticle.tpl"
+	// } else {
+	// beego.Info("电脑端！")
+	c.TplName = "article.tpl"
+	// }
 	//根据userid取出user和avatorUrl
 	useravatar, err := models.GetUserAvatorUrl(prod.Uid)
 	if err != nil {
@@ -704,12 +704,18 @@ func (c *ArticleController) GetWxArticleType() {
 	openID := c.GetSession("openID")
 	if openID == nil {
 		// userid = 0
-		user.Username = "qin.xc"
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录"}
+		c.ServeJSON()
+		return
+		// user.Username = "qin.xc"
 	} else {
 		user, err = models.GetUserByOpenID(openID.(string))
 		if err != nil {
 			beego.Error(err)
-			user.Username = "qin.xc"
+			c.Data["json"] = map[string]interface{}{"info": "用户不存在"}
+			c.ServeJSON()
+			return
+			// user.Username = "qin.xc"
 		}
 		// userid = user.Id
 	}
@@ -720,12 +726,14 @@ func (c *ArticleController) GetWxArticleType() {
 	} else {
 		uID = int64(flowuser.ID)
 	}
-	// beego.Info(uID)
+	beego.Info(uID)
 	//当前用户所在的用户组
 	singletongroup, err := flow.Users.SingletonGroupOf(flow.UserID(uID))
 	if err != nil {
 		beego.Error(err)
 	}
+
+	beego.Info(singletongroup)
 	// gid := c.Input().Get("gid")
 	// gID, err := strconv.ParseInt(gid, 10, 64)
 	// if err != nil {
@@ -733,6 +741,11 @@ func (c *ArticleController) GetWxArticleType() {
 	// }
 	//查询flowdoc——根据uid，acid和stateid，查出flowdocid，然后查表proddocument，
 	// 得到文档productid
+	acid := c.Input().Get("acid")
+	acID, err := strconv.ParseInt(acid, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
 	dtid := c.Input().Get("dtid")
 	dtID, err := strconv.ParseInt(dtid, 10, 64)
 	if err != nil {
@@ -744,11 +757,6 @@ func (c *ArticleController) GetWxArticleType() {
 		beego.Error(err)
 	}
 	docstate, err := flow.DocStates.Get(flow.DocStateID(dsID))
-	if err != nil {
-		beego.Error(err)
-	}
-	acid := c.Input().Get("acid")
-	acID, err := strconv.ParseInt(acid, 10, 64)
 	if err != nil {
 		beego.Error(err)
 	}
@@ -773,13 +781,15 @@ func (c *ArticleController) GetWxArticleType() {
 		c.Data["json"] = map[string]interface{}{"err": err, "data": "查询失败!"}
 		c.ServeJSON()
 	}
+	beego.Info(documents)
 	for _, v := range documents {
-		// beego.Info(v.ID)
+		beego.Info(v.ID)
 		productdoc, err := models.GetDocumentProduct(int64(v.ID))
 		if err != nil {
 			beego.Error(err)
 		} else {
 			// for _, w := range products {
+			// 由productid获取top_project_id，如果相等则查询文章。
 			product, err := models.GetProd(productdoc.ProductId)
 			if err != nil {
 				beego.Error(err)
@@ -2029,6 +2039,16 @@ func (c *ArticleController) AddWxArticles() {
 
 	title := c.Input().Get("title")
 	content := c.Input().Get("content")
+
+	// 进行敏感字符验证
+	// contentCheck := title + content
+	// errcode, errmsg, err := utils.MsgSecCheck(accessToken, contentCheck)
+	// if err != nil {
+	// 	beego.Error(err)
+	// 	c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
+	// 	c.ServeJSON()
+	// } else if errcode != 87014 {
+
 	//id转成64为
 	pidNum, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
@@ -2097,11 +2117,11 @@ func (c *ArticleController) AddWxArticleFlow() {
 			beego.Error(err)
 		}
 	} else {
-		// c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
-		// c.ServeJSON()
-		// return //本地调试的时候，由于小程序无法登陆服务器，所以这里要注释掉。
-		user.Id = 5
-		user.Username = "qin.xc"
+		c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
+		c.ServeJSON()
+		return //本地调试的时候，由于小程序无法登陆服务器，所以这里要注释掉。
+		// user.Id = 5
+		// user.Username = "qin.xc"
 	}
 
 	pid := c.Ctx.Input.Param(":id")
@@ -2156,11 +2176,29 @@ func (c *ArticleController) AddWxArticleFlow() {
 		if err != nil {
 			beego.Error(err)
 		}
-		gid := c.Input().Get("gid")
-		gID, err := strconv.ParseInt(gid, 10, 64)
+
+		// gid := c.Input().Get("gid")
+		// gID, err := strconv.ParseInt(gid, 10, 64)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
+		// 改为有用户名取得single groupid
+		var uID int64
+		flowuser, err := flow.Users.GetByName(user.Username)
+		if err != nil {
+			beego.Error(err)
+		} else {
+			uID = int64(flowuser.ID)
+		}
+		beego.Info(uID)
+		//当前用户所在的用户组
+		singletongroup, err := flow.Users.SingletonGroupOf(flow.UserID(uID))
 		if err != nil {
 			beego.Error(err)
 		}
+
+		beego.Info(singletongroup)
+		gID := int64(singletongroup.ID)
 
 		// err = wxFlowNext(dtID, daID, docID, messageID, groupIds, user)
 		docid, err := wxFlowDoc(dtID, acID, gID, Id, title)

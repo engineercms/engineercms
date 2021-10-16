@@ -9,10 +9,11 @@ import (
 	// "github.com/bitly/go-simplejson"
 	// "io/ioutil"
 	// "github.com/astaxie/beego/logs"
-	"github.com/3xxx/engineercms/models"
+	"github.com/engineercms/engineercms/models"
 	// "sort"
 	"strconv"
 	// "strings"
+	"regexp"
 	"time"
 )
 
@@ -166,8 +167,20 @@ func (c *IndexController) GetIndex() {
 		achsecoffice = make([]AchSecoffice, 0) //再把slice置0
 		achdepart = append(achdepart, aa...)
 	}
+	u := c.Ctx.Input.UserAgent()
+	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	if err != nil {
+		beego.Error(err)
+	}
+	if matched == true {
+		// beego.Info("移动端~")
+		c.TplName = "mobile/mhome.tpl"
+	} else {
+		// beego.Info("电脑端！")
+		c.TplName = "index.tpl"
+	}
 	c.Data["json"] = achdepart
-	c.TplName = "index.tpl"
+	// c.TplName = "index.tpl"
 }
 
 //上面那个是显示侧栏

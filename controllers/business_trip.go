@@ -3,9 +3,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/3xxx/engineercms/controllers/utils"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/controllers/utils"
+	"github.com/engineercms/engineercms/models"
 	"sort"
 	"strconv"
 	"strings"
@@ -176,7 +176,8 @@ func (c *BusinessController) AddBusiness() {
 	// g":true},{"index":2,"name":"61","showtag":true}]
 	// 进行敏感字符验证
 	content := projecttitle + drivername + users
-	errcode, errmsg, err := utils.MsgSecCheck(accessToken, content)
+	// errcode, errmsg, err := utils.MsgSecCheck(accessToken, content)
+	errcode, errmsg, err := utils.MsgSecCheck(2, 2, accessToken, openID.(string), content)
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}
@@ -385,7 +386,8 @@ func (c *BusinessController) UpdateBusiness() {
 	// g":true},{"index":2,"name":"61","showtag":true}]
 	// 进行敏感字符验证
 	content := projecttitle + drivername + users
-	errcode, errmsg, err := utils.MsgSecCheck(accessToken, content)
+	// errcode, errmsg, err := utils.MsgSecCheck(accessToken, content)
+	errcode, errmsg, err := utils.MsgSecCheck(2, 2, accessToken, openID.(string), content)
 	if err != nil {
 		beego.Error(err)
 		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": err}

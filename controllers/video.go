@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/models"
 	// "io/ioutil"
 	// "net"
 	// "net/http"
@@ -49,14 +49,14 @@ func (c *VideoController) GetUserVideo() {
 	// 	if err != nil {
 	// 		beego.Error(err)
 	// 	}
-		//查询admin角色的id
-		//重新获取roleid
-		// role, err := models.GetRoleByRolename("admin")
-		// if err != nil {
-		// 	beego.Error(err)
-		// }
-		// userid = strconv.FormatInt(user.Id, 10)
-		// roleid = strconv.FormatInt(role.Id, 10)
+	//查询admin角色的id
+	//重新获取roleid
+	// role, err := models.GetRoleByRolename("admin")
+	// if err != nil {
+	// 	beego.Error(err)
+	// }
+	// userid = strconv.FormatInt(user.Id, 10)
+	// roleid = strconv.FormatInt(role.Id, 10)
 
 	// } else {
 	// 	c.Data["json"] = map[string]interface{}{"info": "用户未登录", "id": 0}
@@ -86,7 +86,7 @@ func (c *VideoController) GetUserVideo() {
 		offset = (page1 - 1) * limit1
 	}
 
-				//根据pid查出项目id
+	//根据pid查出项目id
 	proj, err := models.GetProj(pidNum)
 	if err != nil {
 		beego.Error(err)

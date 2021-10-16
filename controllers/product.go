@@ -4,8 +4,8 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/models"
 	// "github.com/astaxie/beego/context"
 	"database/sql"
 	"github.com/3xxx/flow"
@@ -143,7 +143,7 @@ func (c *ProdController) GetProjProd() {
 	}
 	// beego.Info(projectuser.Id)
 	// beego.Info(uid)
-	if projectuser.Id == uid || isadmin {
+	if uid != 0 && projectuser.Id == uid || isadmin {
 		c.Data["RoleAdd"] = "true"
 		c.Data["RoleNewDwg"] = "true"
 		c.Data["RoleFlow"] = "true"
@@ -244,7 +244,7 @@ func (c *ProdController) GetProjProd() {
 	// flowgrouplist
 	// flowaccesscontextlist
 	if matched == true {
-		c.TplName = "mproject_products.tpl"
+		c.TplName = "mobile/mproject_products.tpl"
 	} else {
 		c.TplName = "project_products.tpl"
 	}

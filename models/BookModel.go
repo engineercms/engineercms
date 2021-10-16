@@ -15,15 +15,15 @@ import (
 	"time"
 
 	"encoding/json"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/controllers/utils"
-	"github.com/3xxx/engineercms/controllers/utils/cryptil"
-	"github.com/3xxx/engineercms/controllers/utils/filetil"
-	"github.com/3xxx/engineercms/controllers/utils/requests"
-	"github.com/3xxx/engineercms/controllers/utils/ziptil"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/conf"
+	"github.com/engineercms/engineercms/controllers/utils"
+	"github.com/engineercms/engineercms/controllers/utils/cryptil"
+	"github.com/engineercms/engineercms/controllers/utils/filetil"
+	"github.com/engineercms/engineercms/controllers/utils/requests"
+	"github.com/engineercms/engineercms/controllers/utils/ziptil"
 	"github.com/russross/blackfriday/v2"
 )
 
@@ -365,7 +365,7 @@ FROM md_books AS book
              from (select book_id,team_member_id,role_id
                    from md_team_relationship as mtr
                      left join md_team_member as mtm on mtm.team_id=mtr.team_id and mtm.member_id=? order by role_id desc )
-					as t group by book_id) as team 
+					as t group by book_id) as team
 			on team.book_id=book.book_id
   LEFT JOIN md_relationship AS rel1 ON book.book_id = rel1.book_id AND rel1.role_id = 0
   LEFT JOIN md_members AS m ON rel1.member_id = m.member_id
@@ -552,11 +552,11 @@ WHERE (relationship_id > 0 OR book.privately_owned = 0 or team.team_member_id > 
 			LEFT JOIN md_relationship AS rel ON rel.book_id = book.book_id AND rel.member_id = ?
 			left join (select * from (select book_id,team_member_id,role_id
                    	from md_team_relationship as mtr
-					left join md_team_member as mtm on mtm.team_id=mtr.team_id and mtm.member_id=? order by role_id desc )as t group by t.role_id,t.team_member_id,t.book_id) as team 
+					left join md_team_member as mtm on mtm.team_id=mtr.team_id and mtm.member_id=? order by role_id desc )as t group by t.role_id,t.team_member_id,t.book_id) as team
 					on team.book_id = book.book_id
 			LEFT JOIN md_relationship AS rel1 ON rel1.book_id = book.book_id AND rel1.role_id = 0
 			LEFT JOIN md_members AS member ON rel1.member_id = member.member_id
-			WHERE (rel.relationship_id > 0 OR book.privately_owned = 0 or team.team_member_id > 0) 
+			WHERE (rel.relationship_id > 0 OR book.privately_owned = 0 or team.team_member_id > 0)
 			AND book.label LIKE ? ORDER BY order_index DESC ,book.book_id DESC LIMIT ?,?`
 
 		_, err = o.Raw(sql2, memberId, memberId, keyword, offset, pageSize).QueryRows(&books)

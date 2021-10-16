@@ -3,8 +3,8 @@ package models
 import (
 	"bytes"
 	"fmt"
-	"github.com/3xxx/engineercms/conf"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/conf"
 	"html/template"
 	"math"
 )

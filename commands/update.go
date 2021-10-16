@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/3xxx/engineercms/conf"
 	"github.com/astaxie/beego"
+	"github.com/engineercms/engineercms/conf"
 )
 
 //检查最新版本.
 func CheckUpdate() {
 
-	resp, err := http.Get("https://api.github.com/repos/3xxx/engineercms/tags")
+	resp, err := http.Get("https://api.github.com/repos/engineercms/engineercms/tags")
 
 	if err != nil {
 		beego.Error("CheckUpdate => ", err)

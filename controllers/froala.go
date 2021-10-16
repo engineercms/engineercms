@@ -14,7 +14,7 @@ import (
 	"path"
 	// "hydrocms/models"
 	"encoding/base64"
-	"github.com/3xxx/engineercms/models"
+	"github.com/engineercms/engineercms/models"
 	"github.com/nfnt/resize"
 	"image/gif"
 	"image/jpeg"
