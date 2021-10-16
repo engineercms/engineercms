@@ -3,8 +3,8 @@ package migrate
 import (
 	"errors"
 	"fmt"
-	"github.com/3xxx/engineercms/models"
 	"github.com/astaxie/beego/orm"
+	"github.com/engineercms/engineercms/models"
 	"strings"
 	"time"
 )
