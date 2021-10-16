@@ -148,6 +148,11 @@ Linux系统下请替换掉执行文件engineercms(linux)
 * 开源地址[https://github.com/3xxx/engineercms/](https://github.com/3xxx/engineercms/)
 * 问题反馈: [https://github.com/3xxx/engineercms/issues](https://github.com/3xxx/engineercms/issues)
 
+## 更新用到的pkg第三方模块
+`sh
+git submodule update --init
+`
+
 ## 第三方包
 
 1. [beego框架](https://github.com/astaxie/beego)
