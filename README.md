@@ -4,8 +4,22 @@
 
 [![License](https://img.shields.io/hexpm/l/plug.svg)](LICENSE) [![Build Status](https://travis-ci.org/3xxx/engineercms.svg?branch=master)](https://travis-ci.org/3xxx/engineercms) [![GoDoc](https://godoc.org/github.com/3xxx/engineercms?status.svg)](https://godoc.org/github.com/3xxx/engineercms)
 
-[Demo](https://zsj.itdos.com/)
+[Demo](https://zsj.itdos.net/)
 ——基于engineercms的设代资料管理平台（真实应用环境）
+
+```bash
+# 克隆源码
+git clone https://github.com/3xxx/engineercms.git
+# go包自动安装
+# go mod tidy
+go run main.go
+# 编译(sqlite需要CGO支持)
+go build -ldflags "-w"
+# 数据库初始化(此步骤执行之前，需配置`conf/app.conf`)
+# ./engineercms install
+# 执行
+./engineercms
+```
 
 1. 本系统采用go语言（基于[beego](https://github.com/astaxie/beego)框架）开发，运行文件为编译后的二进制可执行文件，所以无需像其他语言（php、nodejs、java等语言）编写的web应用那样，需要配置运行服务环境。
 本系统既可以运行于工程师个人电脑，也可以放到局域网、公网服务器上运行，仅运行可执行文件即可实现网络化管理项目知识资料，免维护，轻量，开源，功能齐全，采用大量开源的先进插件，是工程师不可或缺的工具。
@@ -22,6 +36,7 @@
 11. 通用的文档流程设置。文档审批，文档校审，合同评审流程，图纸校审流程，……
 12. 整合了[mindoc](https://github.com/lifei6671/mindoc)，实现了在线创作、查阅、分享、导入、导出电子书籍。
 13. 文件分享提取码。
+14. 全文检索：上传office文档、pdf等，调用tika解析后存入elasticsearch（中文分词ik），实现全文检索。
 
 一 特性：
 
@@ -97,11 +112,14 @@
 
 √资料“购物车”，管理员批准后可下载资料；
 
+√ websocket聊天室；
+
+√全文检索，快速定位文档；
+
+
 二 todo:
 
 × 规范标准库编辑，爬虫；
-
-× 首页搜索后转入新页面，首页vue.js；
 
 × 读取文件属性——完成时间，作为月度统计依据，或提供选择，以上传时间为统计口径，生成某个目录下月度成果报表，与上个月对比柱状图；
 
@@ -112,8 +130,7 @@
 × 项目合并和拆分：将2个项目目录合并起来，其中一个项目合并到另一个项目的子目录中，手动合并文件夹，自动修改数据库；
 
 × 流媒体服务；
-
-× websocket聊天室；
+× 图片服务；
 
 ## 下载和安装
 
@@ -130,7 +147,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 [wiki](https://github.com/3xxx/EngineerCMS/wiki)。包括linux系统下的编译。linux系统下的部署参见网盘中的文档。
 
 技术开发过程详见[CSDN我的博客](https://blog.csdn.net/hotqin888)
-系统简单使用见[mindoc文档](https://zsj.itdos.com/docs/engineercms_008)
+系统简单使用见[mindoc文档](https://zsj.itdos.net/docs/engineercms_008)
 
 ## Quick Start
 
@@ -141,7 +158,7 @@ Linux系统下请替换掉执行文件engineercms(linux)
 ## Documentation
 
 * [中文文档]——请查阅document文件夹
-* 系统简单使用见[mindoc文档](https://zsj.itdos.com/docs/engineercms_008)
+* 系统简单使用见[mindoc文档](https://zsj.itdos.net/docs/engineercms_008)
 
 ## 免费开源和问题反馈
 

@@ -3385,6 +3385,165 @@
                 }
             }
         },
+        "/elastic/get": {
+            "get": {
+                "tags": [
+                    "elastic"
+                ],
+                "description": "get elasticsearch web",
+                "operationId": "ElasticController.get elasticsearch web",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.GetElastic"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "Elastic not found"
+                    }
+                }
+            }
+        },
+        "/elastic/search": {
+            "get": {
+                "tags": [
+                    "elastic"
+                ],
+                "description": "get earch",
+                "operationId": "ElasticController.get search",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "description": "The query=",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "a",
+                        "description": "The after...",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.GetSearch"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "Search not found"
+                    }
+                }
+            }
+        },
+        "/elastic/tika": {
+            "post": {
+                "tags": [
+                    "elastic"
+                ],
+                "description": "post tika",
+                "operationId": "ElasticController.post tika",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.PostTika"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "Tika not found"
+                    }
+                }
+            }
+        },
+        "/elastic/upload/{id}": {
+            "post": {
+                "tags": [
+                    "elastic"
+                ],
+                "description": "post file by BootstrapFileInput",
+                "operationId": "ElasticController.post bootstrapfileinput",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id of project",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "prodlabel",
+                        "description": "The prodlabel",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "prodprincipal",
+                        "description": "The prodprincipal",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.SUCCESS"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "page not found"
+                    }
+                }
+            }
+        },
+        "/elastic/uploadelastic/{id}": {
+            "get": {
+                "tags": [
+                    "elastic"
+                ],
+                "description": "get upload file to tika\u0026elastic html",
+                "operationId": "ElasticController.upload file to tika\u0026elastic html",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id of project",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.Elastic"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "Page not found"
+                    }
+                }
+            }
+        },
         "/fileinput/bootstrapfileinput": {
             "post": {
                 "tags": [
@@ -5696,6 +5855,38 @@
                 }
             }
         },
+        "/wx/downloadstandard/{id}": {
+            "get": {
+                "tags": [
+                    "wx"
+                ],
+                "description": "get standardpdf by id",
+                "operationId": "StandardController.dowload standardpdf",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id of standardpdf",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.GetAttachbyId"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "pdf not found"
+                    }
+                }
+            }
+        },
         "/wx/getapplyrecharge": {
             "get": {
                 "tags": [
@@ -7427,6 +7618,29 @@
                 }
             }
         },
+        "/wx/standard/upload": {
+            "post": {
+                "tags": [
+                    "wx"
+                ],
+                "description": "post file by BootstrapFileInput",
+                "operationId": "StandardController.post bootstrapfileinput",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.SUCCESS"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "page not found"
+                    }
+                }
+            }
+        },
         "/wx/standardpdf": {
             "get": {
                 "tags": [
@@ -7434,15 +7648,6 @@
                 ],
                 "description": "get standardpdf",
                 "operationId": "StandardController.get standardpdf",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "file",
-                        "description": "The link of standardpdf",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "",
@@ -7863,6 +8068,29 @@
                     },
                     "404": {
                         "description": "articl not found"
+                    }
+                }
+            }
+        },
+        "/wx/uploadstandard": {
+            "get": {
+                "tags": [
+                    "wx"
+                ],
+                "description": "get upload file to standard html",
+                "operationId": "StandardController.upload file to standard html",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/.Elastic"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid page supplied"
+                    },
+                    "404": {
+                        "description": "Page not found"
                     }
                 }
             }
@@ -8419,6 +8647,9 @@
         ".DeleteUserCart": {
             "type": "object"
         },
+        ".Elastic": {
+            "type": "object"
+        },
         ".GetAdminCategory": {
             "type": "object"
         },
@@ -8437,6 +8668,9 @@
         ".GetDiary": {
             "type": "object"
         },
+        ".GetElastic": {
+            "type": "object"
+        },
         ".GetFinance": {
             "type": "object"
         },
@@ -8452,6 +8686,9 @@
         ".GetProjectPage": {
             "type": "object"
         },
+        ".GetSearch": {
+            "type": "object"
+        },
         ".GetUserMoney": {
             "type": "object"
         },
@@ -8459,6 +8696,9 @@
             "type": "object"
         },
         ".Pay": {
+            "type": "object"
+        },
+        ".PostTika": {
             "type": "object"
         },
         ".Recharge": {
@@ -8518,6 +8758,10 @@
         {
             "name": "flv",
             "description": "CMSFLV API\n"
+        },
+        {
+            "name": "elastic",
+            "description": "CMSELASTIC API\n"
         }
     ]
 }

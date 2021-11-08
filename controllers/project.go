@@ -5,11 +5,14 @@ import (
 	// "encoding/json"
 	// "github.com/3xxx/engineercms/controllers/utils"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/utils/pagination"
 	"github.com/casbin/beego-orm-adapter"
 	"github.com/engineercms/engineercms/models"
 	// "github.com/casbin/casbin"
+	"github.com/engineercms/engineercms/controllers/utils"
+	// "log"
 	"os"
 	"path"
 	"path/filepath"
@@ -47,22 +50,11 @@ type Tableserver struct {
 	Total int64      `json:"total"` //string或int64都行！
 }
 
-//项目列表页面
+// 项目列表页面
+// 根据用户角色权限获取项目列表
 func (c *ProjController) Get() {
-	// username, role := checkprodRole(c.Ctx)
-	// roleint, err := strconv.Atoi(role)
-	// if err != nil {
-	// 	beego.Error(err)
-	// }
-	// if role == "1" {
-	// 	c.Data["IsAdmin"] = true
-	// } else if roleint > 1 && roleint < 5 {
-	// 	c.Data["IsLogin"] = true
-	// } else {
-	// 	c.Data["IsAdmin"] = false
-	// 	c.Data["IsLogin"] = false
-	// }
-	// c.Data["Username"] = username
+	// urltoken := c.Input().Get("xxl_sso_token")
+	// lubancheckRole(c.Ctx, urltoken)
 	c.Data["IsProject"] = true
 	// c.Data["Ip"] = c.Ctx.Input.IP()
 	// c.Data["role"] = role
@@ -116,9 +108,11 @@ func (c *ProjController) Get() {
 // 分页提供给项目列表页的table中json数据
 // http://127.0.0.1/v1/project/getprojects?limit=15&pageNo=1
 // 微信小程序里要改id等为小写
+// 根据用户角色权限获取项目列表
 func (c *ProjController) GetProjects() {
 	// id := c.Ctx.Input.Param(":id")
 	id := c.Input().Get("projectid")
+	// beego.Info(id)
 	var err error
 	var offset, limit1, page1 int64
 	// var err error
@@ -146,19 +140,84 @@ func (c *ProjController) GetProjects() {
 	} else {
 		offset = (page1 - 1) * limit1
 	}
-
+	beego.Info(offset)
 	searchText := c.Input().Get("searchText")
 	projects1 := make([]Project1, 0)
+	// var paths []beegoormadapter.CasbinRule
 	if id == "" {
-		//显示全部
-		// var offset int64
-		// if page1 <= 1 {
-		// 	offset = 0
+		// ****鲁班开始
+		// 根据用户角色，显示对应的项目显示全部
+		// 根据用户名查出用户角色——多个角色循环——角色对应的项目id——去重map——循环项目id取得项目细节
+		// _, _, uid, isadmin, _ := checkprodRole(c.Ctx)
+		// beego.Info(isadmin)
+		var count int64
+		// if !isadmin {
+		// 	userroles := e.GetRolesForUser(strconv.FormatInt(uid, 10))
+		// 	// beego.Info(userroles)
+		// 	permissions := e.GetPermissionsForUser(strconv.FormatInt(uid, 10))
+		// 	myRes := e.GetPermissionsForUser("2")
+		// 	log.Print("Permissions for ", "2", ": ", myRes)
+		// 	for _, v := range permissions {
+		// 		for _, w := range v {
+		// 			beego.Info(w)
+		// 		}
+		// 	}
+		// 	// role, err := models.GetRoleByUserId(uid)
+		// 	// if err != nil {
+		// 	// 	beego.Error(err)
+		// 	// }
+
+		// 	// var projids []string
+		// 	strMap := make(map[string]string)
+		// 	for _, v := range userroles {
+		// 		o := orm.NewOrm()
+		// 		qs := o.QueryTable("casbin_rule")
+		// 		_, err := qs.Filter("PType", "p").Filter("v0", v).All(&paths)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		// 用map去重
+
+		// 		for _, w := range paths {
+		// 			projid := strings.Replace(w.V1, "/*", "", -1)
+		// 			// strMap[path.Base(projid)] = path.Base(projid)
+		// 			strMap[strings.Split(projid, "/")[1]] = strings.Split(projid, "/")[1]
+		// 		}
+		// 	}
+		// 	for _, v := range strMap {
+		// 		// beego.Info(projids)
+		// 		projectid, err := strconv.ParseInt(v, 10, 64)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		aa := make([]Project1, 1)
+		// 		aa[0].Id = projectid
+		// 		project, err := models.GetProj(projectid)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		aa[0].Code = project.Code
+		// 		aa[0].Title = project.Title
+		// 		aa[0].Label = project.Label
+		// 		aa[0].Principal = project.Principal
+		// 		//根据项目id取得项目下所有成果数量
+		// 		count, _, err := models.GetProjProducts(project.Id, 3)
+		// 		if err != nil {
+		// 			beego.Error(err)
+		// 		}
+		// 		aa[0].Number = count //len(products)
+		// 		aa[0].Created = project.Created
+		// 		aa[0].Updated = project.Updated
+		// 		projects1 = append(projects1, aa...)
+		// 	}
+		// 	count = int64(len(strMap))
+		// 	// ******鲁班结束****
+		// 	table := Tableserver{projects1, page1, count}
+		// 	c.Data["json"] = table
+		// 	c.ServeJSON()
 		// } else {
-		// 	offset = (page1 - 1) * limit1
-		// }
-		// beego.Info(offset)
 		// beego.Info(limit1)
+		// beego.Info(offset)
 		projects, err := models.GetProjectsPage(limit1, offset, searchText)
 		if err != nil {
 			beego.Error(err)
@@ -166,9 +225,16 @@ func (c *ProjController) GetProjects() {
 		// beego.Info(projects)
 		//记录开始时间
 		// start := time.Now()
-
+		//取得项目所有成果——速度太慢
+		//修改为一次性取到所有成果，然后循环赋值给aa
+		//取项目所有子孙
+		//效率太低
+		// categories, err := models.GetProjectsbyPid(v.Id)
+		// if err != nil {
+		// 	beego.Error(err)
+		// }
 		//取得每个项目的成果数量
-		// projects1 := make([]Project1, 0) //这里不能加*号
+		projects1 := make([]Project1, 0) //这里不能加*号
 		for _, v := range projects {
 			aa := make([]Project1, 1)
 			aa[0].Id = v.Id
@@ -176,14 +242,6 @@ func (c *ProjController) GetProjects() {
 			aa[0].Title = v.Title
 			aa[0].Label = v.Label
 			aa[0].Principal = v.Principal
-			//取得项目所有成果——速度太慢
-			//修改为一次性取到所有成果，然后循环赋值给aa
-			//取项目所有子孙
-			//效率太低
-			// categories, err := models.GetProjectsbyPid(v.Id)
-			// if err != nil {
-			// 	beego.Error(err)
-			// }
 			//根据项目id取得项目下所有成果数量
 			count, _, err := models.GetProjProducts(v.Id, 3)
 			if err != nil {
@@ -207,14 +265,15 @@ func (c *ProjController) GetProjects() {
 			aa[0].Updated = v.Updated
 			projects1 = append(projects1, aa...)
 		}
-		count, err := models.GetProjectsCount(searchText)
+		count, err = models.GetProjectsCount(searchText)
 		if err != nil {
 			beego.Error(err)
 		}
 		table := Tableserver{projects1, page1, count}
-
 		c.Data["json"] = table
 		c.ServeJSON()
+		// }
+
 		//记录结束时间差
 		// elapsed := time.Since(start)
 		// beego.Info(elapsed)
@@ -254,6 +313,53 @@ func (c *ProjController) GetProjects() {
 	}
 }
 
+// 获取用户角色权限
+func lubancheckRole(ctx *context.Context, urltoken string) {
+	token := ctx.GetCookie("token")
+	site := ctx.Input.Site() + ":" + strconv.Itoa(ctx.Input.Port())
+	if token != "" {
+		_, _, _, err := utils.LubanCheckToken(token)
+		if err != nil {
+			beego.Error(err)
+			ctx.Redirect(302, "https://www.54lby.com/sso/login")
+			return
+		}
+
+		urlarray := strings.Split(ctx.Request.URL.String(), "?")
+		if len(urlarray) > 1 {
+			ctx.Redirect(302, strings.Split(ctx.Request.URL.String(), "?")[0])
+		} else {
+			userid, username, usernickname, err := utils.LubanCheckToken(token)
+			if err != nil {
+				beego.Error(err)
+			}
+			ctx.SetCookie("token", token, "3600", "/")
+			ctx.Input.CruSession.Set("uname", username)
+			ctx.Input.CruSession.Set("userid", userid)
+			ctx.Input.CruSession.Set("usernickname", usernickname)
+		}
+	} else {
+		if urltoken == "" {
+			ctx.Redirect(302, "https://www.54lby.com/sso/login?redirect_url="+site+ctx.Request.URL.String())
+		} else {
+			userid, username, usernickname, err := utils.LubanCheckToken(urltoken)
+			if err != nil {
+				beego.Error(err)
+				ctx.Redirect(302, "https://www.54lby.com/sso/login")
+				return
+			}
+			ctx.SetCookie("token", urltoken, "3600", "/")
+			ctx.Input.CruSession.Set("uname", username)
+			ctx.Input.CruSession.Set("userid", userid)
+			ctx.Input.CruSession.Set("usernickname", usernickname)
+			urlarray := strings.Split(ctx.Request.URL.String(), "?")
+			if len(urlarray) > 1 {
+				ctx.Redirect(302, strings.Split(ctx.Request.URL.String(), "?")[0])
+			}
+		}
+	}
+}
+
 // @Title get wx projectlist...
 // @Description get projectlist..
 // @Param projectid query string false "The id of project"
@@ -264,8 +370,10 @@ func (c *ProjController) GetProjects() {
 // @Failure 404 data not found
 // @router /getwxprojects [get]
 // 取出所有项目列表，table中json数据
-//http://127.0.0.1/v1/project/getwxprojects
+// http://127.0.0.1/v1/project/getwxprojects
+// 根据用户角色权限获取项目列表
 func (c *ProjController) GetWxProjects() {
+	// beego.Info("hah")
 	id := c.Input().Get("projectid")
 	var err error
 	var offset, limit1, page1 int64
@@ -302,7 +410,24 @@ func (c *ProjController) GetWxProjects() {
 		if err != nil {
 			beego.Error(err)
 		}
-		c.Data["json"] = projects
+		for _, v := range projects {
+			aa := make([]Project1, 1)
+			aa[0].Id = v.Id
+			aa[0].Code = v.Code
+			aa[0].Title = v.Title
+			aa[0].Label = v.Label
+			aa[0].Principal = v.Principal
+
+			aa[0].Created = v.Created
+			aa[0].Updated = v.Updated
+			projects1 = append(projects1, aa...)
+		}
+		count, err := models.GetProjectsCount(searchText)
+		if err != nil {
+			beego.Error(err)
+		}
+		table := Tableserver{projects1, page1, count}
+		c.Data["json"] = table
 		c.ServeJSON()
 	} else {
 		idNum, err := strconv.ParseInt(id, 10, 64)
@@ -328,11 +453,10 @@ func (c *ProjController) GetWxProjects() {
 			aa[0].Updated = v.Updated
 			projects1 = append(projects1, aa...)
 		}
-		// count, err := models.GetProjectsCount(searchText)
-		// if err != nil {
-		// 	beego.Error(err)
-		// }
-		count := int64(len(projects))
+		count, err := models.GetProjectsCount(searchText)
+		if err != nil {
+			beego.Error(err)
+		}
 		table := Tableserver{projects1, page1, count}
 
 		c.Data["json"] = table

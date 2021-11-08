@@ -646,6 +646,51 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"],
+        beego.ControllerComments{
+            Method: "Get",
+            Router: "/get",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"],
+        beego.ControllerComments{
+            Method: "Search",
+            Router: "/search",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"],
+        beego.ControllerComments{
+            Method: "Tika",
+            Router: "/tika",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"],
+        beego.ControllerComments{
+            Method: "Upload",
+            Router: "/upload/:id",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:ElasticController"],
+        beego.ControllerComments{
+            Method: "UploadElastic",
+            Router: "/uploadelastic/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:FileinputController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:FileinputController"],
         beego.ControllerComments{
             Method: "BootstrapFileInput",
@@ -1755,6 +1800,15 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"],
         beego.ControllerComments{
+            Method: "DownloadStandard",
+            Router: "/downloadstandard/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"],
+        beego.ControllerComments{
             Method: "Search",
             Router: "/search",
             AllowHTTPMethods: []string{"get"},
@@ -1773,8 +1827,26 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"],
         beego.ControllerComments{
+            Method: "Upload",
+            Router: "/standard/upload",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"],
+        beego.ControllerComments{
             Method: "StandardPdf",
             Router: "/standardpdf",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"] = append(beego.GlobalControllerRouter["github.com/engineercms/engineercms/controllers:StandardController"],
+        beego.ControllerComments{
+            Method: "UploadStandard",
+            Router: "/uploadstandard",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

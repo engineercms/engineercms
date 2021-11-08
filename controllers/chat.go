@@ -7,6 +7,7 @@ import (
 	// "io"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 var chat_clients = make(map[*websocket.Conn]bool) // connected clients
@@ -122,13 +123,34 @@ func handleMessages() {
 // 用户头像，用流stream的方式
 func (c *ChatController) Avatar() {
 	// 秦修改了源码，支持字的大小，下面第二个参数是字的大小
-	// a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf", 26.0) //./resource/fonts/Hiragino_Sans_GB_W3.ttf
-	a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf")
+	a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf", 26.0) //./resource/fonts/Hiragino_Sans_GB_W3.ttf
+	// a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf")
 	text := c.Ctx.Input.Param(":text")
-	b, _ := a.DrawToBytes(text, 32) //背景的大小
 	// beego.Info(text)
+	strData, err := url.QueryUnescape(text) //
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(strData)
+	b, err := a.DrawToBytes(strData, 32) //背景的大小
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(b)
 	// w http.ResponseWriter, r *http.Request
 	// io.Copy(c.Ctx.ResponseWriter, b) // stream实现了io.reader接口
 	c.Ctx.Output.Body(b) //流stream的方式
 	// now `b` is image data which you can write to file or http stream.
 }
+
+// https://www.cnblogs.com/haima/p/13442194.html
+// golang之UrlEncode编码/UrlDecode解码
+// var urlStr string = "傻了吧:%:%@163& .html.html"
+// escapeUrl := url.QueryEscape(urlStr)
+// fmt.Println("编码:",escapeUrl)
+
+// enEscapeUrl, _ := url.QueryUnescape(escapeUrl)
+// fmt.Println("解码:",enEscapeUrl)
+// 输出
+// 编码: %E5%82%BB%E4%BA%86%E5%90%A7%3A%25%3A%25%40163%26+.html.html
+// 解码: 傻了吧:%:%@163& .html.html

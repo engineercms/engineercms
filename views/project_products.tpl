@@ -45,6 +45,7 @@
   #imgmodalDialog .modal-header {
     cursor: move;
   }
+
   #modalDialog .modal-header {
     cursor: move;
   }
@@ -114,7 +115,7 @@
   }
 
   /*.form-horizontal .control-label{
-    padding-left:10px; 
+    padding-left:10px;
   }
   .form-horizontal .form-group{
     float: left;
@@ -144,6 +145,9 @@
           </li>
           <li>
             <a href="#" onclick="addButton2()"><i class="fa fa-plus-square">&nbsp;&nbsp;文章模式</i></a>
+          </li>
+          <li>
+            <a href="#" onclick="addButton3()"><i class="fa fa-plus-circle">&nbsp;&nbsp;全文模式</i></a>
           </li>
         </ul>
       </div>
@@ -178,6 +182,11 @@
           <i class="fa fa-shopping-cart">&nbsp;&nbsp;Cart</i>
         </button>
       </div>
+      <!-- <div class="btn-group"> -->
+        <button onclick="window.open('/v1/elastic/get')" type="button" data-name="searchButton" id="searchButton" class="btn btn-default" title="全文检索">
+          <i class="fa fa-search-plus">&nbsp;&nbsp;全文检索</i>
+        </button>
+      <!-- </div> -->
       <!-- 保留<button {{if ne "true" .RoleNewDwg}} style="display:none" {{end}} type="button" data-name="newdwgButton" id="newdwgButton" class="btn btn-default">
         <i class="fa fa-trash">NEWdwg</i>
         </button> -->
@@ -216,20 +225,20 @@
       </div>
     </div>
     <script type="text/javascript">
-    // 图片预览 
+    // 图片预览
     function savepic(o) {
       // pic=window.open(o.src,"demo")
       // setTimeout('pic.document.execCommand("saveas")',0);
       // window.open(o.src, null, "dialogHeight:500px; dialogWidth:600px; resizable:yes");
-      // var img = new Image();// 创建对象 
+      // var img = new Image();// 创建对象
       // img.src =url;// 改变图片的src
       // alert(o.src)
-      $("#imgInModalID").attr("src",o.src);
+      $("#imgInModalID").attr("src", o.src);
       $('#imgModal').modal({
         show: true,
         backdrop: 'static'
       });
-      
+
       $('#modalattach').modal('hide')
       // var fatherBody = $(window.top.document.body);
       // //定义页面存放模态窗口的元素
@@ -260,8 +269,8 @@
         sidePagination: "server",
         queryParamsType: '',
         //请求服务器数据时，你可以通过重写参数的方式添加一些额外的参数，例如 toolbar 中的参数 如果 queryParamsType = 'limit' ,返回参数必须包含
-        // limit, offset, search, sort, order 否则, 需要包含: 
-        // pageSize, pageNumber, searchText, sortName, sortOrder. 
+        // limit, offset, search, sort, order 否则, 需要包含:
+        // pageSize, pageNumber, searchText, sortName, sortOrder.
         // 返回false将会终止请求。
         pageSize: 15,
         pageNumber: 1,
@@ -435,7 +444,7 @@
             relevarray[i] = '<a href="javascript:void(0);" onclick="gototree(' + value[i].ProjectId + ');return false;" title="查看" target="_blank">' + value[i].Relevancy + '</a>';
           }
           return relevarray.join(",");
-          // articleUrl= "<a class='article' href='javascript:void(0)' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
+          // articleUrl= "<a class='article' href='javascript:void(0);' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
           // return articleUrl;
         }
       }
@@ -446,7 +455,9 @@
       // $(window.parent.document).find("input:radio").attr("checked","true");
       // $('#objId', parent.document);
       // 格式：$("#父页面元素id" , parent.document);
+
       parent.gototree(e); // pClick 为父页面 js 方法
+
       // window.parent.document.getElementById("父窗口元素ID");
       // window.parent.document.getElementById("iframepage").src="/project/{{.Id}}/"+e;
 
@@ -457,7 +468,7 @@
 
       // var findCheckableNodess = function() {
       //   return $('#tree',parent.document).treeview('findNodes', [e, 'id']);
-      // }; 
+      // };
       // var checkableNodes = findCheckableNodess();
       //   $('#tree',parent.document).treeview('toggleNodeSelected', [ checkableNodes, { silent: true } ]);
       //   $('#tree',parent.document).treeview('toggleNodeExpanded', [ checkableNodes, { silent: true } ]);
@@ -483,7 +494,7 @@
     function setCodetest(value, row, index) {
       //保留，数组和字符串以及循环的处理
       // array=value.split(",")
-      // var labelarray = new Array() 
+      // var labelarray = new Array()
       // for (i=0;i<value.length;i++)//value是数组"Code":[数组"SL0001-510-08","SL0001-510-08"],
       // {
       //   labelarray[i]="<a href='/project/product/attachment/"+value[i]+"'>" + value[i] + "</a>";
@@ -511,7 +522,7 @@
         } else if (value.length == 0) {
 
         } else if (value.length > 1) {
-          articleUrl = "<a class='article' href='javascript:void(0)' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
+          articleUrl = "<a class='article' href='javascript:void(0);' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
           return articleUrl;
         }
       }
@@ -527,9 +538,9 @@
           // alert(ext);
           if (ext == ".dwg") {
             attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-codepen fa-lg" style="color:Black;"></i></a>';
-          } else if (ext == ".JPG"||ext ==".jpg"||ext ==".png"||ext ==".PNG"||ext ==".bmp"||ext ==".BMP") {
-            attachUrl = '<a class = "view" href="javascript:void(0)"><img style="width:70;height:30px;" src="/downloadattachment?id=' + value[0].Id + '" title="预览" onclick="savepic(this)"/></a>'
-          } else if (ext == ".mp4"||ext ==".MP4") {
+          } else if (ext == ".JPG" || ext == ".jpg" || ext == ".png" || ext == ".PNG" || ext == ".bmp" || ext == ".BMP") {
+            attachUrl = '<a class = "view" href="javascript:void(0);"><img style="width:70;height:30px;" src="/downloadattachment?id=' + value[0].Id + '" title="预览" onclick="savepic(this)"/></a>'
+          } else if (ext == ".mp4" || ext == ".MP4") {
             attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-video-o fa-lg text-info"></i></a>'
           } else if (ext == ".doc" || ext == ".docx" || ext == ".wps") {
             // attachUrl = '<a href="/downloadattachment?id=' + value[0].Id + '" title="下载" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
@@ -550,7 +561,7 @@
         } else if (value.length == 0) {
 
         } else if (value.length > 1) {
-          attachUrl = "<a class='attachment' href='javascript:void(0)' title='查看附件列表'><i class='fa fa-list-ol'></i></a>";
+          attachUrl = "<a class='attachment' href='javascript:void(0);' title='查看附件列表'><i class='fa fa-list-ol'></i></a>";
           return attachUrl;
         }
       }
@@ -569,12 +580,12 @@
       //         }else if(data.length==0){
 
       //         }else if(data.length>1){
-      //           bb= '<a class="attachment" href="javascript:void(0)" title="查看附件列表"><i class="fa fa-list-ol"></i></a>';
-      //         } 
+      //           bb= '<a class="attachment" href="javascript:void(0);" title="查看附件列表"><i class="fa fa-list-ol"></i></a>';
+      //         }
       //   }
       // });
-      // return bb; 
-      // return '<a class="attachment" href="javascript:void(0)" title="attachment"><i class="fa fa-paperclip"></i></a>';
+      // return bb;
+      // return '<a class="attachment" href="javascript:void(0);" title="attachment"><i class="fa fa-paperclip"></i></a>';
     }
 
     function setPdf(value, row, index) {
@@ -585,7 +596,7 @@
         } else if (value.length == 0) {
 
         } else if (value.length > 1) {
-          pdfUrl = "<a class='pdf' href='javascript:void(0)' title='查看pdf列表'><i class='fa fa-list-ol'></i></a>";
+          pdfUrl = "<a class='pdf' href='javascript:void(0);' title='查看pdf列表'><i class='fa fa-list-ol'></i></a>";
           return pdfUrl;
         }
       }
@@ -599,7 +610,7 @@
 
     window.actionEvents = {
       'click .article': function(e, value, row, index) {
-        var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式 
+        var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式
         if (site) {
           $('#articles').bootstrapTable('refresh', { url: '/project/product/syncharticles?site=' + site + '&id=' + row.Id });
         } else {
@@ -614,7 +625,7 @@
         // for(var i=0;i<value.length;i++)
         // alert(value[i].Link);
         // var ret=/http:(.*)\:/.exec(value[i].Link);//http://127.0.0.1:
-        var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式 
+        var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式
         if (site) { //跨域
           // alert("1");
           // $.getJSON(ret+'project/product/attachment/'+row.Id,function(){
@@ -633,7 +644,7 @@
       },
 
       'click .pdf': function(e, value, row, index) {
-        var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式 
+        var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式
         if (site) { //跨域
           $('#pdfs').bootstrapTable('refresh', { url: '/project/product/synchpdf?site=' + site + '&id=' + row.Id });
         } else {
@@ -655,25 +666,25 @@
     function setAttachlink(value, row, index) {
       // attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
       // return attachUrl;
-          var filename = value;
-          var index = filename.lastIndexOf(".");
-          var ext = filename.substring(index);
-          if (ext == ".dwg") {
-            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-codepen fa-lg" style="color:Black;"></i></a>';
-          } else if (ext == ".JPG"||ext ==".jpg"||ext ==".png"||ext ==".PNG"||ext ==".bmp"||ext ==".BMP") {
-            attachUrl = '<a class = "view" href="javascript:void(0)"><img style="width:70;height:30px;" src="/downloadattachment?id=' + row.Id + '" title="预览" onclick="savepic(this)"/></a>'
-          } else if (ext == ".mp4"||ext ==".MP4") {
-            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-video-o fa-lg text-info"></i></a>'
-          } else if (ext == ".doc" || ext == ".docx") {
-            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
-          } else if (ext == ".xls" || ext == ".xlsx") {
-            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
-          } else if (ext == ".ppt" || ext == ".pptx") {
-            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-powerpoint-o fa-lg" style="color:Red;"></i></a>';
-          } else {
-            attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
-          }
-          return attachUrl;
+      var filename = value;
+      var index = filename.lastIndexOf(".");
+      var ext = filename.substring(index);
+      if (ext == ".dwg") {
+        attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-codepen fa-lg" style="color:Black;"></i></a>';
+      } else if (ext == ".JPG" || ext == ".jpg" || ext == ".png" || ext == ".PNG" || ext == ".bmp" || ext == ".BMP") {
+        attachUrl = '<a class = "view" href="javascript:void(0);"><img style="width:70;height:30px;" src="/downloadattachment?id=' + row.Id + '" title="预览" onclick="savepic(this)"/></a>'
+      } else if (ext == ".mp4" || ext == ".MP4") {
+        attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-video-o fa-lg text-info"></i></a>'
+      } else if (ext == ".doc" || ext == ".docx") {
+        attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-word-o fa-lg"></i></a>';
+      } else if (ext == ".xls" || ext == ".xlsx") {
+        attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-excel-o fa-lg" style="color:LimeGreen;"></i></a>';
+      } else if (ext == ".ppt" || ext == ".pptx") {
+        attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-file-powerpoint-o fa-lg" style="color:Red;"></i></a>';
+      } else {
+        attachUrl = '<a href="/downloadattachment?id=' + row.Id + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
+      }
+      return attachUrl;
     }
     //最后面弹出pdf列表中用的'&file='+value+
     function setPdflink(value, row, index) {
@@ -973,6 +984,14 @@
       });
     }
 
+    function addButton3() {
+      if ({{.RoleAdd }} != "true") {
+        alert("权限不够！");
+        return;
+      }
+      window.open("/v1/elastic/uploadelastic/{{.Id }}")
+    }
+
     // 编辑成果信息
     // $("#editorProdButton").click(function() {
     function editorProdButton() {
@@ -987,13 +1006,13 @@
       }
       if (selectRow[0].Uid === {{.Uid }} || {{.RoleUpdate }} == "true") {
         if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式
         }
         if (selectRow[0].Articlecontent[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式
         }
         if (selectRow[0].Pdflink[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式
         }
         if (site) {
           alert("同步成果不允许！");
@@ -1061,13 +1080,13 @@
 
       if (selectRow[0].Uid === {{.Uid }} || {{.RoleDelete }} == "true") {
         if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式
         }
         if (selectRow[0].Articlecontent[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式
         }
         if (selectRow[0].Pdflink[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式
         }
         if (site) {
           alert("同步成果不允许！");
@@ -1196,13 +1215,13 @@
       }
       if (selectRow[0].Uid === {{.Uid }} || {{.RoleDelete }} == "true") {
         if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式
         }
         if (selectRow[0].Articlecontent[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式
         }
         if (selectRow[0].Pdflink[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式
         }
         if (site) {
           alert("同步成果不允许！");
@@ -1260,13 +1279,13 @@
 
       if (selectRow[0].Uid === {{.Uid }} || {{.RoleFlow }} == "true") {
         if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式
         }
         if (selectRow[0].Articlecontent[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式
         }
         if (selectRow[0].Pdflink[0]) {
-          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+          var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式
         }
         if (site) {
           alert("同步成果不允许！");
@@ -1296,7 +1315,7 @@
         // $("#doctype").append('<option value="a">项目模板</option>');
         $.ajax({
           type: "get",
-          url: "/v1/admin/flowtypelist?page=1&limit=10",
+          url: "/v1/admin/flowtypelist?page=1&limit=100",
           success: function(data, status) {
             $.each(data.doctypes, function(i, d) {
               $("#doctype").append('<option value="' + d.ID + '">' + d.Name + '</option>');
@@ -1305,7 +1324,7 @@
         });
         $.ajax({
           type: "get",
-          url: "/v1/admin/flowaccesscontextlist?page=1&limit=10",
+          url: "/v1/admin/flowaccesscontextlist?page=1&limit=100",
           success: function(data, status) {
             $.each(data.accesscontexts, function(i, d) {
               $("#accesscontext").append('<option value="' + d.ID + '">' + d.Name + '</option>');
@@ -1314,7 +1333,7 @@
         });
         $.ajax({
           type: "get",
-          url: "/v1/admin/flowgrouplist?page=1&limit=10",
+          url: "/v1/admin/flowgrouplist?page=1&limit=100",
           success: function(data, status) {
             $.each(data.groups, function(i, d) {
               $("#group").append('<option value="' + d.ID + '">' + d.Name + '</option>');
@@ -1511,13 +1530,13 @@
         return false;
       }
       if (selectRow[0].Attachmentlink[0]) { //||selectRow[0].Pdflink[0].Link||selectRow[0].Articlecontent[0].Link)
-        var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式 
+        var site = /http:\/\/.*?\//.exec(selectRow[0].Attachmentlink[0].Link); //非贪婪模式
       }
       if (selectRow[0].Articlecontent[0]) {
-        var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式 
+        var site = /http:\/\/.*?\//.exec(selectRow[0].Articlecontent[0].Link); //非贪婪模式
       }
       if (selectRow[0].Pdflink[0]) {
-        var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式 
+        var site = /http:\/\/.*?\//.exec(selectRow[0].Pdflink[0].Link); //非贪婪模式
       }
       if (site) {
         alert("同步成果不允许！");
@@ -1553,7 +1572,11 @@
           // });
         }
       });
-    })
+    });
+
+    // $("#elasticButton").click(function() {
+    //   window.open("/v1/elastic/get/")
+    // };
 
     // $(function() {
     //   $('.popup-gallery').magnificPopup({
@@ -2218,7 +2241,7 @@
     //手机
     var toolbarButtonsXS = ['insertImage', 'insertVideo', 'bold', 'italic', 'fontSize', 'undo', 'redo'];
     var pid = $('#pid').val();
-    //编辑器初始化并赋值 
+    //编辑器初始化并赋值
     $('#edit').froalaEditor({
       placeholderText: '请输入内容',
       charCounterCount: true, //默认
@@ -2272,7 +2295,7 @@
     var prodlabel = $('#prodlabel2').val();
     var relevancy = $('#relevancy2').val();
     var html = $('div#edit').froalaEditor('html.get'); //$('#edit')[0].childNodes[1].innerHTML;
-    // $('#myModal').on('hide.bs.modal', function () {  
+    // $('#myModal').on('hide.bs.modal', function () {
     if (prodname && prodcode) {
       $.ajax({
         type: "post",
@@ -2332,7 +2355,7 @@
           $('#modalNewDwg').modal('hide');
           $('#table0').bootstrapTable('refresh', { url: '/project/products/' + {{.Id }} });
           //打开新的dwg页面
-          // window.open("/downloadattachment?id="+data.Id); 
+          // window.open("/downloadattachment?id="+data.Id);
         },
       });
     } else {
@@ -2438,7 +2461,7 @@
   //       onPostBody: function(){
   //       alert("加载成功");
   //     $('#table0').bootstrapTable('append', randomData());
-  //     $('#table0').bootstrapTable('scrollTo', 'bottom'); 
+  //     $('#table0').bootstrapTable('scrollTo', 'bottom');
   //          return false;
   //       }
   //     });

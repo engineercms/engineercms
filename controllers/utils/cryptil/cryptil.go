@@ -113,3 +113,25 @@ func NewRandChars(length int) string {
 		}
 	}
 }
+
+//基于随机数生成随机字符串
+//以上随机只能生成随机数，无法生成随机字符串，但我们实际开发中还是是字符串和数字混合为主，所以列出基于随机数字来生成随机字符串的方法：
+//var defaultLetters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+//
+//// RandomString returns a random string with a fixed length
+//func RandomString(n int, allowedChars ...[]rune) string {
+//	var letters []rune
+//
+//	if len(allowedChars) == 0 {
+//		letters = defaultLetters
+//	} else {
+//		letters = allowedChars[0]
+//	}
+//
+//	b := make([]rune, n)
+//	for i := range b {
+//		b[i] = letters[rand.Int(len(letters))]
+//	}
+//
+//	return string(b)
+//}

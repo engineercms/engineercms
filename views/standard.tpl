@@ -54,6 +54,13 @@
       </div>
       <br>
     </div>
+    <div class="col-lg-12">
+      <br>
+{{/*      <button id="ctlBtn" class="btn btn-default"><i class="glyphicon glyphicon-upload"></i>全文检索上传</button>*/}}
+      <button onclick="window.open('/v1/wx/uploadstandard')" type="button" data-name="searchButton" id="searchButton" class="btn btn-default" title="全文检索">
+        <i class="fa fa-search-plus">&nbsp;&nbsp;全文检索</i>
+      </button>
+    </div>
   </div>
   <div class="col-lg-12">
     <!-- 规范查询结果表 -->
@@ -116,7 +123,7 @@
       <hr />
     </div>
     <div class="col-lg-6">
-      <h4>Copyright © 2016~2020 EngineerCMS</h4>
+      <h4>Copyright © 2016~2021 EngineerCMS</h4>
       <p>
         网站由 <i class="user icon"></i>
         <a target="_blank" href="https://github.com/3xxx">@3xxx</a>
@@ -183,7 +190,7 @@
               </div>
               <div class="form-group must">
                 <label class="col-sm-4 control-label">五、优化PDF文件大小：</label>
-                <label class="col-sm-8">文字识别后保存的pdf是最优的。</label>
+                <label class="col-sm-8">文字识别后再另存为“优化厚的pdf”是最优的。</label>
               </div>
             </div>
           </div>
@@ -224,7 +231,7 @@
             <div class="form-group must">
               <label class="col-sm-3 control-label">上传者</label>
               <div class="col-sm-7">
-                <input type="tel" class="form-control" id="uname1"></div>
+                <input type="tel" class="form-control" id="uname1" placeholder="输入用户名如qin.xc，不是nickname"></div>
             </div>
           </div>
           <div class="modal-footer">
@@ -345,7 +352,9 @@
   }
 
   function setLink(value, row, index) {
-    return '<a href="' + row.Route + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
+    // return '<a href="' + row.Route + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
+    pdfUrl = '<a href="/v1/wx/standardpdf?file=/v1/wx/downloadstandard/'+ row.Id +' "title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o fa-lg text-danger"></i></a>';
+    return pdfUrl;
   }
 
   function setLable(value, row, index) {
@@ -367,8 +376,8 @@
       sidePagination: "server",
       queryParamsType: '',
       //请求服务器数据时，你可以通过重写参数的方式添加一些额外的参数，例如 toolbar 中的参数 如果 queryParamsType = 'limit' ,返回参数必须包含
-      // limit, offset, search, sort, order 否则, 需要包含: 
-      // pageSize, pageNumber, searchText, sortName, sortOrder. 
+      // limit, offset, search, sort, order 否则, 需要包含:
+      // pageSize, pageNumber, searchText, sortName, sortOrder.
       // 返回false将会终止请求。
       pageSize: 15,
       pageNumber: 1,
@@ -466,7 +475,7 @@
       if (title.length >= 2) {
         $('#table').bootstrapTable('refresh', { url: '/standard/search'});
         // $.ajax({
-        //   type: "get", 
+        //   type: "get",
         //   url: "/standard/search",
         //   data: { searchText: $("#name").val(),pageNo:1 },
         //   success: function(data, status) { //数据提交成功时返回数据
@@ -678,7 +687,7 @@
     var route1 = $('#route1').val();
     var uname1 = $('#uname1').val();
     var cid = $('#cid').val();
-    // $('#myModal').on('hide.bs.modal', function () {  
+    // $('#myModal').on('hide.bs.modal', function () {
     if (number1) {
       $.ajax({
         type: "post",
@@ -686,12 +695,12 @@
         data: { cid: cid, number: number1, title: title1, route: route1, uname: uname1 },
         success: function(data, status) {
           alert("修改“" + data + "”成功！(status:" + status + ".)");
+          $('#table').bootstrapTable('refresh');//, { url: '/standard/search' }
         }
       });
     }
     // $(function(){$('#myModal').modal('hide')});
     $('#editorstandardmodal').modal('hide');
-    $('#table').bootstrapTable('refresh', { url: '/getstandard' });
     // "/category/modifyfrm?cid="+cid
     // window.location.reload();//刷新页面
   }
@@ -740,7 +749,7 @@
     //        "categoryid":categoryid,
     //        "category":category,
     //        'content':html,
-    //      });        
+    //      });
     //    });
 
     // 文件上传过程中创建进度条实时显示。

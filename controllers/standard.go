@@ -1,11 +1,24 @@
 package controllers
 
 import (
+	"errors"
+	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/engineercms/engineercms/models"
+
+	"context"
+	//"github.com/PuerkitoBio/goquery"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/engineercms/engineercms/models"
+	"github.com/google/go-tika/tika"
 	"github.com/tealeg/xlsx"
+	"io"
+	"io/ioutil"
+	"log"
+	"math/rand"
+	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"strconv"
@@ -301,11 +314,11 @@ func (c *StandardController) Search() { //search用的是post方法
 
 // @Title get standardpdf
 // @Description get standardpdf
-// @Param file query string true "The link of standardpdf"
 // @Success 200 {object} models.Create
 // @Failure 400 Invalid page supplied
 // @Failure 404 cart not found
 // @router /standardpdf [get]
+// 手机端使用的下载方式
 func (c *StandardController) StandardPdf() { //search用的是post方法
 	_, _, _, isadmin, islogin := checkprodRole(c.Ctx)
 	if !isadmin && !islogin {
@@ -314,9 +327,209 @@ func (c *StandardController) StandardPdf() { //search用的是post方法
 		c.Data["Url"] = route
 		c.Redirect("/login?url="+route, 302)
 	}
-	pdflink := c.Input().Get("file")
-	c.Data["PdfLink"] = pdflink
-	c.TplName = "web/viewer.html"
+	// pdflink := c.Input().Get("file") // 这个只是一个route路径
+	// c.Data["PdfLink"] = pdflink
+	// id := c.Ctx.Input.Param(":id")
+	// c.Data["Id"] = id
+	// c.Data["file"] = pdflink
+	c.TplName = "pdf/web/viewer.html" //?file=\"" + pdflink + "\""
+}
+
+// @Title dowload standardpdf
+// @Description get standardpdf by id
+// @Param id path string  true "The id of standardpdf"
+// @Success 200 {object} models.GetAttachbyId
+// @Failure 400 Invalid page supplied
+// @Failure 404 pdf not found
+// @router /downloadstandard/:id [get]
+// 文件流方式下载pdf规范
+func (c *StandardController) DownloadStandard() {
+	// id := c.Input().Get("id")
+	id := c.Ctx.Input.Param(":id")
+	//pid转成64为
+	idNum, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		beego.Error(err)
+	}
+	//根据id取得规范的路径
+	standard, err := models.GetStandard(idNum)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(standard.Route)
+	fileurl := strings.Replace(standard.Route, "/attachment/", "attachment/", -1)
+	// http.ServeFile(c.Ctx.ResponseWriter, c.Ctx.Request, standard.Route)
+
+	filename := path.Base(fileurl)
+	fileext := path.Ext(filename)
+	matched, err := regexp.MatchString("\\.*[m|M][c|C][d|D]", fileext)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(matched)
+	if matched {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "不能下载mcd文件!"}
+		c.ServeJSON()
+		return
+	}
+
+	// c.Ctx.Output.Download(fileurl)
+	// ioutil.ReadFile(filename string) ([]byte, error)
+	filepath := strings.Replace(standard.Route, "/attachment/", "./attachment/", -1)
+	body, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		beego.Error(err)
+	}
+	// b, _ := a.DrawToBytes(text, 32) //背景的大小
+	// beego.Info(text)
+	// w http.ResponseWriter, r *http.Request
+	// io.Copy(c.Ctx.ResponseWriter, b) // stream实现了io.reader接口
+	var rw = c.Ctx.ResponseWriter
+	//允许访问所有域
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	// 设置Content-Type
+	// "Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), "UTF-8")
+	rw.Header().Set(`content-type`, `application/octet-stream;charset=utf-8`) // 指明response的返回对象是文件流
+	rw.Header().Set("Content-Disposition", "attachment;filename=\""+filename+"\"")
+	rw.Header().Set("Range", strconv.Itoa(65536*16))
+
+	// 下载的字节范围
+	var _, _, totalByte int
+	//if (c.Ctx.Request.Headerrequest != null && request.getHeader("range") != null) {
+	if c.Ctx.Request.Header.Get("range") != "" {
+		// 断点续传
+		//range := c.Ctx.Request.Header.Get("range")//.replaceAll("[^0-9\\-]", "").split("-");
+		// 文件总大小
+		totalByte = len(body)
+		// 下载起始位置
+		//startByte = Integer.parseInt(range[0]);
+		// 下载结束位置
+		//if (range.length > 1) {
+		//    endByte = Integer.parseInt(range[1]);
+		//} else {
+		//    endByte = totalByte - 1;
+		//}
+		// 返回http状态
+		rw.Header().Set("Status Code", "206")
+	} else {
+		// 正常下载
+		// 文件总大小
+		totalByte = len(body)
+		// 下载起始位置
+		_ = 0
+		// 下载结束位置
+		_ = totalByte - 1
+		// 返回http状态
+		rw.Header().Set("Accept-Ranges", "bytes")
+		rw.Header().Set("Status Code", "200")
+	}
+
+	// 需要下载字节数
+	//int length = endByte - startByte + 1;
+
+	// 需要下载字节数
+	// int length = endByte - startByte + 1;
+	length := 65536 * 16
+	// 响应头
+	rw.Header().Set("Accept-Ranges", "bytes")
+	//rw.Header().Set("Content-Range", "bytes "+startByte+"-"+endByte+"/"+totalByte)
+	rw.Header().Set("length", strconv.Itoa(length))
+	// 响应内容
+	//bis.skip(startByte);
+	//int len = 0;
+	//byte[] buff = new byte[1024 * 64];
+	//while ((len = bis.read(buff, 0, buff.length)) != -1) {
+	//    if (length <= len) {
+	//        bos.write(buff, 0, length);
+	//        break;
+	//    } else {
+	//        length -= len;
+	//        bos.write(buff, 0, len);
+	//    }
+	//}
+	// var bs = bytes.NewBufferString("data:ceshi\n\n")
+	rw.Write(body)
+	rw.Flush()
+
+	// c.Ctx.Output.Body(body) //流stream的方式
+}
+
+// RangeSize sets the default range size to 1MB
+const (
+	RangeSize    int64 = 1024 * 1024
+	ThreadAmount int   = 32
+)
+
+// RangeHeader defines the part of file to download.
+type RangeHeader struct {
+	StartPos int64
+	EndPos   int64
+}
+
+func (h *RangeHeader) String() string {
+	return fmt.Sprintf("bytes=%d-%d", h.StartPos, h.EndPos)
+}
+
+// Fetcher downloads file from URL.
+type Fetcher struct {
+	URL    string
+	Pieces []RangeHeader
+}
+
+// retrieveAll downloads the file completely.
+func (f *Fetcher) retrieveAll(w io.Writer) (int64, error) {
+	resp, err := http.Get(f.URL)
+	if err != nil {
+		return 0, err
+	}
+
+	n, err := io.Copy(w, resp.Body)
+	return n, err
+}
+
+// retrievePartial downloads part of the file.
+func (f *Fetcher) retrievePartial(pieceN int, w io.WriterAt) (n int, err error) {
+	if pieceN < 0 || pieceN >= len(f.Pieces) {
+		return 0, errors.New("Unspported index")
+	}
+	s := f.Pieces[pieceN]
+
+	// make HTTP Range request to get file from server
+	req, err := http.NewRequest(http.MethodGet, f.URL, nil)
+	if err != nil {
+		return
+	}
+	req.Header.Set("Range", s.String())
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	// read data from response and write it
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	n, err = w.WriteAt(data, s.StartPos)
+	return
+}
+
+func splitSize(length int64) (size int64) {
+	// less than 1KB
+	if length <= 1024 {
+		return 1024
+	}
+
+	size = length / int64(ThreadAmount)
+	if length%32 != 0 {
+		size = size + 1
+	}
+
+	return
 }
 
 // @Title get wx standards list
@@ -328,7 +541,8 @@ func (c *StandardController) StandardPdf() { //search用的是post方法
 // @Failure 404 standards not found
 // @router /searchwxstandards [get]
 //小程序取得规范列表，分页_plus
-func (c *StandardController) SearchWxStandards() { //search用的是post方法
+func (c *StandardController) SearchWxStandards() {
+	//search用的是post方法
 	// wxsite := beego.AppConfig.String("wxreqeustsite")
 	limit := "5"
 	limit1, err := strconv.ParseInt(limit, 10, 64)
@@ -451,7 +665,8 @@ func (c *StandardController) WxStandardPdf() {
 }
 
 //显示所有有效库
-func (c *StandardController) Valid() { //search用的是post方法
+func (c *StandardController) Valid() {
+	//search用的是post方法
 	// name := c.Input().Get("name")
 	c.Data["IsStandard"] = true //
 	c.TplName = "standard.tpl"
@@ -475,7 +690,8 @@ func (c *StandardController) Valid() { //search用的是post方法
 }
 
 //删除有效库中选中
-func (c *StandardController) DeleteValid() { //search用的是post方法
+func (c *StandardController) DeleteValid() {
+	//search用的是post方法
 	_, _, _, isadmin, isLogin := checkprodRole(c.Ctx)
 	if !isLogin {
 		route := c.Ctx.Request.URL.String()
@@ -690,7 +906,8 @@ func (c *StandardController) ImportLibrary() {
 	// c.Redirect("/standard", 302)
 }
 
-func (c *StandardController) Standard_one_addbaidu() { //一对一模式
+func (c *StandardController) Standard_one_addbaidu() {
+	//一对一模式
 	_, _, uid, _, _ := checkprodRole(c.Ctx)
 	var standard models.Standard
 	//获取上传的文件
@@ -750,5 +967,193 @@ func (c *StandardController) Standard_one_addbaidu() { //一对一模式
 	} else {
 		c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "title": "111", "original": "demo.jpg", "url": standard.Route}
 		c.ServeJSON()
+	}
+}
+
+// @Title upload file to standard html
+// @Description get upload file to standard html
+// @Success 200 {object} models.Elastic
+// @Failure 400 Invalid page supplied
+// @Failure 404 Page not found
+// @router /uploadstandard [get]
+// 进入上传主页面
+func (c *StandardController) UploadStandard() {
+	_, _, _, _, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	}
+	u := c.Ctx.Input.UserAgent()
+	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
+	if err != nil {
+		beego.Error(err)
+	}
+	if matched == true {
+		c.TplName = "standard/upload_standard.tpl"
+	} else {
+		c.TplName = "standard/upload_standard.tpl"
+	}
+}
+
+// @Title post bootstrapfileinput
+// @Description post file by BootstrapFileInput
+// @Success 200 {object} SUCCESS
+// @Failure 400 Invalid page supplied
+// @Failure 404 page not found
+// @router /standard/upload [post]
+// 上传
+func (c *StandardController) Upload() {
+	// 取得用户名
+	_, _, uid, _, isLogin := checkprodRole(c.Ctx)
+	if !isLogin {
+		// route := c.Ctx.Request.URL.String()
+		// c.Data["Url"] = route
+		// c.Redirect("/roleerr?url="+route, 302)
+		c.Data["json"] = "未登陆"
+		c.ServeJSON()
+		return
+	}
+	//获取上传的文件
+	_, h, err := c.GetFile("input-ke-2[]")
+	// beego.Info(h.Filename)自动将英文括号改成了_下划线
+	if err != nil {
+		beego.Error(err)
+	}
+	fileSuffix := path.Ext(h.Filename)
+	if fileSuffix != ".DOC" && fileSuffix != ".doc" && fileSuffix != ".DOCX" && fileSuffix != ".docx" && fileSuffix != ".pdf" && fileSuffix != ".PDF" {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "文件类型错误，请上传doc或pdf"}
+		c.ServeJSON()
+		return
+	}
+
+	category, categoryname, fileNumber, year, fileName, _ := SplitStandardName(h.Filename)
+	var filepath, article_body string
+	var standard models.Standard
+	// var filesize int64
+	if h == nil {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "文件为空！"}
+		c.ServeJSON()
+		return
+	}
+	//纯英文下没有取到汉字字符，所以没有名称
+	if fileName == "" {
+		fileName = fileNumber
+	}
+
+	if category != "Atlas" {
+		standard.Number = categoryname + " " + fileNumber + "-" + year
+		standard.Title = fileName
+	} else {
+		standard.Number = fileNumber
+		standard.Title = fileName
+	}
+	//这里增加Category
+	standard.Category = categoryname //2016-7-16这里改为GBT这种，空格前的名字
+	standard.Created = time.Now()
+	standard.Updated = time.Now()
+	standard.Uid = uid
+	standard.Route = "/attachment/standard/" + category + "/" + h.Filename
+	sid, err := models.SaveStandard(standard)
+	if err != nil {
+		beego.Error(err)
+	} else {
+		// 如果文件存在，则返回
+		if isExist(filepath) {
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "文件已存在！"}
+			c.ServeJSON()
+			return
+		}
+
+		//保存附件
+		if category != "" {
+			err := os.MkdirAll("./attachment/standard/"+category, 0777) //..代表本当前exe文件目录的上级，.表示当前目录，没有.表示盘的根目录
+			if err != nil {
+				beego.Error(err)
+			}
+		}
+		filepath = "./attachment/standard/" + category + "/" + h.Filename
+		err = c.SaveToFile("input-ke-2[]", filepath) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
+		if err != nil {
+			beego.Error(err)
+			c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "文件保存错误！"}
+			c.ServeJSON()
+			return
+		}
+		//filesize, _ = FileSize(filepath)
+		//filesize = filesize / 1000.0
+
+		c.Data["json"] = map[string]interface{}{"state": "SUCCESS", "title": h.Filename, "original": h.Filename, "url": standard.Route}
+		c.ServeJSON()
+	}
+
+	cwd, _ := os.Getwd()
+
+	filepath = strings.Replace(filepath, "./attachment/", "/attachment/", -1)
+	f, err := os.Open(cwd + filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	fmt.Println(f.Name())
+	client := tika.NewClient(nil, "http://localhost:9998")
+	body, err := client.Parse(context.Background(), f)
+	// body, err := client.Detect(context.Background(), f) //application/pdf
+	// fmt.Println(err)
+	// fmt.Println(body)
+
+	dom, err := goquery.NewDocumentFromReader(strings.NewReader(body))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	dom.Find("p").Each(func(i int, selection *goquery.Selection) {
+		if selection.Text() != " " || selection.Text() != "\n" {
+			fmt.Println(selection.Text())
+			article_body = article_body + selection.Text()
+		}
+	})
+
+	now := time.Now()
+	year_2, month, day := now.Date()
+	today_str := fmt.Sprintf("%04d-%02d-%02d", year_2, month, day)
+	rand.Seed(time.Now().Unix())
+	// 提取pdf第一页作为封面
+	datapath := cwd + "/static/pdf/mutool.exe"
+	beego.Info(datapath)
+	// workpath := "/attachment/standard/" + category + "/"
+
+	// filename := "01"
+	// inameexp := ".pdf"workpath + filename + onameexp
+	onameexp := ".png"
+	// mutool convert -O width=200 -F png -o output.png 01.pdf 1
+	arg := []string{"convert", "-O", "width=300", "-F", "png", "-o", cwd + "/static/images/" + fileName + onameexp, cwd + filepath, "1"}
+	fmt.Println("------------", arg)
+	cmd := exec.Command(datapath, arg...)
+	//记录开始时间
+	// start := time.Now()
+
+	err = cmd.Start()
+	if err != nil {
+		fmt.Printf("err: %v", err)
+	}
+
+	doc := &Document{
+		//是productid还是attachmentid
+		ID: strconv.FormatInt(sid, 10),
+		// ImageURL:  "/static/images/" + strconv.Itoa(rand.Intn(8)) + "s.jpg", //1s.jpg
+		ImageURL:  "/static/images/" + fileName + "1" + onameexp,
+		Published: today_str, //fmt.Sprintf("%04d-%02d-%02d", jYear, jMonth, jDay),
+		Title:     fileName,
+		Body:      article_body,
+	}
+
+	err = Createitem(indexName, doc)
+	if err != nil {
+		log.Fatalln(err)
 	}
 }

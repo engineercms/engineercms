@@ -32,6 +32,12 @@ import (
 	// _ "github.com/engineercms/engineercms/routers"
 )
 
+// 2021-8-30发现建表有问题：
+// 1.beego是首先运行controllers里的init()，然后运行models里的init()，这是不科学的。gorm就先运行models里的init()，建立表格
+// 2.因为controllers里先查询表还是操作表啥的出错，eforce那个，总是提示没有casbin_rule表，出错，程序走不下去，不去models里执行init()里的建表代码
+// 3.将controllers里错误注释掉，它就执行建表了。但是user表总是到它为止，将user表后面的注释，就可以继续自动建表了，也没找到什么地方不对，再恢复，好像也可以。
+// 4.在eforce里加个判断，如果查询有admin角色，则说明建好了角色表，可以执行操作了，否则return，不执行后面的建立角色-权限表。
+
 func main() {
 	// beego.AddFuncMap("dict", dict)
 	beego.AddFuncMap("loadtimes", loadtimes)

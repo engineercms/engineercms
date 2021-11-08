@@ -223,12 +223,11 @@ func init() {
 					&controllers.ChatController{},
 				),
 			),
-			//beego.NSNamespace("/mathcad",
-			//	// beego.NSBefore(FilterUser),
-			//	beego.NSInclude(
-			//		&controllers.MathcadController{},
-			//	),
-			//),
+			beego.NSNamespace("/elastic",
+				beego.NSInclude(
+					&controllers.ElasticController{},
+				),
+			),
 			// beego.NSNamespace("/suggest",
 			// 	beego.NSInclude(
 			// 		&controllers.SearchController{},

@@ -16,10 +16,12 @@ require (
 	github.com/casbin/casbin v1.7.0
 	github.com/casbin/xorm-adapter v1.0.0
 	github.com/dchest/lru v0.0.0-20151022103600-d8fd1e40a385 // indirect
+	github.com/elastic/go-elasticsearch/v8 v8.0.0-20211104170603-75263a5e99d2
 	github.com/eyebluecn/tank v0.0.0-00010101000000-000000000000
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-xorm/xorm v0.7.9 // indirect
 	github.com/golang-jwt/jwt v3.2.1+incompatible
+	github.com/google/go-tika v0.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/holys/initials-avatar v0.0.0-20180809162153-a82edcad3408
 	github.com/howeyc/fsnotify v0.9.0
