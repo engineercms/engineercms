@@ -8,7 +8,7 @@ import (
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/utils/pagination"
-	"github.com/casbin/beego-orm-adapter"
+	"github.com/engineercms/beego-orm-adapter"
 	"github.com/engineercms/engineercms/models"
 	// "github.com/casbin/casbin"
 	"github.com/engineercms/engineercms/controllers/utils"

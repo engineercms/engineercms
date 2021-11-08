@@ -12,11 +12,11 @@ require (
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/boombuler/barcode v1.0.1
-	github.com/casbin/beego-orm-adapter v1.0.0
 	github.com/casbin/casbin v1.7.0
 	github.com/casbin/xorm-adapter v1.0.0
 	github.com/dchest/lru v0.0.0-20151022103600-d8fd1e40a385 // indirect
 	github.com/elastic/go-elasticsearch/v8 v8.0.0-20211104170603-75263a5e99d2
+	github.com/engineercms/beego-orm-adapter v0.0.0-20211108114137-c1976132fa57
 	github.com/eyebluecn/tank v0.0.0-00010101000000-000000000000
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-xorm/xorm v0.7.9 // indirect

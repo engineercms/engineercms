@@ -47,8 +47,6 @@ github.com/boombuler/barcode v1.0.1 h1:NDBbPmhS+EqABEs5Kg3n/5ZNjy73Pz7SIV+KCeqyX
 github.com/boombuler/barcode v1.0.1/go.mod h1:paBWMcWSl3LHKBqUq+rly7CNSldXjb2rDl3JlRe0mD8=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737 h1:rRISKWyXfVxvoa702s91Zl5oREZTrR3yv+tXrrX7G/g=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
-github.com/casbin/beego-orm-adapter v1.0.0 h1:R0dVfKyla8/rYeKItflusEA/VSWWMImhLmQY97DTmi8=
-github.com/casbin/beego-orm-adapter v1.0.0/go.mod h1:QKII/4rS1+Uun5QIuB24hVc40tx+frxsa5d2b9CCDIM=
 github.com/casbin/casbin v1.7.0 h1:PuzlE8w0JBg/DhIqnkF1Dewf3z+qmUZMVN07PonvVUQ=
 github.com/casbin/casbin v1.7.0/go.mod h1:c67qKN6Oum3UF5Q1+BByfFxkwKvhwW57ITjqwtzR1KE=
 github.com/casbin/xorm-adapter v1.0.0 h1:AJq8+6BhmjD6Oajth8UUpuE/2RAX3PR+s/T98+4tQr8=
@@ -81,6 +79,8 @@ github.com/elastic/go-elasticsearch/v8 v8.0.0-20211104170603-75263a5e99d2 h1:Ao5
 github.com/elastic/go-elasticsearch/v8 v8.0.0-20211104170603-75263a5e99d2/go.mod h1:xe9a/L2aeOgFKKgrO3ibQTnMdpAeL0GC+5/HpGScSa4=
 github.com/elazarl/go-bindata-assetfs v1.0.0 h1:G/bYguwHIzWq9ZoyUQqrjTmJbbYn3j3CKKpKinvZLFk=
 github.com/elazarl/go-bindata-assetfs v1.0.0/go.mod h1:v+YaWX3bdea5J/mo8dSETolEo7R71Vk1u8bnjau5yw4=
+github.com/engineercms/beego-orm-adapter v0.0.0-20211108114137-c1976132fa57 h1:ZqanKqVBMo6NimcYJQjxTbzXNA6Gq1Xt/cNwxh4ww8M=
+github.com/engineercms/beego-orm-adapter v0.0.0-20211108114137-c1976132fa57/go.mod h1:bXPvapCQIIObTuCZ4pQdH5ZirZDq0BQB7EIFKhhePwU=
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 h1:Yzb9+7DPaBjB8zlTR87/ElzFsnQfuHnVUVqpZZIcV5Y=
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5/go.mod h1:a2zkGnVExMxdzMo3M0Hi/3sEU+cWnZpSni0O6/Yb/P0=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
