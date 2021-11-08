@@ -136,7 +136,10 @@ func (c *CartController) GetCart() {
 		islogin = false
 		return
 	}
-	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
+	isadmin, err := e.HasRoleForUser(userid, "role_"+roleid)
+	if err != nil {
+		beego.Error(err)
+	}
 	c.Data["IsAdmin"] = isadmin
 	c.Data["IsLogin"] = islogin
 	c.Data["Username"] = user.Nickname
@@ -209,7 +212,10 @@ func (c *CartController) GetApprovalCart() {
 	} else {
 		offset = (page1 - 1) * limit1
 	}
-	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
+	isadmin, err := e.HasRoleForUser(userid, "role_"+roleid)
+	if err != nil {
+		beego.Error(err)
+	}
 	// beego.Info(isadmin)
 	carts, err := models.GetApprovalCart(user.Id, limit1, offset, status1, searchText, isadmin)
 	if err != nil {
@@ -286,8 +292,11 @@ func (c *CartController) GetApplyCart() {
 	} else {
 		offset = (page1 - 1) * limit1
 	}
-	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
-	beego.Info(isadmin)
+	isadmin, err := e.HasRoleForUser(userid, "role_"+roleid)
+	if err != nil {
+		beego.Error(err)
+	}
+	// beego.Info(isadmin)
 	carts, err := models.GetApplyCart(user.Id, limit1, offset, status1, searchText, isadmin)
 	if err != nil {
 		beego.Error(err)
@@ -419,7 +428,10 @@ func (c *CartController) DeleteUserCart() {
 		c.Data["json"] = map[string]interface{}{"code": "ERROR", "info": "用户未登录", "msg": "未登陆"}
 		return
 	}
-	isadmin := e.HasRoleForUser(userid, "role_"+roleid)
+	isadmin, err := e.HasRoleForUser(userid, "role_"+roleid)
+	if err != nil {
+		beego.Error(err)
+	}
 	for _, id := range Array {
 		idNum, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {

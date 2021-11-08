@@ -308,6 +308,7 @@ func (c *LoginController) LoginPost() {
 
 //退出登录
 func (c *LoginController) Logout() {
+	site := c.Ctx.Input.Site() + ":" + strconv.Itoa(c.Ctx.Input.Port())
 	v := c.GetSession("uname")
 	if v != nil {
 		//删除指定的session
@@ -315,8 +316,11 @@ func (c *LoginController) Logout() {
 		c.DelSession("uid") //删除mindoc的用户登录信息
 		//销毁全部的session
 		// c.DestroySession()
+		c.Ctx.SetCookie("token", "", "3600", "/") //cookie置空，即删除https://blog.csdn.net/yang731227/article/details/82263125
 	}
 	islogin := false
+	// https://www.54lby.com/sso/login?redirect_url=https%3A%2F%2Fcms.54lby.com%2F
+	c.Ctx.Redirect(302, "https://www.54lby.com/sso/logouts?redirect_url="+site+c.Ctx.Request.URL.String())
 	c.Data["json"] = map[string]interface{}{"islogin": islogin}
 	c.ServeJSON()
 }
@@ -358,7 +362,8 @@ func (c *LoginController) Loginerr() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /wxlogin/:id [get]
-//微信小程序访问微信服务器获取用户信息
+// 微信小程序根据openid自动匹配用户名后登录。访问微信服务器获取用户信息
+// 如果 用户不存在，则提供openid给注册界面——wxregion
 func (c *LoginController) WxLogin() {
 	id := c.Ctx.Input.Param(":id")
 	JSCODE := c.Input().Get("code")
@@ -413,7 +418,7 @@ func (c *LoginController) WxLogin() {
 		user, err := models.GetUserByOpenID(openID)
 		if err != nil {
 			beego.Error(err)
-			c.Data["json"] = map[string]interface{}{"errNo": 0, "msg": "未查到用户", "data": "这个openID的用户不存在"}
+			c.Data["json"] = map[string]interface{}{"errNo": 0, "msg": "未查到用户", "data": "这个openID的用户不存在", "openID": openID}
 			c.ServeJSON()
 		} else {
 			//根据userid取出user和avatorUrl
@@ -451,7 +456,10 @@ func (c *LoginController) WxLogin() {
 			}
 			uid := strconv.FormatInt(user.Id, 10)
 			roleid := strconv.FormatInt(role.Id, 10)
-			isAdmin = e.HasRoleForUser(uid, "role_"+roleid)
+			isAdmin, err = e.HasRoleForUser(uid, "role_"+roleid)
+			if err != nil {
+				beego.Error(err)
+			}
 			// useridstring := strconv.FormatInt(user.Id, 10)
 			//用户登录后，存储openid在服务端的session里，下次用户通过hotqinsessionid来取得openid
 			c.SetSession("openID", openID)
@@ -575,7 +583,7 @@ func Authorizer(ctx *context.Context) (uname, role string, uid int64) {
 //用户登录，则role是1则是admin，其余没有意义
 //ip区段，casbin中表示，比如9楼ip区段作为用户，赋予了角色，这个角色具有访问项目目录权限
 func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin, islogin bool) {
-	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的数据??。
+	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的session数据。
 	var userid, roleid, userrole string
 	var user models.User
 	var err error
@@ -595,8 +603,10 @@ func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
-			isadmin = e.HasRoleForUser(userid, "role_"+roleid)
-
+			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
+			if err != nil {
+				beego.Error(err)
+			}
 			uid = user.Id
 			if user.Role == "0" {
 				// isadmin = false
@@ -629,8 +639,10 @@ func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
-			isadmin = e.HasRoleForUser(userid, "role_"+roleid)
-
+			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
+			if err != nil {
+				beego.Error(err)
+			}
 			// if user.Role == "1" {
 			// 	isadmin = true
 			// }
@@ -664,8 +676,10 @@ func CheckprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
-			isadmin = e.HasRoleForUser(userid, "role_"+roleid)
-
+			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
+			if err != nil {
+				beego.Error(err)
+			}
 			uid = user.Id
 			if user.Role == "0" {
 				// isadmin = false
@@ -698,8 +712,10 @@ func CheckprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
-			isadmin = e.HasRoleForUser(userid, "role_"+roleid)
-
+			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
+			if err != nil {
+				beego.Error(err)
+			}
 			// if user.Role == "1" {
 			// 	isadmin = true
 			// }

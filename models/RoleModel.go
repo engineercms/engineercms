@@ -215,11 +215,21 @@ func InsertRole() error {
 		fmt.Println("insert role end")
 	} else {
 		log.Println(err)
+		role, err := GetRoleByRolename(r.Rolename)
+		if err != nil {
+			log.Println(err)
+		}
+		id = role.Id
 	}
 	user, err := GetUserByUsername("admin")
 	if err != nil {
 		log.Println(err)
 	}
+
+	// 将用户admin加入到角色admin里
+
+	// e.AddGroupingPolicy(strconv.FormatInt(user.Id, 10), "role_"+strconv.FormatInt(id, 10))
+
 	//将用户admin加入到角色admin里
 	err = AddUserRole(user.Id, id)
 	if err != nil {

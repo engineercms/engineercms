@@ -284,7 +284,10 @@ func (c *UserController) AddWxUser() {
 		}
 		uid := strconv.FormatInt(user2.Id, 10)
 		roleid := strconv.FormatInt(role.Id, 10)
-		isAdmin := e.HasRoleForUser(uid, "role_"+roleid)
+		isAdmin, err := e.HasRoleForUser(uid, "role_"+roleid)
+		if err != nil {
+			beego.Error(err)
+		}
 		if !isAdmin {
 			c.Data["json"] = map[string]interface{}{"info": "非管理员", "id": 0}
 			c.ServeJSON()

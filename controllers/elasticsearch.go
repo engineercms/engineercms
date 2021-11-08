@@ -366,10 +366,12 @@ func (c *ElasticController) Upload() {
 	}
 
 	dom.Find("p").Each(func(i int, selection *goquery.Selection) {
-		if selection.Text() != " " || selection.Text() != "\n" {
-			fmt.Println(selection.Text())
-			article_body = article_body + selection.Text()
-		}
+		// if selection.Text() != " " || selection.Text() != "\n" {
+		// fmt.Println(selection.Text())
+		text := strings.Replace(selection.Text(), "\n", "", -1)
+		text = strings.Replace(text, " ", "", -1)
+		article_body = article_body + text //selection.Text()
+		// }
 	})
 
 	now := time.Now()

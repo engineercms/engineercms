@@ -545,8 +545,11 @@ func (c *OnlyController) GetData() {
 							docxarr[0].Permission = k[2]
 						}
 					}
-					roles := e.GetRolesForUser(useridstring) //取出用户的所有角色
-					for _, w1 := range roles {               //2018.4.30修改这个bug，这里原先w改为w1
+					roles, err := e.GetRolesForUser(useridstring) //取出用户的所有角色
+					if err != nil {
+						beego.Error(err)
+					}
+					for _, w1 := range roles { //2018.4.30修改这个bug，这里原先w改为w1
 						roleRes = e.GetPermissionsForUser(w1) //取出角色的所有权限，改为w1
 						for _, k := range roleRes {
 							// beego.Info(k)
@@ -725,8 +728,11 @@ func (c *OnlyController) OnlyOffice() {
 				}
 			}
 
-			roles := e.GetRolesForUser(useridstring) //取出用户的所有角色
-			for _, w1 := range roles {               //2018.4.30修改这个bug，这里原先w改为w1
+			roles, err := e.GetRolesForUser(useridstring) //取出用户的所有角色
+			if err != nil {
+				beego.Error(err)
+			}
+			for _, w1 := range roles { //2018.4.30修改这个bug，这里原先w改为w1
 				roleRes = e.GetPermissionsForUser(w1) //取出角色的所有权限，改为w1
 				for _, k := range roleRes {
 					// beego.Info(k)
@@ -1697,7 +1703,10 @@ func (c *OnlyController) DownloadDoc() {
 	}
 
 	//3.取得用户角色——取得角色的权限
-	userroles := e.GetRolesForUser(strconv.FormatInt(uid, 10))
+	userroles, err := e.GetRolesForUser(strconv.FormatInt(uid, 10))
+	if err != nil {
+		beego.Error(err)
+	}
 	// beego.Info(userroles)
 	// userrole := make([]Userrole, 0)
 	// var canidown bool
@@ -1853,7 +1862,10 @@ func (c *OnlyController) Download() {
 	}
 	// beego.Info(police[0][0])
 
-	userroles := e.GetRolesForUser(strconv.FormatInt(uid, 10))
+	userroles, err := e.GetRolesForUser(strconv.FormatInt(uid, 10))
+	if err != nil {
+		beego.Error(err)
+	}
 	// beego.Info(userroles)
 	// userrole := make([]Userrole, 0)
 	// var canidown bool

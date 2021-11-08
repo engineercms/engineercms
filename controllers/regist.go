@@ -229,7 +229,10 @@ func (c *RegistController) WxRegist() {
 				beego.Error(err)
 			} else {
 				roleid := strconv.FormatInt(role.Id, 10)
-				isAdmin = e.HasRoleForUser(uid, "role_"+roleid)
+				isAdmin, err = e.HasRoleForUser(uid, "role_"+roleid)
+				if err != nil {
+					beego.Error(err)
+				}
 			}
 
 			//用户登录后，存储openid在服务端的session里，下次用户通过hotqinsessionid来取得openid

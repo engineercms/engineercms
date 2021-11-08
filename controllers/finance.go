@@ -473,7 +473,11 @@ func (c *FinanceController) DeleteWxFinance() {
 			}
 			uid := strconv.FormatInt(user.Id, 10)
 			roleid := strconv.FormatInt(role.Id, 10)
-			if e.HasRoleForUser(uid, "role_"+roleid) {
+			hasrole, err := e.HasRoleForUser(uid, "role_"+roleid)
+			if err != nil {
+				beego.Error(err)
+			}
+			if hasrole {
 				id := c.Input().Get("id")
 				//id转成64为
 				idNum, err := strconv.ParseInt(id, 10, 64)

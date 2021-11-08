@@ -103,7 +103,7 @@ func SaveUser(user User) (uid int64, err error) {
 	// 	}
 	// 	uid = user1.Id
 	// }
-	return uid, err
+	return user1.Id, err
 }
 
 //后台手工操作添加微信小程序openid和用户名
@@ -121,7 +121,7 @@ func AddUserOpenID(userid int64, openid string) (id int64, err error) {
 			return id, err
 		}
 	}
-	return id, err //这里需要改改，否则，即使已经存在，则err为空。
+	return useropenid.Uid, err //这里需要改改，否则，即使已经存在，则err为空。id=0则已经存在
 }
 
 //取出所有openid
