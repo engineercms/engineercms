@@ -1,0 +1,6 @@
+[submodule "pkg/pdfcpu"]
+	path = pkg/pdfcpu
+	url = https://github.com/pdfcpu/pdfcpu.git
+[submodule "pkg/tank"]
+	path = pkg/tank
+	url = https://github.com/eyebluecn/tank.git
