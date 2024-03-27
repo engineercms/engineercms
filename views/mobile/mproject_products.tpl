@@ -96,6 +96,7 @@
       $("#table0").bootstrapTable({
         url: '/project/products/{{.Id}}',
         method: 'get',
+        classes: "table table-striped", //这里设置表格样式
         // search: 'true',
         // showRefresh: 'true',
         // showToggle: 'true',

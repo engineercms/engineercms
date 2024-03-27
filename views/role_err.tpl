@@ -2,12 +2,13 @@
 <!DOCTYPE html>
 <html>
 <head>
- <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <title>EngineerCMS</title>
   <script type="text/javascript" src="/static/js/jquery-2.1.3.min.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
 </head>
+
 <body>
   <div id="content" class="col-md-8 col-md-offset-2">
     <div class="col-md-6 auth-page">
@@ -70,33 +71,35 @@
       return false;
     }
     return true
-}
-function backToHome(){
-  window.location.href="/";
-  return false;
-}
-$('#uname').attr("autocomplete","off"); 
-$(document).ready(function(){
-  $("#uname").keyup(function(event){
-    var uname1=document.getElementById("uname");
-    // alert(event.keyCode);
-   if (event.keyCode != 38 && event.keyCode != 40 && uname1.value.length==2){
-    $.ajax({
-                type:"post",//这里是否一定要用post？？？
-                url:"/regist/getuname",
-                data: { uname: $("#uname").val()},
-                dataType:'json',//dataType:JSON,这种是jquerylatest版本的表达方法。不支持新版jquery。
-                success:function(data,status){
-                  $(".option").remove();
-                  $.each(data,function(i,d){
-                      $("#cars").append('<option class="option" value="' + data[i].Username + '">' + data[i].Nickname + '</option>');
-                  });
-                }
-      });
+  }
+
+  function backToHome() {
+    window.location.href = "/";
+    return false;
+  }
+  $('#uname').attr("autocomplete", "off");
+  $(document).ready(function() {
+    $("#uname").keyup(function(event) {
+      var uname1 = document.getElementById("uname");
+      // alert(event.keyCode);
+      if (event.keyCode != 38 && event.keyCode != 40 && uname1.value.length == 2) {
+        $.ajax({
+          type: "post", //这里是否一定要用post？？？
+          url: "/regist/getuname",
+          data: { uname: $("#uname").val() },
+          dataType: 'json', //dataType:JSON,这种是jquerylatest版本的表达方法。不支持新版jquery。
+          success: function(data, status) {
+            $(".option").remove();
+            $.each(data, function(i, d) {
+              $("#cars").append('<option class="option" value="' + data[i].Username + '">' + data[i].Nickname + '</option>');
+            });
+          }
+        });
 
       }
     });
   });
   </script>
 </body>
+
 </html>

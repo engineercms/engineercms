@@ -33,31 +33,31 @@ http://sourceforge.net/adobe/cmap/wiki/License/
   <script src="/static/pdfjs/l10n.js"></script>
   <script src="/static/pdfjs/pdf.js"></script>
   <script src="/static/pdfjs/debugger.js"></script>
-
+  
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
   <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
   <script type="text/javascript">
     DEFAULT_URL = {{.PdfLink }};
   // $(document).ready(function() {
     // $.ajax({
-    //   type:"post",
-    //   async: false,
-    //     //ajax接收pdf数据流，注意dataType值的设置是否有错，如果不指定，jQuery将自动根据HTTP包MIME信息返回
-    //    //responseXML或responseText .      回答问题1
-    //   contentType:"application/pdf;charset=utf-8",
-    //   url:"{% url netPan.File.views.browserFuf%}",
-    //   data:{
-    //       id: preFileId
-    //   },
-    //   success:function(data){
-    //     var pdfAsDataUri = data;
-    //     //如果引入了viewer.js , 处理方法
-    //     var pdfAsArray = convertDataURIToBinary(pdfAsDataUri);
-    //     DEFAULT_URL = pdfAsArray;
-    //       //  只引入了pdf.js, 未引入viewer.js， 处理方法
-    //       // var pdfAsArray = convertDataURIToBinary(pdfAsDataUri);
-    //       // PDFJS.getDocument（pdfAsArray).then();  自己写pdf的处理函数
-    //   }
+    //         type:"post",
+    //         async: false,
+    //           //ajax接收pdf数据流，注意dataType值的设置是否有错，如果不指定，jQuery将自动根据HTTP包MIME信息返回
+    //          //responseXML或responseText .      回答问题1
+    //         contentType:"application/pdf;charset=utf-8", 
+    //         url:"{% url netPan.File.views.browserFuf%}",
+    //         data:{
+    //             id: preFileId
+    //         },
+    //         success:function(data){
+    //             var pdfAsDataUri = data;
+    //             //如果引入了viewer.js , 处理方法
+    //             var pdfAsArray = convertDataURIToBinary(pdfAsDataUri);
+    //             DEFAULT_URL = pdfAsArray;
+    //                   //  只引入了pdf.js, 未引入viewer.js， 处理方法
+    //                   // var pdfAsArray = convertDataURIToBinary(pdfAsDataUri);
+    //                   // PDFJS.getDocument（pdfAsArray).then();  自己写pdf的处理函数
+    //         }
     // });
     // DEFAULT_URL = {{.PdfLink }}; //'/attachment/SL2017MeritEngineerCMS/20170902广州东莞压矿.pdf'; 未使用var关键字定义的变量都是全局变量
     // console.log(DEFAULT_URL)
@@ -126,7 +126,7 @@ http://sourceforge.net/adobe/cmap/wiki/License/
           <button id="secondaryDownload" class="secondaryToolbarButton download visibleMediumView" title="Download" tabindex="54" data-l10n-id="download">
             <span data-l10n-id="download_label">Download</span>
           </button>
-          <a href="#" id="secondaryViewBookmark" class="secondaryToolbarButton bookmark visibleSmallView" title="Current view (copy or open in new window)" tabindex="55" data-l10n-id="bookmark">
+          <a href="javascript:void(0)" id="secondaryViewBookmark" class="secondaryToolbarButton bookmark visibleSmallView" title="Current view (copy or open in new window)" tabindex="55" data-l10n-id="bookmark">
             <span data-l10n-id="bookmark_label">Current View</span>
           </a>
           <div class="horizontalToolbarSeparator visibleLargeView"></div>
@@ -180,7 +180,7 @@ http://sourceforge.net/adobe/cmap/wiki/License/
                 <button title="Previous Page" id="previous" tabindex="14" data-l10n-id="previous">
                     <span><i class="fa fa-arrow-left"></i></span>
                   </button>
-                <div class="splitToolbarButtonSeparator"></div>
+                <div class="splitToolbarButtonSeparator"></div> 
                 <button title="Next Page" id="next" tabindex="14" data-l10n-id="next">
                     <span><i class="fa fa-arrow-right"></i></span>
                   </button>  -->
@@ -198,7 +198,7 @@ http://sourceforge.net/adobe/cmap/wiki/License/
               <button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download">
                 <span data-l10n-id="download_label">Download</span>
               </button>
-              <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark">
+              <a href="javascript:void(0)" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="35" data-l10n-id="bookmark">
                 <span data-l10n-id="bookmark_label">Current View</span>
               </a>
               <div class="verticalToolbarSeparator hiddenSmallView"></div>

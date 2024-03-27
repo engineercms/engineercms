@@ -17,7 +17,11 @@
   <link rel="stylesheet" href="/static/voxes/css/owl.transitions.css">
   <link rel="stylesheet" href="/static/voxes/css/fakeLoader.css">
   <link rel="stylesheet" href="/static/voxes/css/style.css">
-  <link rel="shortcut icon" href="/static/voxes/img/favicon.png">
+  <!-- <link rel="shortcut icon" href="/static/voxes/img/favicon.png"> -->
+    <!-- 收藏用logo图标 -->
+  <link rel="bookmark" type="image/x-icon" href="/static/img/only.ico"/>
+  <!-- 网站显示页logo图标 -->
+  <link rel="shortcut icon" href="/static/img/only.ico">
 </head>
 
 <body class="login-register-wrap">

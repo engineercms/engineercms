@@ -14,9 +14,9 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/engineercms/engineercms/controllers/utils/cryptil"
-	"github.com/engineercms/engineercms/controllers/utils/filetil"
-	"github.com/engineercms/engineercms/controllers/utils/ziptil"
+	"github.com/3xxx/engineercms/controllers/utils/cryptil"
+	"github.com/3xxx/engineercms/controllers/utils/filetil"
+	"github.com/3xxx/engineercms/controllers/utils/ziptil"
 	"html"
 	"sync"
 )
@@ -201,7 +201,7 @@ func (convert *Converter) Convert() (err error) {
 			for {
 				action, isClosed := <-convert.process
 				if action == nil && !isClosed {
-					break
+					break;
 				}
 				group.Add(1)
 				<-convert.limitChan

@@ -1,11 +1,7 @@
 package models
 
 import (
-	// "github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	// _ "github.com/mattn/go-sqlite3"
-	// "strconv"
-	// "strings"
+	"github.com/beego/beego/v2/client/orm"
 	"time"
 )
 
@@ -85,7 +81,7 @@ func DeleteArticle(id int64) error {
 func GetArticles(pid int64) (Articles []*Article, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("Article")
-	_, err = qs.Filter("Productid", pid).All(&Articles, "Id", "ProductId", "Created", "Updated")
+	_, err = qs.Filter("product_id", pid).All(&Articles, "Id", "ProductId", "Created", "Updated")
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +92,7 @@ func GetArticles(pid int64) (Articles []*Article, err error) {
 func GetWxArticles(pid int64) (Articles []*Article, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("Article")
-	_, err = qs.Filter("Productid", pid).All(&Articles)
+	_, err = qs.Filter("product_id", pid).All(&Articles)
 	if err != nil {
 		return nil, err
 	}
@@ -130,16 +126,61 @@ type Result struct {
 }
 
 func GetWxUserArticles(pid int64) (results []*Result, err error) {
-	db := GetDB()
+	// db := GetDB()
 	// 这个可行db.Table("article").Select("product_id as productid, count(*) as total").Group("product_id").Scan(&results)
 	// db.Table("article").Select("product_id as productid, count(*) as total,user.nickname as usernickname").Group("product_id").
 	// 	Joins("left JOIN product on product.id = article.product_id").
 	// 	Joins("left JOIN user on user.id = product.uid").
 	// 	Scan(&results)
-	err = db.Order("total desc").Table("article").Select("product_id as productid, count(*) as total,user.nickname as usernickname").
+	err = _db.Order("total desc").Table("article").Select("product_id as productid, count(*) as total,user.nickname as usernickname").
 		Joins("left JOIN product on product.id = article.product_id").
 		Joins("left JOIN user on user.id = product.uid").Group("product.uid").
 		Joins("left JOIN project on project.id = product.project_id").Where("project.id=?", pid).
 		Scan(&results).Error
 	return results, err
+}
+
+//取出某个项目id下的文章列表
+// type WxArticleResult struct {
+// 	Usernickname string `json:"name"`
+// 	ProductId    int64
+// 	Subtext      string
+// 	Content      string
+// 	Created      time.Time
+// 	Id           int64
+// 	Total        int64 `json:"value"`
+// }
+
+// 由名字模糊搜索,productid——projectid
+// Select("product_id as product_id,article.id as id,article.subtext as subtext,article.content as content,article.created as created").
+// 不加上面这句，就会导致Id一直是projectid，因为是join，所以id会冲突，以最后查询出的id当做ariticle这个结构体的id了。
+func SearchArticles(pid int64, limit, offset int, key string, isDesc bool) (articles []*Article, err error) {
+	db := _db //GetDB()
+	err = db.Order("created desc").Table("article").
+		Select("product_id as product_id,article.id as id,article.subtext as subtext,article.content as content,article.created as created").
+		Joins("left JOIN product on product.id = article.product_id").
+		Joins("left JOIN project on project.id = product.project_id").
+		Where("project.id=? AND article.subtext like ?", pid, "%"+key+"%").
+		Limit(limit).Offset(offset).Scan(&articles).Error
+	return articles, err
+
+	// projects := db.Where("name like ?", "%"+this.Name+"%").Find(&result)
+
+	// cond := orm.NewCondition()
+	// cond1 := cond.Or("Subtext__contains", key).Or("Content__contains", key)
+	// o := orm.NewOrm()
+	// qs := o.QueryTable("Article")
+	// qs = qs.SetCond(cond1)
+	// if isDesc {
+	// 	_, err = qs.Distinct().Limit(limit, offset).OrderBy("-created").All(&articles)
+	// 	if err != nil {
+	// 		return articles, err
+	// 	}
+	// } else {
+	// 	_, err = qs.Distinct().Limit(limit, offset).All(&articles)
+	// 	if err != nil {
+	// 		return articles, err
+	// 	}
+	// }
+	// return articles, err
 }

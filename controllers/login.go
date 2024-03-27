@@ -1,16 +1,19 @@
 package controllers
 
 import (
+	// "context"
 	"crypto/md5"
 	"encoding/hex"
 	// "fmt"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/context"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web/context" //用这个context，不是adapter
 	// "net/url"
-	"github.com/engineercms/engineercms/controllers/utils"
-	"github.com/engineercms/engineercms/models"
+	"github.com/3xxx/engineercms/controllers/utils"
+	"github.com/3xxx/engineercms/models"
+	"github.com/beego/beego/v2/server/web"
 	"strconv"
-	// "github.com/astaxie/beego/session"
+	// "github.com/beego/beego/v2/adapter/session"
 	"encoding/json"
 	// "github.com/casbin/beego-orm-adapter"
 	// "github.com/casbin/casbin"
@@ -23,23 +26,23 @@ import (
 
 // CMSWX login API
 type LoginController struct {
-	beego.Controller
+	web.Controller
 }
 
 type SuccessController struct {
-	beego.Controller
+	web.Controller
 }
 
 type ServiceValidateController struct {
-	beego.Controller
+	web.Controller
 }
 
 // func (c *LoginController) Get() {
-// 	isExit := c.Input().Get("exit") == "true"
+// 	isExit := c.GetString("exit") == "true"
 // 	// secofficeshow?secid=1643&level=3&key=modify
-// 	url1 := c.Input().Get("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
-// 	url2 := c.Input().Get("level")
-// 	url3 := c.Input().Get("key")
+// 	url1 := c.GetString("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
+// 	url2 := c.GetString("level")
+// 	url3 := c.GetString("key")
 // 	var url string
 // 	if url2 == "" {
 // 		url = url1
@@ -72,9 +75,9 @@ type ServiceValidateController struct {
 // }
 
 // func (c *LoginController) Loginerr() {
-// 	url1 := c.Input().Get("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
-// 	url2 := c.Input().Get("level")
-// 	url3 := c.Input().Get("key")
+// 	url1 := c.GetString("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
+// 	url2 := c.GetString("level")
+// 	url3 := c.GetString("key")
 // 	var url string
 // 	if url2 == "" {
 // 		url = url1
@@ -88,12 +91,27 @@ type ServiceValidateController struct {
 // 	c.TplName = "loginerr.tpl"
 // }
 
-//登录页面
+// 登录页面
 func (c *LoginController) Login() {
+	var err error
+	url := c.GetString("url")
+	logs.Info(url)
+	if url == "" {
+		url, err = web.AppConfig.String("redirect")
+		if err != nil {
+			logs.Error(err)
+		}
+		switch url {
+		//登录后默认跳转……
+		case "IsIndex":
+			url = "/index"
+		}
+	}
+	c.Data["Url"] = url
 	u := c.Ctx.Input.UserAgent()
 	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	if matched == true {
 		// beego.Info("移动端~")
@@ -104,25 +122,25 @@ func (c *LoginController) Login() {
 	}
 }
 
-//login页面输入用户名和密码后登陆提交
+// login页面输入用户名和密码后登陆提交
 func (c *LoginController) Post() {
-	// uname := c.Input().Get("uname")
-	// url := c.Input().Get("returnUrl")
-	url1 := c.Input().Get("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
-	url2 := c.Input().Get("level")
-	url3 := c.Input().Get("key")
+	// uname := c.GetString("uname")
+	// url := c.GetString("returnUrl")
+	url1 := c.GetString("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
+	url2 := c.GetString("level")
+	url3 := c.GetString("key")
 	var url string
 	if url2 == "" && url1 != "" {
 		url = url1
 	} else if url2 != "" {
 		url = url1 + "&level=" + url2 + "&key=" + url3
 	} else {
-		url = c.Input().Get("referrer")
+		url = c.GetString("referrer")
 	}
 	var user models.User
-	user.Username = c.Input().Get("uname")
-	Pwd1 := c.Input().Get("pwd")
-	// autoLogin := c.Input().Get("autoLogin") == "on"
+	user.Username = c.GetString("uname")
+	Pwd1 := c.GetString("pwd")
+	// autoLogin := c.GetString("autoLogin") == "on"
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(Pwd1))
 	cipherStr := md5Ctx.Sum(nil)
@@ -130,25 +148,26 @@ func (c *LoginController) Post() {
 	user.Password = hex.EncodeToString(cipherStr)
 	err := models.ValidateUser(user)
 	if err == nil {
+		//将session存入名称为hotqinsessionid（config里设置的名称）的session里，下次取名称为hotqinsessionid的session即可得到uname和pwd
 		c.SetSession("uname", user.Username)
 		c.SetSession("pwd", user.Password)
 		utils.FileLogs.Info(user.Username + " " + "login" + " 成功")
 		User, err := models.GetUserByUsername(user.Username)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			utils.FileLogs.Error(user.Username + " 查询用户 " + err.Error())
 		}
 		if User.Ip == "" {
 			err = models.UpdateUser(User.Id, "Ip", c.Ctx.Input.IP())
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 				utils.FileLogs.Error(user.Username + " 添加用户ip " + err.Error())
 			}
 		} else {
 			//更新user表的lastlogintime
 			err = models.UpdateUserlastlogintime(user.Username)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 				utils.FileLogs.Error(user.Username + " 更新用户登录时间 " + err.Error())
 			}
 		}
@@ -156,17 +175,20 @@ func (c *LoginController) Post() {
 			c.Redirect(url, 302)
 		} else {
 			var id string
-			index := beego.AppConfig.String("redirect")
-			navid1 := beego.AppConfig.String("navigationid1")
-			navid2 := beego.AppConfig.String("navigationid2")
-			navid3 := beego.AppConfig.String("navigationid3")
-			navid4 := beego.AppConfig.String("navigationid4")
-			navid5 := beego.AppConfig.String("navigationid5")
-			navid6 := beego.AppConfig.String("navigationid6")
-			navid7 := beego.AppConfig.String("navigationid7")
-			navid8 := beego.AppConfig.String("navigationid8")
-			navid9 := beego.AppConfig.String("navigationid9")
-			// beego.Info(index)
+			index, err := web.AppConfig.String("redirect")
+			navid1, err := web.AppConfig.String("navigationid1")
+			navid2, err := web.AppConfig.String("navigationid2")
+			navid3, err := web.AppConfig.String("navigationid3")
+			navid4, err := web.AppConfig.String("navigationid4")
+			navid5, err := web.AppConfig.String("navigationid5")
+			navid6, err := web.AppConfig.String("navigationid6")
+			navid7, err := web.AppConfig.String("navigationid7")
+			navid8, err := web.AppConfig.String("navigationid8")
+			navid9, err := web.AppConfig.String("navigationid9")
+			if err != nil {
+				logs.Error(err)
+			}
+			// web.Info(index)
 			switch index {
 			case "":
 				c.Redirect("/index", 302)
@@ -226,7 +248,7 @@ func GetRandomSalt() []byte {
 	return GetRandomString(8)
 }
 
-//生成随机字符串
+// 生成随机字符串
 func GetRandomString(length int) []byte {
 	str := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	bytes := []byte(str)
@@ -246,16 +268,16 @@ func GetRandomString(length int) []byte {
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
 // @router /loginpost [post]
-//login弹框输入用户名和密码后登陆提交//微信用户注册登录用register
+// login弹框输入用户名和密码后登陆提交//微信用户注册登录用register
 func (c *LoginController) LoginPost() {
 	var user models.User
-	user.Username = c.Input().Get("uname")
+	user.Username = c.GetString("uname")
 	// beego.Info(user.Username)
 	// uname := c.GetString("uname")
 	// Pwd1 := c.GetString("pwd")
-	Pwd1 := c.Input().Get("pwd")
+	Pwd1 := c.GetString("pwd")
 	// beego.Info(Pwd1)
-	// autoLogin := c.Input().Get("autoLogin") == "on"
+	// autoLogin := c.GetString("autoLogin") == "on"
 	islogin := 0
 	// maxAge := 0
 	// if autoLogin {
@@ -276,20 +298,20 @@ func (c *LoginController) LoginPost() {
 		utils.FileLogs.Info(user.Username + " " + "login" + " 成功")
 		User, err := models.GetUserByUsername(user.Username)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			utils.FileLogs.Error(user.Username + " 查询用户 " + err.Error())
 		}
 		if User.Ip == "" {
 			err = models.UpdateUser(User.Id, "Ip", c.Ctx.Input.IP())
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 				utils.FileLogs.Error(user.Username + " 添加用户ip " + err.Error())
 			}
 		} else {
 			//更新user表的lastlogintime
 			err = models.UpdateUserlastlogintime(user.Username)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 				utils.FileLogs.Error(user.Username + " 更新用户登录时间 " + err.Error())
 			}
 		}
@@ -306,9 +328,9 @@ func (c *LoginController) LoginPost() {
 	c.ServeJSON()
 }
 
-//退出登录
+// 退出登录
 func (c *LoginController) Logout() {
-	site := c.Ctx.Input.Site() + ":" + strconv.Itoa(c.Ctx.Input.Port())
+	// site := c.Ctx.Input.Site() + ":" + strconv.Itoa(c.Ctx.Input.Port())
 	v := c.GetSession("uname")
 	if v != nil {
 		//删除指定的session
@@ -320,16 +342,16 @@ func (c *LoginController) Logout() {
 	}
 	islogin := false
 	// https://www.54lby.com/sso/login?redirect_url=https%3A%2F%2Fcms.54lby.com%2F
-	c.Ctx.Redirect(302, "https://www.54lby.com/sso/logouts?redirect_url="+site+c.Ctx.Request.URL.String())
+	// c.Ctx.Redirect(302, "https://www.54lby.com/sso/logouts?redirect_url="+site+c.Ctx.Request.URL.String())
 	c.Data["json"] = map[string]interface{}{"islogin": islogin}
 	c.ServeJSON()
 }
 
-//作废20180915
+// 作废20180915
 func (c *LoginController) Loginerr() {
-	url1 := c.Input().Get("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
-	url2 := c.Input().Get("level")
-	url3 := c.Input().Get("key")
+	url1 := c.GetString("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
+	url2 := c.GetString("level")
+	url3 := c.GetString("key")
 	var url string
 	if url2 == "" {
 		url = url1
@@ -342,7 +364,7 @@ func (c *LoginController) Loginerr() {
 	u := c.Ctx.Input.UserAgent()
 	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	if matched == true {
 		// beego.Info("移动端~")
@@ -366,35 +388,44 @@ func (c *LoginController) Loginerr() {
 // 如果 用户不存在，则提供openid给注册界面——wxregion
 func (c *LoginController) WxLogin() {
 	id := c.Ctx.Input.Param(":id")
-	JSCODE := c.Input().Get("code")
+	JSCODE := c.GetString("code")
 	// beego.Info(JSCODE)
 	var APPID, SECRET string
+	var err error
 	if id == "1" {
 		APPID = "wx7f77b90a1a891d93"
 		SECRET = "f58ca4f28cbb52ccd805d66118060449"
 	} else {
 		appstring := "wxAPPID" + id
-		APPID = beego.AppConfig.String(appstring)
+		APPID, err = web.AppConfig.String(appstring)
+		if err != nil {
+			logs.Error(err)
+			// return
+		}
 		secretstring := "wxSECRET" + id
-		SECRET = beego.AppConfig.String(secretstring)
+		SECRET, err = web.AppConfig.String(secretstring)
+		if err != nil {
+			logs.Error(err)
+			// return
+		}
 		// beego.Info(APPID)
 	}
 	//这里用security.go里的方法
 	requestUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID + "&secret=" + SECRET + "&js_code=" + JSCODE + "&grant_type=authorization_code"
 	resp, err := http.Get(requestUrl)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 		// return
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		beego.Error(err)
+		logs.Error(err)
 		// return
 	}
 	var data map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 		// return
 	}
 	// beego.Info(data)
@@ -417,16 +448,20 @@ func (c *LoginController) WxLogin() {
 
 		user, err := models.GetUserByOpenID(openID)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			c.Data["json"] = map[string]interface{}{"errNo": 0, "msg": "未查到用户", "data": "这个openID的用户不存在", "openID": openID}
 			c.ServeJSON()
 		} else {
 			//根据userid取出user和avatorUrl
 			useravatar, err := models.GetUserAvatorUrl(user.Id)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
-			wxsite := beego.AppConfig.String("wxreqeustsite")
+			wxsite, err := web.AppConfig.String("wxreqeustsite")
+			if err != nil {
+				logs.Error(err)
+				// return
+			}
 			var photo string
 			if len(useravatar) != 0 {
 				photo = wxsite + useravatar[0].UserAvatar.AvatarUrl
@@ -434,7 +469,7 @@ func (c *LoginController) WxLogin() {
 			//根据userid取出appreciation赞赏码
 			userappreciation, err := models.GetUserAppreciationUrl(user.Id)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			var appreciationphoto string
 			if len(userappreciation) != 0 {
@@ -452,26 +487,40 @@ func (c *LoginController) WxLogin() {
 			//判断是否具备admin角色
 			role, err := models.GetRoleByRolename("admin")
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			uid := strconv.FormatInt(user.Id, 10)
 			roleid := strconv.FormatInt(role.Id, 10)
 			isAdmin, err = e.HasRoleForUser(uid, "role_"+roleid)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			// useridstring := strconv.FormatInt(user.Id, 10)
-			//用户登录后，存储openid在服务端的session里，下次用户通过hotqinsessionid来取得openid
+			//用户登录后，存储openid在服务端的session里，下次用户通过hotqinsessionid来取得openID、sessionKey等。
 			c.SetSession("openID", openID)
 			c.SetSession("sessionKey", sessionKey) //这个没用
+			// beego.Info(sessionKey)                 //C0Ec4QtPRo4o9LPx1cyFVA==
 			// https://blog.csdn.net/yelin042/article/details/71773636
 			c.SetSession("skey", skey) //这个没用
 			//为何有这个hotqinsessionid?
 			//用户小程序register后，只是存入服务器数据库中的openid和用户名对应
 			//用户小程序login的时候，即这里，将openid存入session
 			//下次用户请求携带hotqinsessionid即可取到session-openid了。
-			sessionId := c.Ctx.Input.Cookie(beego.AppConfig.String("SessionName")) //这一步什么意思
-			c.Data["json"] = map[string]interface{}{"errNo": 1, "msg": "success", "userId": uid, "isAdmin": isAdmin, "sessionId": sessionId, "photo": photo, "appreciationphoto": appreciationphoto}
+			sessionname, err := web.AppConfig.String("SessionName")
+			if err != nil {
+				logs.Error(err)
+				// return
+			}
+			sessionId := c.Ctx.Input.Cookie(sessionname) //这一步什么意思？hotqinsessionid
+			// 返回请求中的 cookie 数据，例如 Cookie("username")，就可以获取请求头中携带的 cookie 信息中 username 对应的值
+			// beego.Info(sessionId) //32f6966c2ba2a1144d453fe8969c822e
+			// 解释以上的意思：小程序请求带上这个sessionid，服务端就能获取到openId。原理是什么？openid := c.GetSession("openID")
+			tokenString, err := utils.CreateToken(user.Username)
+			if err != nil {
+				logs.Error(err)
+			}
+
+			c.Data["json"] = map[string]interface{}{"errNo": 1, "msg": "success", "userId": uid, "userNickname": user.Nickname, "userName": user.Username, "isAdmin": isAdmin, "sessionId": sessionId, "token": tokenString, "openID": openID, "photo": photo, "appreciationphoto": appreciationphoto}
 			c.ServeJSON()
 		}
 		// beego.Info(useridstring)
@@ -490,7 +539,7 @@ func (c *LoginController) WxLogin() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /wxhassession [get]
-//微信小程序根据小程序自身存储的session，检查ecms里的openid session是否有效
+// 微信小程序根据小程序自身存储的session，检查ecms里的openid session是否有效
 func (c *LoginController) WxHasSession() {
 	// var openID string
 	openid := c.GetSession("openID")
@@ -513,14 +562,14 @@ func (c *LoginController) WxHasSession() {
 // ce conversion: interface {} is nil, not string
 // 2018/09/09 18:57:04.807 [C] [asm_amd64.s:509] D:/gowork/src/github.com/3xxx/engi
 // neercms/controllers/login.go:260
-//判断用户是否登录
+// 判断用户是否登录
 func checkAccount(ctx *context.Context) bool {
 	var user models.User
 	//（4）获取当前的请求会话，并返回当前请求会话的对象
 	//但是我还是建议大家采用 SetSession、GetSession、DelSession 三个方法来操作，避免自己在操作的过程中资源没释放的问题
 	// sess, _ := globalSessions.SessionStart(ctx.ResponseWriter, ctx.Request)
 	// defer sess.SessionRelease(ctx.ResponseWriter)
-	v := ctx.Input.CruSession.Get("uname")
+	v := ctx.Input.Session("uname")
 	if v == nil {
 		return false
 		//     this.SetSession("asta", int(1))
@@ -529,7 +578,8 @@ func checkAccount(ctx *context.Context) bool {
 		//     this.SetSession("asta", v.(int)+1)
 		//     this.Data["num"] = v.(int)
 		user.Username = v.(string)
-		v = ctx.Input.CruSession.Get("pwd")
+		// v = ctx.Input.CruSession.Get("pwd")
+		v = ctx.Input.Session("pwd")
 		user.Password = v.(string) //ck.Value
 		err := models.ValidateUser(user)
 		if err == nil {
@@ -541,12 +591,12 @@ func checkAccount(ctx *context.Context) bool {
 }
 
 func checkRole(ctx *context.Context) (role string, err error) { //这里返回用户的role
-	v := ctx.Input.CruSession.Get("uname")
+	v := ctx.Input.Session("uname")
 	var user models.User
 	user.Username = v.(string) //ck.Value
 	user, err = models.GetUserByUsername(user.Username)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	return user.Role, err
 }
@@ -560,7 +610,7 @@ func checkRole(ctx *context.Context) (role string, err error) { //这里返回�
 // }
 
 func Authorizer(ctx *context.Context) (uname, role string, uid int64) {
-	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的数据??。
+	v := ctx.Input.Session("uname") //用来获取存储在服务器端中的数据??。
 	// beego.Info(v)                          //qin.xc
 	var user models.User
 	var err error
@@ -568,7 +618,7 @@ func Authorizer(ctx *context.Context) (uname, role string, uid int64) {
 		uname = v.(string)
 		user, err = models.GetUserByUsername(uname)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		} else {
 			uid = user.Id
 			//获取用户角色，用户角色也要存入token么？
@@ -580,10 +630,10 @@ func Authorizer(ctx *context.Context) (uname, role string, uid int64) {
 	return uname, role, uid
 }
 
-//用户登录，则role是1则是admin，其余没有意义
-//ip区段，casbin中表示，比如9楼ip区段作为用户，赋予了角色，这个角色具有访问项目目录权限
+// 用户登录，则role是1则是admin，其余没有意义!!!
+// ip区段，casbin中表示，比如9楼ip区段作为用户，赋予了角色，这个角色具有访问项目目录权限
 func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin, islogin bool) {
-	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的session数据。
+	v := ctx.Input.Session("uname") //用来获取存储在服务器端中的session数据。
 	var userid, roleid, userrole string
 	var user models.User
 	var err error
@@ -593,19 +643,19 @@ func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 		uname = v.(string)
 		user, err = models.GetUserByUsername(uname)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		} else {
 			//查询admin角色的id
 			//重新获取roleid
 			role, err := models.GetRoleByRolename("admin")
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
 			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			uid = user.Id
 			if user.Role == "0" {
@@ -635,13 +685,13 @@ func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 			//重新获取roleid
 			role, err := models.GetRoleByRolename("admin")
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
 			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			// if user.Role == "1" {
 			// 	isadmin = true
@@ -656,7 +706,7 @@ func checkprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 }
 
 func CheckprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin, islogin bool) {
-	v := ctx.Input.CruSession.Get("uname") //用来获取存储在服务器端中的数据??。
+	v := ctx.Input.Session("uname") //用来获取存储在服务器端中的数据??。
 	var userid, roleid, userrole string
 	var user models.User
 	var err error
@@ -666,19 +716,19 @@ func CheckprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 		uname = v.(string)
 		user, err = models.GetUserByUsername(uname)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		} else {
 			//查询admin角色的id
 			//重新获取roleid
 			role, err := models.GetRoleByRolename("admin")
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
 			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			uid = user.Id
 			if user.Role == "0" {
@@ -708,13 +758,13 @@ func CheckprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 			//重新获取roleid
 			role, err := models.GetRoleByRolename("admin")
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			userid = strconv.FormatInt(user.Id, 10)
 			roleid = strconv.FormatInt(role.Id, 10)
 			isadmin, err = e.HasRoleForUser(userid, "role_"+roleid)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			// if user.Role == "1" {
 			// 	isadmin = true
@@ -734,7 +784,7 @@ func CheckprodRole(ctx *context.Context) (uname, role string, uid int64, isadmin
 // @Failure 400 Invalid page supplied
 // @Failure 404 data not found
 // @router /islogin [get]
-//login弹框输入用户名和密码后登陆提交
+// login弹框输入用户名和密码后登陆提交
 func (c *LoginController) Islogin() {
 	var islogin, isadmin bool
 	var uname string
@@ -750,7 +800,7 @@ func (c *LoginController) Islogin() {
 		uname = v.(string)
 		user, err = models.GetUserByUsername(uname)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		} else {
 			uid = user.Id
 			if user.Role == "0" {
@@ -789,7 +839,7 @@ func (c *LoginController) Islogin() {
 	c.ServeJSON()
 }
 
-//*********SSO单点登录JWT token
+// *********SSO单点登录JWT token
 // @Title get sso login
 // @Description get sso logintpl
 // @Param service query string  false "The service of login"
@@ -868,7 +918,7 @@ func (c *LoginController) SsoLogin() {
 	c.Data["service"] = c.GetString("service")
 	username, err := utils.CheckToken(authString)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 		c.TplName = "sso/index.tpl"
 	} else if username != "" {
 		c.TplName = "sso/success.tpl"
@@ -900,9 +950,9 @@ func (c *LoginController) SsoLoginPost() {
 	}
 	//密码md5加密
 	var user models.User
-	// user.Username = c.Input().Get("uname")
-	// Pwd1 := c.Input().Get("pwd")
-	// autoLogin := c.Input().Get("autoLogin") == "on"
+	// user.Username = c.GetString("uname")
+	// Pwd1 := c.GetString("pwd")
+	// autoLogin := c.GetString("autoLogin") == "on"
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(password))
 	cipherStr := md5Ctx.Sum(nil)
@@ -919,12 +969,12 @@ func (c *LoginController) SsoLoginPost() {
 		//更新user表的lastlogintime
 		err = models.UpdateUserlastlogintime(user.Username)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			utils.FileLogs.Error(user.Username + " 更新用户登录时间 " + err.Error())
 		} else {
 			tokenString, err := utils.CreateToken(login_name)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			//请求中head中设置token
 
@@ -962,13 +1012,51 @@ func (c *ServiceValidateController) Get() {
 	ticket := c.GetString("ticket")
 	userName, err := utils.CheckToken(ticket)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	if userName != "" {
 		c.Data["json"] = map[string]interface{}{"success": 0, "msg": "登录成功", "user": userName}
 	} else {
 		c.Data["json"] = map[string]interface{}{"success": -1, "msg": "用户未登录"}
 	}
+	c.ServeJSON()
+}
+
+// @Title post wx login
+// @Description post wx login
+// @Success 200 {object} success
+// @Failure 400 Invalid page supplied
+// @Failure 404 articl not found
+// @router /passlogin [get]
+// 微信小程序根据openid自动匹配用户名后登录。访问微信服务器获取用户信息
+// 如果 用户不存在，则提供openid给注册界面——wxregion
+func (c *LoginController) PassLogin() {
+	// hotqinsessionid := c.GetString("hotqinsessionid")
+	var user models.User
+	var err error
+	openID := c.GetSession("openID")
+	logs.Info(openID)
+	if openID != nil {
+		user, err = models.GetUserByOpenID(openID.(string))
+		if err != nil {
+			logs.Error(err)
+		}
+	} else {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "state": "ERROR", "data": "用户未登录！"}
+		c.ServeJSON()
+		return
+		// user.Id = 9
+		// user.Username = "qin.xc"
+	}
+	tokenString, err := utils.CreateToken(user.Username)
+	if err != nil {
+		logs.Error(err)
+	}
+	//下面是写在response head中，没什么用处
+	c.Ctx.Output.Header("Authorization", tokenString)
+	//设置cookie 名称,值,时间,路径
+	c.Ctx.SetCookie("TOKEN", tokenString, "3600", "/")
+	c.Data["json"] = map[string]interface{}{"errNo": 1, "msg": "success", "token": tokenString, "userId": user.Id, "userNickname": user.Nickname, "userName": user.Username, "openID": openID}
 	c.ServeJSON()
 }
 

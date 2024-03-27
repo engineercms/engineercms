@@ -1,8 +1,8 @@
 package models
 
 import (
-	// "github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/client/orm"
 	// _ "github.com/mattn/go-sqlite3"
 	// "strconv"
 	// "strings"
@@ -149,11 +149,35 @@ func AddProduct(code, title, label, principal string, uid, Projectid, TopProject
 	return id, err
 }
 
+// qs.OrderBy("id") // ORDER BY id ASC,
+// qs.OrderBy("-id") // ORDER BY id DESC,
 //根据侧栏id查出所有成果——按编号排序
 func GetProducts(id int64) (products []*Product, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("Product")
 	_, err = qs.Filter("ProjectId", id).OrderBy("-code").Limit(-1).All(&products)
+	if err != nil {
+		return nil, err
+	}
+	return products, err
+}
+
+//根据侧栏id查出所有成果——按编号排序
+func GetProductsAsc(id int64) (products []*Product, err error) {
+	o := orm.NewOrm()
+	qs := o.QueryTable("Product")
+	_, err = qs.Filter("ProjectId", id).OrderBy("id").Limit(-1).All(&products)
+	if err != nil {
+		return nil, err
+	}
+	return products, err
+}
+
+//根据侧栏id查出所有成果——按编号排序
+func GetProductsDesc(id int64) (products []*Product, err error) {
+	o := orm.NewOrm()
+	qs := o.QueryTable("Product")
+	_, err = qs.Filter("ProjectId", id).OrderBy("-id").Limit(-1).All(&products)
 	if err != nil {
 		return nil, err
 	}
@@ -237,6 +261,7 @@ func GetProductDocument(id int64) (proddoc ProductDocument, err error) {
 }
 
 //根据flowdocumentid和doctypeid查询productid
+// 当前项目id下
 func GetDocumentProduct(docid int64) (proddoc ProductDocument, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("ProductDocument")

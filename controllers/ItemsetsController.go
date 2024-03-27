@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	"github.com/engineercms/engineercms/conf"
-	"github.com/engineercms/engineercms/controllers/utils/pagination"
-	"github.com/engineercms/engineercms/models"
+	"github.com/3xxx/engineercms/conf"
+	"github.com/3xxx/engineercms/controllers/utils/pagination"
+	"github.com/3xxx/engineercms/models"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 type ItemsetsController struct {
@@ -66,7 +67,7 @@ func (c *ItemsetsController) List() {
 		if err == orm.ErrNoRows {
 			c.Abort("404")
 		} else {
-			beego.Error(err)
+			logs.Error(err)
 			c.Abort("500")
 		}
 	}

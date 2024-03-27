@@ -2,12 +2,14 @@ package controllers
 
 import (
 	// m "github.com/beego/admin/src/models"
-	// "github.com/astaxie/beego/orm"
+	// "github.com/beego/beego/v2/adapter/orm"
 	"crypto/md5"
 	"encoding/hex"
-	"github.com/astaxie/beego"
-	m "github.com/engineercms/engineercms/models"
-	// "github.com/astaxie/beego/logs"
+	m "github.com/3xxx/engineercms/models"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+	// "github.com/beego/beego/v2/adapter/logs"
 	"github.com/tealeg/xlsx"
 	"html/template"
 	"os"
@@ -17,7 +19,7 @@ import (
 )
 
 type UserController struct {
-	beego.Controller
+	web.Controller
 }
 
 func (c *UserController) Index() {
@@ -58,12 +60,12 @@ func (c *UserController) Index() {
 	// if err == nil {
 	// 	c.Data["Uname"] = ck.Value
 	// } else {
-	// 	beego.Error(err)
+	// 	logs.Error(err)
 	// }
 	//2.取得客户端用户名
 	// ck, err := c.Ctx.Request.Cookie("uname")
 	// if err != nil {
-	// 	beego.Error(err)
+	// 	logs.Error(err)
 	// }
 	// uname := ck.Value
 	//3.取出用户的权限等级
@@ -72,7 +74,7 @@ func (c *UserController) Index() {
 	//4.取得客户端用户名
 	// ck, err := c.Ctx.Request.Cookie("uname")
 	// if err != nil {
-	// 	beego.Error(err)
+	// 	logs.Error(err)
 	// }
 	// uname := ck.Value
 	//5.取出用户的权限等级
@@ -102,7 +104,7 @@ func (c *UserController) Index() {
 	//2.取得客户端用户名
 	// ck, err := c.Ctx.Request.Cookie("uname")
 	// if err != nil {
-	// 	beego.Error(err)
+	// 	logs.Error(err)
 	// } else {
 	// 	c.Data["Uname"] = ck.Value
 	// }
@@ -123,53 +125,92 @@ func (c *UserController) Index() {
 	}
 }
 
+// 后端分页的数据结构
+type userTableserver struct {
+	Rows  []*m.User `json:"rows"`
+	Page  int64     `json:"page"`
+	Total int64     `json:"total"` //string或int64都行！
+}
+
 // @Title get user
 // @Description get user by userid
 // @Param id path string false "The id of user"
 // @Param role query string false "The role of user"
+// @Param searchText query string false "The searchText of users"
+// @Param pageNo query string true "The page for users list"
+// @Param limit query string true "The limit of page for users list"
 // @Success 200 {object} models.User
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /user/:id [get]
-//如果不带id则取到所有用户
-//如果带id，则取一个用户
+// 如果不带id则取到所有用户
+// 如果带id，则取一个用户
 func (c *UserController) User() {
+	_, _, _, isadmin, _ := CheckprodRole(c.Ctx)
+	if !isadmin {
+		c.Data["json"] = map[string]interface{}{"msg": "非管理员权限，无法查询用户信息！", "data": "请登录管理员。"}
+		c.ServeJSON()
+	}
 	id := c.Ctx.Input.Param(":id")
 	c.Data["Id"] = id
 	c.Data["Ip"] = c.Ctx.Input.IP()
 	// var categories []*models.AdminCategory
 	if id == "0" { //如果id为空，则查询类别
-		_, _, _, isadmin, _ := CheckprodRole(c.Ctx)
-		if !isadmin {
-			c.Redirect("/login", 301)
+		limit := c.GetString("limit")
+		if limit == "" {
+			limit = "5"
 		}
-		users, err := m.GetUsers()
+		limit1, err := strconv.ParseInt(limit, 10, 64)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
-		//如果设置了role,用于onlyoffice的权限设置
-		role := c.Input().Get("role")
+		page := c.GetString("pageNo")
+		page1, err := strconv.ParseInt(page, 10, 64)
+		if err != nil {
+			logs.Error(err)
+		}
+
+		var offset int64
+		if page1 <= 1 {
+			offset = 0
+		} else {
+			offset = (page1 - 1) * limit1
+		}
+		searchText := c.GetString("searchText")
+		users, count, err := m.GetUsersPage(limit1, offset, "Username", searchText)
+		if err != nil {
+			logs.Error(err)
+		}
+		for _, w := range users {
+			w.Password = "0123456789abcdefghijklmnopqrstuv"
+		}
+		//如果设置了role,用于onlyoffice/officeview的权限设置
+		role := c.GetString("role")
 		if role != "" {
 			for _, v := range users {
 				v.Role = role
 			}
 		}
-		c.Data["json"] = &users
+		table := userTableserver{users, page1, count}
+		// table := prodTableserver2{products, 1, 20}
+		c.Data["json"] = table
+		// c.Data["json"] = &users
 		c.ServeJSON()
 	} else {
 		//pid转成64为
 		idNum, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 		user := m.GetUserByUserId(idNum)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 
 		// var users1 []*m.User
 		users := make([]*m.User, 1)
 		users[0] = &user
+		users[0].Password = "0123456789abcdefghijklmnopqrstuv"
 		// users = append(users, &user...)
 		c.Data["json"] = users //取到一个用户数据，不是数组，所以table无法显示
 		c.ServeJSON()
@@ -182,7 +223,7 @@ func (c *UserController) User() {
 	// }
 }
 
-//用户登录查看自己的资料_不是这个，是GetUserByUsername
+// 用户登录查看自己的资料_不是这个，是GetUserByUsername
 func (c *UserController) View() {
 	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
 	c.Data["Username"] = username
@@ -191,7 +232,7 @@ func (c *UserController) View() {
 	c.Data["IsAdmin"] = isadmin
 	c.Data["IsLogin"] = islogin
 	c.Data["Uid"] = uid
-	userid, _ := strconv.ParseInt(c.Input().Get("useid"), 10, 64)
+	userid, _ := strconv.ParseInt(c.GetString("useid"), 10, 64)
 	user := m.GetUserByUserId(userid)
 	c.Data["User"] = user
 	c.TplName = "admin_user_view.tpl"
@@ -213,45 +254,60 @@ func (c *UserController) View() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /adduser [post]
-//添加用户
+// 添加用户
 func (c *UserController) AddUser() {
 	var user m.User
-	user.Username = c.Input().Get("username")
-	user.Nickname = c.Input().Get("nickname")
+	user.Username = c.GetString("username")
+	user.Nickname = c.GetString("nickname")
 
-	Pwd1 := c.Input().Get("password")
+	Pwd1 := c.GetString("password")
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(Pwd1))
 	cipherStr := md5Ctx.Sum(nil)
 	user.Password = hex.EncodeToString(cipherStr)
-	// user.Repassword = c.Input().Get("repassword")
-	// Pwd1=c.Input().Get("password")
-	// 				md5Ctx := md5.New()
-	// 				md5Ctx.Write([]byte(Pwd1))
-	// 				cipherStr := md5Ctx.Sum(nil)
-	// 				user.Password = hex.EncodeToString(cipherStr)
+	// user.Repassword = c.GetString("repassword")
+	// Pwd1=c.GetString("password")
+	// md5Ctx := md5.New()
+	// md5Ctx.Write([]byte(Pwd1))
+	// cipherStr := md5Ctx.Sum(nil)
+	// user.Password = hex.EncodeToString(cipherStr)
 
-	user.Email = c.Input().Get("email")
-	user.Department = c.Input().Get("department")
-	user.Secoffice = c.Input().Get("secoffice")
-	user.Ip = c.Input().Get("ip")
-	user.Port = c.Input().Get("port")
-	statusint, err := strconv.Atoi(c.Input().Get("status"))
+	user.Email = c.GetString("email")
+	user.Sex = c.GetString("sex")
+	ispartymember := c.GetString("ispartymember")
+	if ispartymember == "true" {
+		user.IsPartyMember = true
+	} else {
+		user.IsPartyMember = false
+	}
+	user.Department = c.GetString("department")
+	user.Secoffice = c.GetString("secoffice")
+	user.Ip = c.GetString("ip")
+	user.Port = c.GetString("port")
+	statusint, err := strconv.Atoi(c.GetString("status"))
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "message": err}
+		c.ServeJSON()
 	}
 	user.Status = statusint
-	user.Role = c.Input().Get("role")
+	user.Role = c.GetString("role")
 	id, err := m.SaveUser(user)
 	if err == nil && id > 0 {
 		// c.Rsp(true, "Success")
 		// return
-		c.Data["json"] = "ok"
+		c.Data["json"] = map[string]interface{}{"info": "SUCCESS", "message": "ok", "data": id}
 		c.ServeJSON()
-	} else {
+	} else if err == nil && id == 0 {
 		// c.Rsp(false, err.Error())
-		beego.Error(err)
+		logs.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "message": "用户已存在", "data": id}
+		c.ServeJSON()
 		// return
+	} else {
+		logs.Error(err)
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "message": err, "data": id}
+		c.ServeJSON()
 	}
 }
 
@@ -267,7 +323,7 @@ func (c *UserController) AddUser() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /addwxuser [post]
-//小程序添加用户
+// 小程序添加用户
 func (c *UserController) AddWxUser() {
 	var user m.User
 	var err error
@@ -275,18 +331,18 @@ func (c *UserController) AddWxUser() {
 	if openID != nil {
 		user2, err := m.GetUserByOpenID(openID.(string))
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 		//判断是否具备admin角色
 		role, err := m.GetRoleByRolename("admin")
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 		uid := strconv.FormatInt(user2.Id, 10)
 		roleid := strconv.FormatInt(role.Id, 10)
 		isAdmin, err := e.HasRoleForUser(uid, "role_"+roleid)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 		if !isAdmin {
 			c.Data["json"] = map[string]interface{}{"info": "非管理员", "id": 0}
@@ -299,22 +355,22 @@ func (c *UserController) AddWxUser() {
 		return
 		// user.Id = 9
 	}
-	user.Username = c.Input().Get("uname")
-	user.Nickname = c.Input().Get("nickname")
+	user.Username = c.GetString("uname")
+	user.Nickname = c.GetString("nickname")
 	// beego.Info(user.Username)
-	Pwd1 := c.Input().Get("password")
+	Pwd1 := c.GetString("password")
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(Pwd1))
 	cipherStr := md5Ctx.Sum(nil)
 	user.Password = hex.EncodeToString(cipherStr)
-	// user.Email = c.Input().Get("email")
-	// user.Department = c.Input().Get("department")
-	// user.Secoffice = c.Input().Get("secoffice")
-	// user.Ip = c.Input().Get("ip")
-	// user.Port = c.Input().Get("port")
-	// statusint, err := strconv.Atoi(c.Input().Get("status"))
+	// user.Email = c.GetString("email")
+	// user.Department = c.GetString("department")
+	// user.Secoffice = c.GetString("secoffice")
+	// user.Ip = c.GetString("ip")
+	// user.Port = c.GetString("port")
+	// statusint, err := strconv.Atoi(c.GetString("status"))
 	// if err != nil {
-	// 	beego.Error(err)
+	// 	logs.Error(err)
 	// }
 	user.Status = 1
 	user.Role = "4"
@@ -335,7 +391,7 @@ func (c *UserController) AddWxUser() {
 // 	if err := c.ParseForm(&u); err != nil {
 // 		//handle error
 // 		// c.Rsp(false, err.Error())
-// 		beego.Error(err.Error)
+// 		logs.Error(err.Error)
 // 		return
 // 	}
 // 	id, err := m.UpdateUser(&u)
@@ -344,7 +400,7 @@ func (c *UserController) AddWxUser() {
 // 		return
 // 	} else {
 // 		// c.Rsp(false, err.Error())
-// 		beego.Error(err.Error)
+// 		logs.Error(err.Error)
 // 		return
 // 	}
 // }
@@ -359,13 +415,13 @@ func (c *UserController) AddWxUser() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 articl not found
 // @router /updatewxuser [post]
-//小程序修改用户密码
+// 小程序修改用户密码
 func (c *UserController) UpdateWxUser() {
-	oldpass := c.Input().Get("oldpass")
-	uid := c.Input().Get("uid")
+	oldpass := c.GetString("oldpass")
+	uid := c.GetString("uid")
 	id, err := strconv.ParseInt(uid, 10, 64)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	//取出用户旧密码
 	user := m.GetUserByUserId(id)
@@ -374,10 +430,10 @@ func (c *UserController) UpdateWxUser() {
 	cipherStr := md5Ctx.Sum(nil)
 	Password := hex.EncodeToString(cipherStr)
 	if user.Password == Password {
-		newpass := c.Input().Get("newpass")
+		newpass := c.GetString("newpass")
 		err = m.UpdateUser(id, "Password", newpass)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			c.Data["json"] = "wrong"
 			c.ServeJSON()
 		} else {
@@ -399,25 +455,28 @@ func (c *UserController) UpdateWxUser() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /updateuser [post]
-//在线修改保存某个字段
+// 在线修改保存某个字段
 func (c *UserController) UpdateUser() {
 	//进行权限判断isme or isadmin
 	_, _, uid, isadmin, _ := checkprodRole(c.Ctx)
-	pk := c.Input().Get("pk") //这个其实就是userid
+	pk := c.GetString("pk") //这个其实就是userid
 	id, err := strconv.ParseInt(pk, 10, 64)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	if isadmin || uid == id {
-		name := c.Input().Get("name")
-		value := c.Input().Get("value")
+		name := c.GetString("name")
+		value := c.GetString("value")
+		logs.Info(value)
 		value = template.HTMLEscapeString(value) //过滤xss攻击
+		logs.Info(value)
 		err = m.UpdateUser(id, name, value)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			data := "写入数据错误!"
 			c.Ctx.WriteString(data)
 		} else {
+			logs.Info("ok")
 			data := "ok!"
 			c.Ctx.WriteString(data)
 		}
@@ -429,10 +488,10 @@ func (c *UserController) UpdateUser() {
 
 //这个作废，用在线修改
 // func (c *UserController) UpdateUser() {
-// 	userid := c.Input().Get("userid")
-// 	nickname := c.Input().Get("nickname")
-// 	email := c.Input().Get("email")
-// 	Pwd1 := c.Input().Get("password")
+// 	userid := c.GetString("userid")
+// 	nickname := c.GetString("nickname")
+// 	email := c.GetString("email")
+// 	Pwd1 := c.GetString("password")
 // 	if Pwd1 != "" {
 // 		md5Ctx := md5.New()
 // 		md5Ctx.Write([]byte(Pwd1))
@@ -440,12 +499,12 @@ func (c *UserController) UpdateUser() {
 // 		password := hex.EncodeToString(cipherStr)
 // 		err := m.UpdateUser(userid, nickname, email, password) //这里修改
 // 		if err != nil {
-// 			beego.Error(err)
+// 			logs.Error(err)
 // 		}
 // 	} else {
 // 		err := m.UpdateUser(userid, nickname, email, "") //这里修改
 // 		if err != nil {
-// 			beego.Error(err)
+// 			logs.Error(err)
 // 		}
 // 	}
 // 	c.TplName = "user_view.tpl"
@@ -460,7 +519,7 @@ func (c *UserController) UpdateUser() {
 // 		return
 // 	} else {
 // 		// c.Rsp(false, err.Error())
-// 		beego.Error(err.Error)
+// 		logs.Error(err.Error)
 // 		return
 // 	}
 // }
@@ -472,7 +531,7 @@ func (c *UserController) UpdateUser() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /deleteuser [post]
-//删除用户
+// 删除用户
 func (c *UserController) DeleteUser() {
 	ids := c.GetString("ids")
 	array := strings.Split(ids, ",")
@@ -480,14 +539,14 @@ func (c *UserController) DeleteUser() {
 		//id转成64位
 		idNum, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 		status, err := m.DelUserById(idNum)
 		if err == nil && status > 0 {
 			c.Data["json"] = "ok"
 			c.ServeJSON()
 		} else if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 	}
 }
@@ -498,7 +557,7 @@ func (c *UserController) DeleteUser() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /getuserbyusername [get]
-//用户查看自己，修改密码等
+// 用户查看自己，修改密码等
 func (c *UserController) GetUserByUsername() {
 	username, role, uid, isadmin, islogin := checkprodRole(c.Ctx)
 	c.Data["Username"] = username
@@ -522,12 +581,12 @@ func (c *UserController) GetUserByUsername() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /usermyself [get]
-//用户个人数据，填充table，以便编辑
+// 用户个人数据，填充table，以便编辑
 func (c *UserController) Usermyself() {
 	// 	_, role := checkprodRole(c.Ctx)
 	// 	roleint, err := strconv.Atoi(role)
 	// 	if err != nil {
-	// 		beego.Error(err)
+	// 		logs.Error(err)
 	// 	}
 	// 	if role == "1" {
 	// 		c.Data["IsAdmin"] = true
@@ -565,10 +624,11 @@ func (c *UserController) Usermyself() {
 	// }
 	user, err := m.GetUserByUsername(username)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	users := make([]*m.User, 1)
 	users[0] = &user
+	users[0].Password = "0123456789abcdefghijklmnopqrstuv"
 	c.Data["json"] = users
 	c.ServeJSON()
 }
@@ -579,16 +639,14 @@ func (c *UserController) Usermyself() {
 // @Failure 400 Invalid page supplied
 // @Failure 404 user not found
 // @router /importusers [post]
-//上传excel文件，导入到数据库
-//引用来自category的查看成果类型里的成果
+// 上传excel文件，导入到数据库
+// 引用来自category的查看成果类型里的成果
 func (c *UserController) ImportUsers() {
 	//获取上传的文件
 	_, h, err := c.GetFile("usersexcel")
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
-	// beego.Info(h.path)
-	// var attachment string
 	var path string
 
 	// var filesize int64
@@ -597,7 +655,7 @@ func (c *UserController) ImportUsers() {
 		path = "./attachment/" + h.Filename    // 关闭上传的文件，不然的话会出现临时文件不能清除的情况
 		err = c.SaveToFile("usersexcel", path) //.Join("attachment", attachment)) //存文件    WaterMark(path)    //给文件加水印
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			c.Data["json"] = "err保存文件失败"
 			c.ServeJSON()
 		} else {
@@ -605,7 +663,7 @@ func (c *UserController) ImportUsers() {
 			//读出excel内容写入数据库
 			xlFile, err := xlsx.OpenFile(path) //
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			for _, sheet := range xlFile.Sheets {
 				for i, row := range sheet.Rows {
@@ -615,19 +673,19 @@ func (c *UserController) ImportUsers() {
 						if len(row.Cells) >= 2 { //总列数，从1开始
 							user.Username = row.Cells[j].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 						if len(row.Cells) >= 3 {
 							user.Nickname = row.Cells[j+1].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 						if len(row.Cells) >= 4 {
 							Pwd1 := row.Cells[j+2].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 
 							md5Ctx := md5.New()
@@ -638,55 +696,72 @@ func (c *UserController) ImportUsers() {
 						if len(row.Cells) >= 5 {
 							user.Email = row.Cells[j+3].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 						if len(row.Cells) >= 6 {
-							user.Department = row.Cells[j+4].String()
+							user.Sex = row.Cells[j+4].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 						if len(row.Cells) >= 7 {
-							user.Secoffice = row.Cells[j+5].String()
+							ispartymember := row.Cells[j+5].String()
+							if ispartymember == "是" {
+								user.IsPartyMember = true
+							} else {
+								user.IsPartyMember = false
+							}
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 						if len(row.Cells) >= 8 {
-							user.Ip = row.Cells[j+6].String()
+							user.Department = row.Cells[j+6].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 						if len(row.Cells) >= 9 {
-							user.Port = row.Cells[j+7].String()
+							user.Secoffice = row.Cells[j+7].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 						if len(row.Cells) >= 10 {
-							status := row.Cells[j+8].String()
+							user.Ip = row.Cells[j+8].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
+							}
+						}
+						if len(row.Cells) >= 11 {
+							user.Port = row.Cells[j+9].String()
+							if err != nil {
+								logs.Error(err)
+							}
+						}
+						if len(row.Cells) >= 12 {
+							status := row.Cells[j+10].String()
+							if err != nil {
+								logs.Error(err)
 							}
 							status1, err := strconv.Atoi(status)
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 							user.Status = status1
 						}
-						if len(row.Cells) >= 11 {
-							role := row.Cells[j+9].String()
+						if len(row.Cells) >= 13 {
+							role := row.Cells[j+11].String()
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 
 							user.Role = role
 							user.Lastlogintime = time.Now()
 							_, err = m.SaveUser(user) //如果姓名重复，也要返回uid
 							if err != nil {
-								beego.Error(err)
+								logs.Error(err)
 							}
 						}
 					}
@@ -695,7 +770,7 @@ func (c *UserController) ImportUsers() {
 			//删除附件
 			err = os.Remove(path)
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 			}
 			c.Data["json"] = "ok"
 			c.ServeJSON()
@@ -707,10 +782,10 @@ func (c *UserController) ImportUsers() {
 }
 
 func (this *UserController) Roleerr() {
-	// url := this.Input().Get("url")
-	url1 := this.Input().Get("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
-	url2 := this.Input().Get("level")
-	url3 := this.Input().Get("key")
+	// url := this.GetString("url")
+	url1 := this.GetString("url") //这里不支持这样的url，http://192.168.9.13/login?url=/topic/add?id=955&mid=3
+	url2 := this.GetString("level")
+	url3 := this.GetString("key")
 	var url string
 	if url2 == "" {
 		url = url1

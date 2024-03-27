@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)https://bootstrap.sbox.cn/docs/5.3/examples/cheatsheet/ -->
+<html lang="en" data-bs-theme="auto">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script src="/static/bootstrap5.3/color-modes.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Hugo 0.101.0">
+  <title>3D Editor</title>
+  <!-- Cheatsheet · Bootstrap v5.3 -->
+  <link rel="canonical" href="https://bootstrap.sbox.cn/docs/5.3/examples/cheatsheet/">
+  <link href="/static/bootstrap5.3/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" href="https://bootstrap.sbox.cn/docs/5.3/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+  <link rel="icon" href="https://bootstrap.sbox.cn/docs/5.3/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="https://bootstrap.sbox.cn/docs/5.3/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+  <link rel="manifest" href="https://bootstrap.sbox.cn/docs/5.3/assets/img/favicons/manifest.json">
+  <link rel="mask-icon" href="https://bootstrap.sbox.cn/docs/5.3/assets/img/favicons/safari-pinned-tab.svg" color="#712cf9">
+  <link rel="icon" href="https://bootstrap.sbox.cn/docs/5.3/assets/img/favicons/favicon.ico">
+  <meta name="theme-color" content="#712cf9">
+  <style>
+    .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+      .b-example-divider {
+        width: 100%;
+        height: 3rem;
+        background-color: rgba(0, 0, 0, .1);
+        border: solid rgba(0, 0, 0, .15);
+        border-width: 1px 0;
+        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+      }
+
+      .b-example-vr {
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 100vh;
+      }
+
+      .bi {
+        vertical-align: -.125em;
+        fill: currentColor;
+      }
+
+      .nav-scroller {
+        position: relative;
+        z-index: 2;
+        height: 2.75rem;
+        overflow-y: hidden;
+      }
+
+      .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .btn-bd-primary {
+        --bd-violet-bg: #712cf9;
+        --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+        --bs-btn-font-weight: 600;
+        --bs-btn-color: var(--bs-white);
+        --bs-btn-bg: var(--bd-violet-bg);
+        --bs-btn-border-color: var(--bd-violet-bg);
+        --bs-btn-hover-color: var(--bs-white);
+        --bs-btn-hover-bg: #6528e0;
+        --bs-btn-hover-border-color: #6528e0;
+        --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+        --bs-btn-active-color: var(--bs-btn-hover-color);
+        --bs-btn-active-bg: #5a23c8;
+        --bs-btn-active-border-color: #5a23c8;
+      }
+      .bd-mode-toggle {
+        z-index: 1500;
+      }
+    </style>
+  <!-- Custom styles for this template -->
+  <link href="/static/bootstrap5.3/cheatsheet.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/x-editable@1.5.1/dist/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"> -->
+  <link href="/static/bootstrap5.3/bootstrap-table.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-body-tertiary">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="check2" viewBox="0 0 16 16">
+      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"></path>
+    </symbol>
+    <symbol id="circle-half" viewBox="0 0 16 16">
+      <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"></path>
+    </symbol>
+    <symbol id="moon-stars-fill" viewBox="0 0 16 16">
+      <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"></path>
+      <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"></path>
+    </symbol>
+    <symbol id="sun-fill" viewBox="0 0 16 16">
+      <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"></path>
+    </symbol>
+  </svg>
+  <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+    <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="切换主题 (light)">
+      <svg class="bi my-1 theme-icon-active" width="1em" height="1em">
+        <use href="#sun-fill"></use>
+      </svg>
+      <span class="visually-hidden" id="bd-theme-text">切换主题</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
+      <li>
+        <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="light" aria-pressed="true">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+            <use href="#sun-fill"></use>
+          </svg>
+          Light
+          <svg class="bi ms-auto d-none" width="1em" height="1em">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+            <use href="#moon-stars-fill"></use>
+          </svg>
+          Dark
+          <svg class="bi ms-auto d-none" width="1em" height="1em">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+            <use href="#circle-half"></use>
+          </svg>
+          Auto
+          <svg class="bi ms-auto d-none" width="1em" height="1em">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+    </ul>
+  </div>
+  <header class="bd-header bg-dark py-3 d-flex align-items-stretch border-bottom border-dark">
+    <div class="container-fluid d-flex align-items-center">
+      <h1 class="d-flex align-items-center fs-4 text-white mb-0">
+        <img src="/static/bootstrap5.3/bootstrap-logo-white.svg" width="38" height="30" class="me-3" alt="Bootstrap">
+        三维模型编辑
+      </h1>
+      <a href="https://zsj.itdos.net/docs/freecad/freecad-023-002" class="ms-auto link-light" hreflang="ar">帮助</a>
+    </div>
+  </header>
+  <aside class="bd-aside sticky-xl-top text-body-secondary align-self-start mb-3 mb-xl-5 px-2">
+    <h2 class="h6 pt-4 pb-3 mb-4 border-bottom">编辑模型参数</h2>
+    <nav class="small" id="toc">
+      <ul class="list-unstyled">
+        <li class="my-2">
+          <button class="btn d-inline-flex align-items-center border-0" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#contents-collapse" aria-controls="contents-collapse">批量输入参数</button>
+          <ul class="list-unstyled ps-3 collapse" id="contents-collapse" style="">
+            <div class="mb-3">
+              <label for="exampleFormControlTextarea1" class="form-label">一套参数之间用英文逗号分割，多套参数之间用分号分割；或从excel表格复制过来，表格中参数均按列排列，支持多列</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="excel表格中一套参数对应一列，多列对应多套参数"></textarea>
+            </div>
+            <!-- <li><button type="button" class="btn btn-primary" id="liveToastBtn">Show live toast</button></li> -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button class="btn btn-primary me-md-2" type="button" onclick="postFCparameter()">提交批量参数</button>
+              <!-- <button class="btn btn-primary" type="button">Button</button> -->
+            </div>
+          </ul>
+        </li>
+        <li class="my-2">
+          <button class="btn d-inline-flex align-items-center border-0" data-bs-toggle="collapse" aria-expanded="true" data-bs-target="#forms-collapse" aria-controls="forms-collapse">尺寸参数表</button>
+          <ul class="list-unstyled ps-3 collapse show" id="forms-collapse" style="">
+            <div id="toolbar">
+              <button id="submit1" class="btn btn-default">提交修改</button>
+              <a href="" target="_blank" id="glblink" style="display:none">查看glb</a>
+            </div>
+            <table id="table"></table>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="bd-cheatsheet container-fluid bg-body">
+    <section id="components">
+      <article class="my-3" id="carousel">
+        <!-- <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2"> -->
+        <div class="bd-heading sticky-xl-top align-self-start mt-3 mb-2 mt-xl-0 mb-xl-1">
+          <h3>{{.FreeCADModel.TitleB}}</h3>
+          <a class="d-flex align-items-center" href="#">{{.FreeCADModel.Description}}</a>
+        </div>
+        <div>
+          <div class="bd-example-snippet bd-code-snippet">
+            <div class="bd-example">
+              <!-- <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">  data-bs-ride="pause"-->
+              <div id="carouselExampleCaptions" class="carousel slide">
+                <div class="carousel-indicators">
+                  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-label="Slide 1" aria-current="true"></button>
+                  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2" class=""></button>
+                  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3" class=""></button>
+                </div>
+                <div class="carousel-inner">
+                  <div class="carousel-item active">
+                    <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg d-block w-100" width="800" height="800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: First slide" preserveAspectRatio="xMidYMid slice" focusable="false">
+                      <title>Placeholder</title>
+                      <rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#555" dy=".3em">First slide</text>
+                    </svg> -->
+                    <div class="online_3d_viewer bd-placeholder-img bd-placeholder-img-lg d-block w-100" style="height: 800px;" model="{{.Model}}" backgroundcolor="33,37,41">
+                      <!-- backgroundcolor="102,102,102" -->
+                    </div>
+                    <div class="carousel-caption d-none d-md-block">
+                      <h5>First 3d model</h5>
+                      <p>三维模型.</p>
+                    </div>
+                  </div>
+                  <div class="carousel-item">
+                    <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg d-block w-100" width="800" height="800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Second slide" preserveAspectRatio="xMidYMid slice" focusable="false">
+                      <title>dxf工程图</title>
+                      <rect width="100%" height="100%" fill="#666"></rect><text x="50%" y="50%" fill="#444" dy=".3em">Second slide</text>
+                    </svg> -->
+                    <img width="100%" height="100%" src="{{.DxfSvgUrl}}">
+                    <div class="carousel-caption d-none d-md-block">
+                      <h5>Second svg工程图</h5>
+                      <p>工程图.</p>
+                    </div>
+                  </div>
+                  <div class="carousel-item">
+                    <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg d-block w-100" width="800" height="800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Third slide" preserveAspectRatio="xMidYMid slice" focusable="false">
+                      <title>渲染图</title>
+                      <rect width="100%" height="100%" fill="#555"></rect><text x="50%" y="50%" fill="#333" dy=".3em">Third slide</text>
+                    </svg> -->
+                    <img width="100%" height="100%" src="{{.RenderImgUrl}}">
+                    <div class="carousel-caption d-none d-md-block">
+                      <h5>Third 渲染图</h5>
+                      <p>渲染图.</p>
+                    </div>
+                  </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+  <div class="modal fade" id="exampleModalDefault" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="staticBackdropLive" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLiveLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLiveLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>I will not close if you click outside me. Don't even try to press escape key.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Understood</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="exampleModalCenteredScrollable" tabindex="-1" aria-labelledby="exampleModalCenteredScrollableTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalCenteredScrollableTitle">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>This is some placeholder content to show the scrolling behavior for modals. We use repeated line breaks to demonstrate how content can exceed minimum inner height, thereby showing inner scrolling. When content becomes longer than the predefined max-height of modal, content will be cropped and scrollable within the modal.</p>
+          <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+          <p>This content should appear at the bottom after you scroll.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="exampleModalFullscreen" tabindex="-1" aria-labelledby="exampleModalFullscreenLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-4" id="exampleModalFullscreenLabel">Full screen modal</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/static/bootstrap5.3/jquery.min.js"></script>
+  <!-- <script src="/static/bootstrap5.3/bootstrap-editable.min.js"></script> -->
+  <script src="/static/bootstrap5.3/bootstrap-table.min.js"></script>
+  <!-- <script src="/static/bootstrap5.3/bootstrap-table-editable.min.js"></script> -->
+  <script src="/static/bootstrap5.3/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <script src="/static/bootstrap5.3/cheatsheet.js"></script>
+  <script type="text/javascript" src="/static/online3dview/build/engine_dev/o3dv.min.js"></script>
+  <script type='text/javascript'>
+  window.addEventListener('load', () => {
+    OV.Init3DViewerElements();
+  });
+
+  // $(function() {
+  //   $('#table').bootstrapTable()
+  // });
+
+  // const toastTrigger = document.getElementById('liveToastBtn')
+  // const toastLiveExample = document.getElementById('liveToast')
+
+  // if (toastTrigger) {
+  //   const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+  //   toastTrigger.addEventListener('click', () => {
+  //     toastBootstrap.show()
+  //   })
+  // }
+
+  // 获得黏贴到textarea里的excel数据列和行
+  var paste_data=[];
+  function postFCparameter() {
+    if ({{.IslogIn }}) {
+      alert("请登录！");
+      return;
+    }
+    $('#postFCparameter').attr("disabled", true);
+    $.ajax({
+      type: "post",
+      url: "/v1/freecad/editfcmodelbatch",
+      data: { modelid: {{.ID}}, inputdata: JSON.stringify(paste_data) },
+      success: function(data, status) {
+        if (data.info == "ERROR") {
+          alert("错误！(status:" + data.data + ".)");
+          $('#postFCparameter').attr("disabled", false);
+        } else if (data.info == "SUCCESS") {
+          alert("修改成功！(status:" + status + ".)");
+
+          for (var i = 0; i < data.glblink_batch.length; i++) {
+            var _card_='<a href="/v1/freecad/online3dview#model='+ data.glblink_batch[i] +'" target="_blank" id="glblink_batch">查看glb_'+ i +'</a>'
+            $(".gap-2").append(_card_)
+          }
+          $('#postFCparameter').attr("disabled", false);
+        }
+      },
+      error: function(data, status) {
+        alert(data);
+        $('#postFCparameter').attr("disabled", false);
+        $("#glblink_batch").css("display", "none");
+      }
+    });
+  }
+
+  // 获得黏贴到textarea里的excel数据列和行
+  document.addEventListener("paste", e => {
+    // e.preventDefault(); //阻止默认粘贴事件
+    e.stopPropagation(); //阻止事件冒泡
+    // var data=[];
+    let paste = (e.clipboardData || window.clipboardData).getData("text"); //以text方式接收粘贴内容
+
+    let rows = paste.split('\r\n') // \t是制表符，\r是换行，\n是回车
+    // console.log(rows);
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i]) {
+        paste_data[i]=[]
+        // console.log(rows[i])
+        let columns = rows[i].split("\t"); // 按列划分
+        // data.push(columns);
+        // console.log(columns);
+        for (let j = 0; j < columns.length; j++) {
+          paste_data[i][j]=columns[j]
+        //   console.log(columns[j]);
+        }
+      }
+    }
+    // console.log(paste_data);
+    // console.log(JSON.stringify(paste_data))
+  })
+
+  $(function() {
+    let $table = $('#table');
+    let $button = $('#button');
+    let $getTableData = $('#submit1');
+
+    $button.click(function() {
+      $table.bootstrapTable('insertRow', {
+        index: 0,
+        row: {
+          id: '',
+          name: '',
+          price: ''
+        }
+      });
+    });
+
+    $table.bootstrapTable({
+      url: '/v1/freecad/getfcparameter/{{.ID}}',
+      toolbar: '#toolbar',
+      clickEdit: true,
+      // showToggle: true,
+      pagination: true, //显示分页条
+      // showColumns: true,
+      // showPaginationSwitch: true, //显示切换分页按钮
+      showRefresh: true, //显示刷新按钮
+      //clickToSelect: true,  //点击row选中radio或CheckBox
+      columns: [{
+        field: 'number',
+        title: 'No.',
+        halign: 'center',
+        align: 'center',
+        valign: 'middle'
+      }, {
+        field: 'name',
+        title: '名称',
+        halign: 'center',
+        align: 'center',
+        valign: 'middle'
+      }, {
+        field: 'symbol',
+        title: '符号',
+        halign: 'center',
+        align: 'center',
+        valign: 'middle'
+      }, {
+        field: 'unit',
+        title: '单位',
+        halign: 'center',
+        align: 'center',
+        valign: 'middle'
+      }, {
+        field: 'inputvalue',
+        title: '数值',
+        halign: 'center',
+        align: 'center',
+        valign: 'middle'
+      }, {
+        field: 'remark',
+        title: '备注',
+        halign: 'center',
+        align: 'center',
+        valign: 'middle'
+      }],
+      /**
+       * @param {点击列的 field 名称} field
+       * @param {点击列的 value 值} value
+       * @param {点击列的整行数据} row
+       * @param {td 元素} $element
+       */
+      onClickCell: function(field, value, row, $element) {
+        $element.attr('contenteditable', true);
+        $element.blur(function() {
+          let index = $element.parent().data('index');
+          let tdValue = $element.html();
+
+          saveData(index, field, tdValue*1);
+        })
+      }
+    });
+
+    //计时器
+    var intDiff = parseInt(0); //倒计时总秒数量
+    function timer(intDiff) {
+      time = window.setInterval(function() {
+        var minute = 0,
+          second = 1; //时间默认值
+        if (intDiff > 0) {
+          second = Math.floor(intDiff);
+        }
+        if (second <= 9) second = '0' + second;
+        $('#second').html('<s></s>' + second + '秒');
+        intDiff++;
+      }, 1000);
+    }
+
+    // 提交参数
+    $getTableData.click(function() {
+      // alert(JSON.stringify($table.bootstrapTable('getData')));
+      if ({{.IslogIn }}) {
+        alert("请登录！");
+        return;
+      }
+      $('#Submit1').attr("disabled", true);
+      $("#glblink").css("display", "none");
+      var data = JSON.stringify($table.bootstrapTable('getData'))
+      // 坑：x-editable修改数值后，只能是text等的string，见它的源码Type of input. Can be <code>text|textarea|select|date|checklist</code>
+      // 需要转成数值，jquery中只要*1即可将文本转为数值
+      // for(var i=0;i<data.length;i++){
+      //   data[i].realvalue=data[i].realvalue*1;
+      // }
+      // 全部按string传到服务端
+      // var data2 = JSON.stringify(data)
+      // var data = str*1;
+      $.ajax({
+        type: "post",
+        url: "/v1/freecad/editfcmodel",
+        data: { modelid: {{.ID}}, inputdata: data },
+        success: function(data, status) {
+          if (data.info == "ERROR") {
+            clearInterval(time),
+              function() {
+                timer();
+              }
+            alert("错误！(status:" + data.data + ".)");
+            $('#Submit1').attr("disabled", false);
+          } else if (data.info == "SUCCESS") {
+            alert("修改成功！(status:" + status + ".)");
+            // var _card_ = '<div class="carousel-item "><div class="online_3d_viewer bd-placeholder-img bd-placeholder-img-lg d-block w-100" style="height: 800px;" model="'+data.glblink+'" backgroundcolor="33,37,41"><canvas id="viewer" data-engine="three.js r158" width="0" height="0" style="width: 0px; height: 0px; display: inherit;"></canvas></div><div class="carousel-caption d-none d-md-block"><h5>First 3d model</h5><p>三维模型(NEW!).</p></div></div>'
+            // $(".carousel-inner").append(_card_)
+            // for (var i = 0; i < data.data.length; i++) {
+            //   // alert(data.data[i].ID);
+            //   // alert(data.data[i].realvalue);
+            //   $('#table2').bootstrapTable('updateByUniqueId', {
+            //     id: data.data[i].outputalias,
+            //     row: {
+            //       outputvalue: data.data[i].outputvalue
+            //     }
+            //   });
+            // }
+            $("#glblink").css("display", "block");
+            $("#glblink").attr("href", "/v1/freecad/online3dview#model=" + data.glblink);
+            $('#Submit1').attr("disabled", false);
+            // clearInterval(time),
+              // function() {
+              //   timer();
+              // }
+          }
+        },
+        error: function(data, status) {
+          alert(data);
+          $('#Submit1').attr("disabled", false);
+          $("#glblink").css("display", "none");
+          // revertFunc();
+        }
+      });
+    });
+
+    function saveData(index, field, value) {
+      $table.bootstrapTable('updateCell', {
+        index: index, //行索引
+        field: field, //列名
+        value: value //cell值
+      })
+    }
+
+  });
+  </script>
+</body>
+
+</html>

@@ -132,7 +132,7 @@
         </button>
         <ul class="dropdown-menu" aria-labelledby="">
           <li>
-            <a href="#" onclick="addButton()"><i class="fa fa-plus">&nbsp;&nbsp;单附件模式</i></a>
+            <a href="javascript:void(0)" onclick="addButton()"><i class="fa fa-plus">&nbsp;&nbsp;单附件模式</i></a>
           </li>
         </ul>
       </div>
@@ -177,6 +177,7 @@
         url: '/v1/wx/getapplyrechargedata',
         method: 'get',
         search: 'true',
+        classes: "table table-striped", //这里设置表格样式
         showRefresh: 'true',
         showColumns: 'true',
         toolbar: '#toolbar1',

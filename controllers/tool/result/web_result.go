@@ -3,7 +3,7 @@ package result
 import (
 	"fmt"
 	// "github.com/eyebluecn/tank/code/tool/i18n"
-	"github.com/engineercms/engineercms/controllers/tool/i18n"
+	"github.com/3xxx/engineercms/controllers/tool/i18n"
 	"net/http"
 )
 

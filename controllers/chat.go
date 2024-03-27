@@ -1,10 +1,13 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 	"github.com/gorilla/websocket"
 	"github.com/holys/initials-avatar"
 	// "io"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/url"
@@ -28,7 +31,7 @@ type ChatMessage struct {
 }
 
 type ChatController struct {
-	beego.Controller
+	web.Controller
 }
 
 func init() {
@@ -123,24 +126,52 @@ func handleMessages() {
 // 用户头像，用流stream的方式
 func (c *ChatController) Avatar() {
 	// 秦修改了源码，支持字的大小，下面第二个参数是字的大小
-	a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf", 26.0) //./resource/fonts/Hiragino_Sans_GB_W3.ttf
-	// a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf")
+	// a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf", 26.0) //./resource/fonts/Hiragino_Sans_GB_W3.ttf
+	a := avatar.New("./static/fonts/Hiragino_Sans_GB_W3.ttf")
 	text := c.Ctx.Input.Param(":text")
 	// beego.Info(text)
 	strData, err := url.QueryUnescape(text) //
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	// beego.Info(strData)
 	b, err := a.DrawToBytes(strData, 32) //背景的大小
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	// beego.Info(b)
 	// w http.ResponseWriter, r *http.Request
 	// io.Copy(c.Ctx.ResponseWriter, b) // stream实现了io.reader接口
 	c.Ctx.Output.Body(b) //流stream的方式
 	// now `b` is image data which you can write to file or http stream.
+	// 写入文件
+	// var f *os.File
+	// f, err = os.Create(filename) //创建文件
+	// if err != nil {
+	// 	logs.Error(err)
+	// }
+	// _, err = f.Write(b)
+}
+
+// golang文件流下载
+// https://www.bilibili.com/video/BV1Yp4y197Ly
+type JsonData struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+func download(response http.ResponseWriter, request *http.Request) {
+	user := JsonData{
+		Name: "dewei",
+		Age:  33,
+	}
+	mjson, _ := json.Marshal(user)
+	jsonData := string(mjson)
+	b := []byte(jsonData)
+	fileName := "user.json"
+	response.Header().Add("content-type", "application/octet-stream;charset=utf-8")
+	response.Header().Add("Content-Disposition", "attachement;filename=\""+fileName+"\"")
+	response.Write(b)
 }
 
 // https://www.cnblogs.com/haima/p/13442194.html

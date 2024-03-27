@@ -4,17 +4,21 @@ import (
 	// "crypto/md5"
 	// "encoding/hex"
 	// "errors"
-	// "strconv"
 	"fmt"
 	"log"
+	// "strconv"
 	"time"
-	// "github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	// "github.com/astaxie/beego/validation"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/client/orm"
+	// "github.com/beego/beego/v2/adapter/validation"
 	// . "github.com/beego/admin/src/lib"
 	// "github.com/casbin/beego-orm-adapter"
 	// "github.com/casbin/casbin"
+	// "github.com/3xxx/engineercms/controllers"
+	// "github.com/casbin/casbin"
 )
+
+// var e *casbin.Enforcer
 
 //角色表-20201225修改json status为role
 type Role struct {
@@ -34,6 +38,7 @@ type UserRole struct {
 
 func init() {
 	orm.RegisterModel(new(Role), new(UserRole))
+	// _db.CreateTable(&Role{})
 	// InsertRole()
 }
 
@@ -111,7 +116,7 @@ func GetRoleByRoleId(roleid int64) (role Role) {
 	return role
 }
 
-//由用户id取得所拥有的角色id
+//由用户id取得所拥有的角色
 func GetRoleByUserId(id int64) (roles []*UserRole, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("UserRole")
@@ -221,6 +226,7 @@ func InsertRole() error {
 		}
 		id = role.Id
 	}
+
 	user, err := GetUserByUsername("admin")
 	if err != nil {
 		log.Println(err)

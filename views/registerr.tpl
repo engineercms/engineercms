@@ -2,9 +2,9 @@
 {{template "header"}}
 <title>注册 - MeritMS</title>
 </head>
-<body>
 
-<div id="content" class="col-md-8 col-md-offset-2">
+<body>
+  <div id="content" class="col-md-8 col-md-offset-2">
     <div class="col-md-6 auth-page">
       <h3 class="title">
         <span class="glyphicon glyphicon-remove"></span>
@@ -66,4 +66,5 @@
   </script>
 
 </body>
+
 </html>

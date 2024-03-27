@@ -1,13 +1,10 @@
 {{define "mheader"}}
-
 <html style="">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
   <meta http-equiv="X-UA-Compatible" content="IE=Edge">
   <meta name="apple-mobile-web-app-status-bar-style" content="yes">
-
 <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
   <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css"/>
@@ -21,7 +18,6 @@
   <!-- [endif]-->
   <script type="text/javascript" src="/static/js/blog_mobile.js"></script>
   </head>
-
 <!-- <div class="page-header"></div> -->
 <!--这是一条横线-->
 {{end}}

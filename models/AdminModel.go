@@ -1,33 +1,32 @@
 package models
 
 import (
+	// "context"
 	"database/sql"
 	"encoding/gob"
-	// "github.com/3xxx/engineercms/commands"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	"github.com/engineercms/engineercms/conf"
+	"fmt"
+	"github.com/3xxx/engineercms/conf"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 	_ "github.com/go-sql-driver/mysql"
-	// "gorm.io/driver/sqlite"
-	// "gorm.io/gorm"
-	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
-	"xorm.io/xorm"
-	// "strconv"
-	// "strings"
-	"fmt"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 	"log"
 	"os"
 	"time"
+	"xorm.io/xorm"
+	// "log"
 )
 
 var engine *xorm.Engine
 
-//定义全局的db对象，我们执行数据库操作主要通过他实现。
+// 定义全局的db对象，我们执行数据库操作主要通过他实现。
 var _db *gorm.DB
-
-// var gdb *gorm.DB
 
 type AdminCategory struct {
 	Id       int64     `form:"-"`
@@ -62,7 +61,7 @@ type AdminCalendar struct {
 	// BColor    string    `json:"borderColor",orm:"null"`
 }
 
-//项目同步ip表
+// 项目同步ip表
 type AdminSynchIp struct {
 	Id       int64     `form:"-"`
 	ParentId int64     `orm:"null"`
@@ -73,7 +72,7 @@ type AdminSynchIp struct {
 	Updated  time.Time `orm:"auto_now;type(datetime)"`
 }
 
-//科室结构
+// 科室结构
 type AdminDepartment struct {
 	Id       int64     `form:"-"`
 	ParentId int64     `orm:"null"`
@@ -83,7 +82,7 @@ type AdminDepartment struct {
 	Updated  time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
-//首页轮播图片
+// 首页轮播图片
 type AdminCarousel struct {
 	Id      int64     `json:"id",form:"-"`
 	Title   string    `form:"title;text;title:",valid:"MinSize(1);MaxSize(20)"` //orm:"unique",
@@ -100,49 +99,23 @@ type AdminCarousel struct {
 //   `color` varchar(20) DEFAULT NULL,
 
 func init() {
-	orm.RegisterModel(new(AdminCategory), new(AdminIpsegment), new(AdminCalendar), new(AdminSynchIp), new(AdminDepartment), new(AdminCarousel)) //, new(Article)
-	orm.RegisterModelWithPrefix(conf.GetDatabasePrefix(),
-		new(Member),
-		new(Book),
-		new(Relationship),
-		new(Option),
-		new(Document),
-		new(MindocAttachment),
-		new(Logger),
-		new(MemberToken),
-		new(DocumentHistory),
-		new(Migration),
-		new(Label),
-		new(Blog),
-		new(Template),
-		new(Team),
-		new(TeamMember),
-		new(TeamRelationship),
-		new(Itemsets),
-	)
-	orm.RegisterModelWithPrefix("share_", new(Bridge), new(Share))
-	//gorm设置默认表名前缀
-	// gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-	// 	return "prefix_" + defaultTableName
-	// }
-	// //gorm自动生成表
-	// db.AutoMigrate(&Product{}, &Email{})
-	// db.CreateTable(&User{})
-	gob.Register(Blog{})
-	gob.Register(Document{})
-	gob.Register(Template{})
+	logs.Info("adminmode")
 
 	var dns string
 	var err error
-	db_type := beego.AppConfig.String("db_type")
-	db_host := beego.AppConfig.String("db_host")
-	db_port := beego.AppConfig.String("db_port")
-	db_user := beego.AppConfig.String("db_user")
-	db_pass := beego.AppConfig.String("db_pass")
-	db_name := beego.AppConfig.String("db_name")
-	db_path := beego.AppConfig.String("db_path")
-	db_sslmode := beego.AppConfig.String("db_sslmode")
+	db_type, err := web.AppConfig.String("db_type")
+	db_host, err := web.AppConfig.String("db_host")
+	db_port, err := web.AppConfig.String("db_port")
+	db_user, err := web.AppConfig.String("db_user")
+	db_pass, err := web.AppConfig.String("db_pass")
+	db_name, err := web.AppConfig.String("db_name")
+	db_path, err := web.AppConfig.String("db_path")
+	db_sslmode, err := web.AppConfig.String("db_sslmode")
+	if err != nil {
+		logs.Error(err)
+	}
 	switch db_type {
+	// 1.注册驱动
 	case "mysql":
 		orm.RegisterDriver("mysql", orm.DRMySQL)
 		dns = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", db_user, db_pass, db_host, db_port, db_name)
@@ -164,46 +137,88 @@ func init() {
 		dns = fmt.Sprintf("%s%s.db", db_path, db_name)
 		break
 	default:
-		beego.Critical("Database driver is not allowed:", db_type)
+		logs.Critical("Database driver is not allowed:", db_type)
 	}
-	orm.RegisterDataBase("default", db_type, dns, 10)
 
-	// 注册xorm
+	// 2.beego注册默认数据库
+	orm.RegisterDataBase("default", db_type, dns)
+
+	// 2.注册xorm
 	// var err error
 	engine, err = xorm.NewEngine(db_type, dns)
 	if err != nil {
 		log.Println(err)
 	}
 
-	// 注册gorm
-	_db, err = gorm.Open(db_type, dns)
-	// _db, err := gorm.Open(sqlite.Open(dns), &gorm.Config{})
+	// 2.注册gorm
+	// _db, err = gorm.Open(db_type, dns)
+	// 20220102下面这里用了:=导致全局变量一致无法用！！
+	_db, err = gorm.Open(sqlite.Open(dns), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent), //gorm查询静默模式。在conf里设置的，以及main.go里设置的，仅仅针对beego的orm有效
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true, // 使用单数表名，启用该选项后，`User` 表将是`user`
+			// NameReplacer:  strings.NewReplacer("CID", "Cid"), // 在转为数据库名称之前，使用NameReplacer更改结构/字段名称。
+			// TablePrefix:   "t_",                              // 表名前缀，`User`表为`t_users`
+			// CreateBatchSize: 1000,
+		},
+	})
+
 	// defer _db.Close()//20200803这个不能打开。
-	// _db.LogMode(true)
+	// db.LogMode(false)
 	if err != nil {
 		panic("连接数据库失败, error=" + err.Error())
 	}
-	// orm.RegisterDriver("sqlite", orm.DRSqlite)
-	// orm.RegisterDataBase("default", "sqlite3", "database/engineer.db", 10)
 
-	// 初始化gorm-20201008
-	// 	var err error
-	// var dns string
-	// db_type := beego.AppConfig.String("db_type")
-	// db_name := beego.AppConfig.String("db_name")
-	// db_path := beego.AppConfig.String("db_path")
-	// if db_path == "" {
-	// 	db_path = "./"
-	// }
-
-	// defer gdb.Close()
-	//禁止表名复数形式
-	_db.SingularTable(true)
 	// 开发的时候需要打开调试日志
 	// _db.LogMode(true)
-	//设置数据库连接池参数
-	_db.DB().SetMaxOpenConns(100) //设置数据库连接池最大连接数
-	_db.DB().SetMaxIdleConns(20)  //连接池最大允许的空闲连接数，如果没有sql任务需要执行的连接数大于20，超过的连接会被连接池关闭。
+
+	sqlDB, err := _db.DB()
+	// SetMaxIdleConns 设置空闲连接池中连接的最大数量，如果没有sql任务需要执行的连接数大于20，超过的连接会被连接池关闭。
+	sqlDB.SetMaxIdleConns(10)
+	// SetMaxOpenConns 设置打开数据库连接的最大数量。
+	sqlDB.SetMaxOpenConns(100)
+	// SetConnMaxLifetime 设置了连接可复用的最大时间。
+	sqlDB.SetConnMaxLifetime(24 * time.Hour)
+
+	// 3.注册模型
+	orm.RegisterModel(new(AdminCategory), new(AdminIpsegment), new(AdminCalendar), new(AdminSynchIp), new(AdminDepartment), new(AdminCarousel)) //, new(Article)
+	// 来自mindoc-\commands\command.go
+	orm.RegisterModelWithPrefix(conf.GetDatabasePrefix(),
+		new(Member),
+		new(Book),
+		new(Relationship),
+		new(Option),
+		new(Document),
+		new(MindocAttachment),
+		new(Logger),
+		new(MemberToken),
+		new(DocumentHistory),
+		new(Migration),
+		new(Label),
+		new(Blog),
+		new(Template),
+		new(Team),
+		new(TeamMember),
+		new(TeamRelationship),
+		new(Itemsets),
+		new(Comment),
+		new(WorkWeixinAccount),
+	)
+	orm.RegisterModelWithPrefix("share_", new(Bridge), new(Share))
+
+	gob.Register(Blog{})
+	gob.Register(Document{})
+	gob.Register(Template{})
+
+	//gorm
+	_db.AutoMigrate(&Article{}, &Business{}, &BusinessUser{}, &NickName{}, &BusinessCheckin{}, &Location{}, &LocationNavigate{})
+	_db.AutoMigrate(&AnsysApdl{}, &AnsysInputs{}, &AnsysOutputs{}, &AnsysHistory{}, &AnsysHistoryInputValue{}, &AnsysHistoryOutputValue{}, &AnsysArticle{})
+	_db.AutoMigrate(&ExcelTemple{}, &ExcelInputs{}, &ExcelOutputs{}, &ExcelHistory{}, &ExcelHistoryInputValue{}, &ExcelHistoryOutputValue{}, &ExcelArticle{})
+	_db.AutoMigrate(&UserTemple{}, &TempleInputs{}, &TempleOutputs{}, &UserHistory{}, &HistoryInputValue{}, &HistoryOutputValue{}, &MathArticle{})
+	_db.AutoMigrate(&Pay{}, &Money{}, &Recharge{}, &PayMath{}, &PayMathPdf{}, &PayExcel{}, &PayExcelPdf{})
+	_db.AutoMigrate(&PassProject{})
+	_db.AutoMigrate(&PhotoData{})
+	_db.AutoMigrate(&FreecadModel{}, &FreecadInputs{})
 }
 
 //获取gorm db对象，其他包需要执行数据库查询的时候，只要通过tools.getDB()获取db对象即可。
@@ -211,21 +226,27 @@ func init() {
 // db对象在调用他的方法的时候会从数据库连接池中获取新的连接
 // 注意：使用连接池技术后，千万不要使用完db后调用db.Close关闭数据库连接，
 // 这样会导致整个数据库连接池关闭，导致连接池没有可用的连接
-func GetDB() *gorm.DB {
-	return _db
-}
+// 不需要getdb，只要全局变量_db即可。但是每次使用，是否要给_db重新赋一个新的变量？？？比如db:=_db???会互相影响吗
+// func GetDB() *gorm.DB {
+// 	return _db
+// }
+// func GetDB(ctx context.Context) *gorm.DB {
+// 	return _db.WithContext(ctx)
+// }
 
-//创建数据库_来自github.com/beego/admin——这个仅作为参考用，没有使用
+// 创建数据库_来自github.com/beego/admin——这个仅作为参考用，没有使用
 func createdb() {
-	db_type := beego.AppConfig.String("db_type")
-	db_host := beego.AppConfig.String("db_host")
-	db_port := beego.AppConfig.String("db_port")
-	db_user := beego.AppConfig.String("db_user")
-	db_pass := beego.AppConfig.String("db_pass")
-	db_name := beego.AppConfig.String("db_name")
-	db_path := beego.AppConfig.String("db_path")
-	db_sslmode := beego.AppConfig.String("db_sslmode")
-
+	db_type, err := web.AppConfig.String("db_type")
+	db_host, err := web.AppConfig.String("db_host")
+	db_port, err := web.AppConfig.String("db_port")
+	db_user, err := web.AppConfig.String("db_user")
+	db_pass, err := web.AppConfig.String("db_pass")
+	db_name, err := web.AppConfig.String("db_name")
+	db_path, err := web.AppConfig.String("db_path")
+	db_sslmode, err := web.AppConfig.String("db_sslmode")
+	if err != nil {
+		logs.Error(err)
+	}
 	var dns string
 	var sqlstring string
 	switch db_type {
@@ -246,7 +267,7 @@ func createdb() {
 		sqlstring = "create table init (n varchar(32));drop table init;"
 		break
 	default:
-		beego.Critical("Database driver is not allowed:", db_type)
+		logs.Critical("Database driver is not allowed:", db_type)
 	}
 
 	// gdb, err := gorm.Open(db_type, dns)
@@ -270,17 +291,20 @@ func createdb() {
 	defer db.Close()
 }
 
-//数据库连接_这个仅作为参考，和上面重复
+// 数据库连接_这个仅作为参考，和上面重复
 func Connect() {
 	var dns string
-	db_type := beego.AppConfig.String("db_type")
-	db_host := beego.AppConfig.String("db_host")
-	db_port := beego.AppConfig.String("db_port")
-	db_user := beego.AppConfig.String("db_user")
-	db_pass := beego.AppConfig.String("db_pass")
-	db_name := beego.AppConfig.String("db_name")
-	db_path := beego.AppConfig.String("db_path")
-	db_sslmode := beego.AppConfig.String("db_sslmode")
+	db_type, err := web.AppConfig.String("db_type")
+	db_host, err := web.AppConfig.String("db_host")
+	db_port, err := web.AppConfig.String("db_port")
+	db_user, err := web.AppConfig.String("db_user")
+	db_pass, err := web.AppConfig.String("db_pass")
+	db_name, err := web.AppConfig.String("db_name")
+	db_path, err := web.AppConfig.String("db_path")
+	db_sslmode, err := web.AppConfig.String("db_sslmode")
+	if err != nil {
+		logs.Error(err)
+	}
 	switch db_type {
 	case "mysql":
 		orm.RegisterDriver("mysql", orm.DRMySQL)
@@ -299,12 +323,12 @@ func Connect() {
 		dns = fmt.Sprintf("%s%s.db", db_path, db_name)
 		break
 	default:
-		beego.Critical("Database driver is not allowed:", db_type)
+		logs.Critical("Database driver is not allowed:", db_type)
 	}
 	orm.RegisterDataBase("default", db_type, dns)
 }
 
-//添加
+// 添加
 func AddAdminCategory(pid int64, title, code string, grade int) (id int64, err error) {
 	o := orm.NewOrm()
 	// var category AdminCategory
@@ -343,7 +367,7 @@ func AddAdminCategory(pid int64, title, code string, grade int) (id int64, err e
 	return id, nil
 }
 
-//修改
+// 修改
 func UpdateAdminCategory(cid int64, title, code string, grade int) error {
 	o := orm.NewOrm()
 	//id转成64为
@@ -365,7 +389,7 @@ func UpdateAdminCategory(cid int64, title, code string, grade int) error {
 	return nil
 }
 
-//删除
+// 删除
 func DeleteAdminCategory(cid int64) error {
 	o := orm.NewOrm()
 	category := &AdminCategory{Id: cid}
@@ -385,8 +409,8 @@ func DeleteAdminCategory(cid int64) error {
 	return nil
 }
 
-//根据父级id取得所有
-//如果父级id为空，则取所有一级category
+// 根据父级id取得所有
+// 如果父级id为空，则取所有一级category
 func GetAdminCategory(pid int64) (categories []*AdminCategory, err error) {
 	o := orm.NewOrm()
 	categories = make([]*AdminCategory, 0)
@@ -398,7 +422,7 @@ func GetAdminCategory(pid int64) (categories []*AdminCategory, err error) {
 	return categories, err
 }
 
-//根据类别名字title查询所有下级分级category
+// 根据类别名字title查询所有下级分级category
 func GetAdminCategoryTitle(title string) (categories []*AdminCategory, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("AdminCategory")
@@ -421,7 +445,7 @@ func GetAdminCategoryTitle(title string) (categories []*AdminCategory, err error
 	// }
 }
 
-//根据id查分级
+// 根据id查分级
 func GetAdminCategorybyId(id int64) (category []*AdminCategory, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("AdminCategory")
@@ -433,7 +457,7 @@ func GetAdminCategorybyId(id int64) (category []*AdminCategory, err error) {
 	return category, err
 }
 
-//添加ip地址段
+// 添加ip地址段
 func AddAdminIpsegment(title, startip, endip string, iprole int) (id int64, err error) {
 	o := orm.NewOrm()
 	ipsegment := &AdminIpsegment{
@@ -451,7 +475,7 @@ func AddAdminIpsegment(title, startip, endip string, iprole int) (id int64, err 
 	return id, nil
 }
 
-//修改Ip地址段
+// 修改Ip地址段
 func UpdateAdminIpsegment(cid int64, title, startip, endip string, iprole int) error {
 	o := orm.NewOrm()
 	ipsegment := &AdminIpsegment{Id: cid}
@@ -469,7 +493,7 @@ func UpdateAdminIpsegment(cid int64, title, startip, endip string, iprole int) e
 	return nil
 }
 
-//删除
+// 删除
 func DeleteAdminIpsegment(cid int64) error {
 	o := orm.NewOrm()
 	ipsegment := &AdminIpsegment{Id: cid}
@@ -482,7 +506,7 @@ func DeleteAdminIpsegment(cid int64) error {
 	return nil
 }
 
-//查询所有Ip地址段
+// 查询所有Ip地址段
 func GetAdminIpsegment() (ipsegments []*AdminIpsegment, err error) {
 	o := orm.NewOrm()
 	// ipsegments = make([]*AdminIpsegment, 0)
@@ -509,8 +533,8 @@ func GetAdminIpsegment() (ipsegments []*AdminIpsegment, err error) {
 	// }
 }
 
-//********日历********
-//添加
+// ********日历********
+// 添加
 func AddAdminCalendar(title, content, color string, allday, public bool, start, end time.Time) (id int64, err error) {
 	o := orm.NewOrm()
 	calendar := &AdminCalendar{
@@ -531,7 +555,7 @@ func AddAdminCalendar(title, content, color string, allday, public bool, start, 
 	return id, err
 }
 
-//取所有——要修改为支持时间段的，比如某个月份
+// 取所有——要修改为支持时间段的，比如某个月份
 func GetAdminCalendar(start, end time.Time, public bool) (calendars []*AdminCalendar, err error) {
 	cond := orm.NewCondition()
 	cond1 := cond.And("Starttime__gte", start).And("Starttime__lt", end) //这里全部用开始时间来判断
@@ -557,8 +581,8 @@ func GetAdminCalendar(start, end time.Time, public bool) (calendars []*AdminCale
 	return calendars, err
 }
 
-//取所有——要修改为支持时间段的，比如某个月份
-//未测试！！！20181117修改filter为cond2
+// 取所有——要修改为支持时间段的，比如某个月份
+// 未测试！！！20181117修改filter为cond2
 func SearchAdminCalendar(title string, public bool) (calendars []*AdminCalendar, err error) {
 	cond := orm.NewCondition()
 	cond1 := cond.Or("title__contains", title).Or("content__contains", title)
@@ -584,7 +608,7 @@ func SearchAdminCalendar(title string, public bool) (calendars []*AdminCalendar,
 	return calendars, err
 }
 
-//修改
+// 修改
 func UpdateAdminCalendar(cid int64, title, content, color string, allday, public bool, start, end time.Time) error {
 	o := orm.NewOrm()
 	calendar := &AdminCalendar{Id: cid}
@@ -606,7 +630,7 @@ func UpdateAdminCalendar(cid int64, title, content, color string, allday, public
 	return nil
 }
 
-//拖曳
+// 拖曳
 func DropAdminCalendar(cid int64, start, end time.Time) error {
 	o := orm.NewOrm()
 	calendar := &AdminCalendar{Id: cid}
@@ -621,7 +645,7 @@ func DropAdminCalendar(cid int64, start, end time.Time) error {
 	return nil
 }
 
-//resize
+// resize
 func ResizeAdminCalendar(cid int64, end time.Time) error {
 	o := orm.NewOrm()
 	calendar := &AdminCalendar{Id: cid}
@@ -637,7 +661,7 @@ func ResizeAdminCalendar(cid int64, end time.Time) error {
 	return nil
 }
 
-//根据id查询事件
+// 根据id查询事件
 func GetAdminCalendarbyid(id int64) (calendar AdminCalendar, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("AdminCalendar")
@@ -648,7 +672,7 @@ func GetAdminCalendarbyid(id int64) (calendar AdminCalendar, err error) {
 	return calendar, err
 }
 
-//删除事件
+// 删除事件
 func DeleteAdminCalendar(cid int64) error {
 	o := orm.NewOrm()
 	calendar := &AdminCalendar{Id: cid}
@@ -661,8 +685,8 @@ func DeleteAdminCalendar(cid int64) error {
 	return nil
 }
 
-//****项目同步ip****
-//添加AdminSynchIp
+// ****项目同步ip****
+// 添加AdminSynchIp
 func AddAdminSynchIp(pid int64, username, synchip, port string) (id int64, err error) {
 	o := orm.NewOrm()
 	adminsynchip := &AdminSynchIp{
@@ -680,7 +704,7 @@ func AddAdminSynchIp(pid int64, username, synchip, port string) (id int64, err e
 	return id, nil
 }
 
-//修改
+// 修改
 func UpdateAdminSynchIp(cid int64, username, synchip, port string) error {
 	o := orm.NewOrm()
 	adminsynchip := &AdminSynchIp{Id: cid}
@@ -697,7 +721,7 @@ func UpdateAdminSynchIp(cid int64, username, synchip, port string) error {
 	return nil
 }
 
-//删除
+// 删除
 func DeleteAdminSynchIp(cid int64) error {
 	o := orm.NewOrm()
 	synchip := &AdminSynchIp{Id: cid}
@@ -710,7 +734,7 @@ func DeleteAdminSynchIp(cid int64) error {
 	return nil
 }
 
-//根据父级id取得所有AdminSynchIp
+// 根据父级id取得所有AdminSynchIp
 func GetAdminSynchIp(pid int64) (synchips []*AdminSynchIp, err error) {
 	o := orm.NewOrm()
 	synchips = make([]*AdminSynchIp, 0)
@@ -724,7 +748,7 @@ func GetAdminSynchIp(pid int64) (synchips []*AdminSynchIp, err error) {
 
 //***科室结构********
 
-//添加部门
+// 添加部门
 func AddAdminDepart(pid int64, title, code string) (id int64, err error) {
 	o := orm.NewOrm()
 	depart := &AdminDepartment{
@@ -741,7 +765,7 @@ func AddAdminDepart(pid int64, title, code string) (id int64, err error) {
 	return id, nil
 }
 
-//修改
+// 修改
 func UpdateAdminDepart(cid int64, title, code string) error {
 	o := orm.NewOrm()
 	category := &AdminDepartment{Id: cid}
@@ -757,7 +781,7 @@ func UpdateAdminDepart(cid int64, title, code string) error {
 	return nil
 }
 
-//删除
+// 删除
 func DeleteAdminDepart(cid int64) error {
 	o := orm.NewOrm()
 	category := &AdminDepartment{Id: cid}
@@ -770,8 +794,8 @@ func DeleteAdminDepart(cid int64) error {
 	return nil
 }
 
-//根据部门id取得所有科室
-//如果父级id为0，则取所有部门
+// 根据部门id取得所有科室
+// 如果父级id为0，则取所有部门
 func GetAdminDepart(pid int64) (departs []*AdminDepartment, err error) {
 	o := orm.NewOrm()
 	departs = make([]*AdminDepartment, 0)
@@ -783,19 +807,21 @@ func GetAdminDepart(pid int64) (departs []*AdminDepartment, err error) {
 	return departs, err
 }
 
-//根据父级id取得所有
-//如果父级id为空，则取所有一级category
-// func GetAdminCategory(pid int64) (categories []*AdminDepartment, err error) {
-// 	o := orm.NewOrm()
-// 	categories = make([]*AdminDepartment, 0)
-// 	qs := o.QueryTable("AdminDepartment")
-// 	_, err = qs.Filter("parentid", pid).All(&categories)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return categories, err
-// }
-//根据部门名字title返回自身
+// 根据父级id取得所有
+// 如果父级id为空，则取所有一级category
+//
+//	func GetAdminCategory(pid int64) (categories []*AdminDepartment, err error) {
+//		o := orm.NewOrm()
+//		categories = make([]*AdminDepartment, 0)
+//		qs := o.QueryTable("AdminDepartment")
+//		_, err = qs.Filter("parentid", pid).All(&categories)
+//		if err != nil {
+//			return nil, err
+//		}
+//		return categories, err
+//	}
+//
+// 根据部门名字title返回自身
 func GetAdminDepartName(title string) (AdminDepartment, error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("AdminDepartment")
@@ -807,7 +833,7 @@ func GetAdminDepartName(title string) (AdminDepartment, error) {
 	return cate, err
 }
 
-//根据部门名字title查询所有下级科室category
+// 根据部门名字title查询所有下级科室category
 func GetAdminDepartTitle(title string) (categories []*AdminDepartment, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("AdminDepartment")
@@ -821,7 +847,7 @@ func GetAdminDepartTitle(title string) (categories []*AdminDepartment, err error
 	return categories, err
 }
 
-//根据id查科室
+// 根据id查科室
 func GetAdminDepartbyId(id int64) (category AdminDepartment, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable("AdminDepartment")
@@ -832,7 +858,7 @@ func GetAdminDepartbyId(id int64) (category AdminDepartment, err error) {
 	return category, err
 }
 
-//由分院id和科室 名称取得科室
+// 由分院id和科室 名称取得科室
 func GetAdminDepartbyidtitle(id int64, title string) (*AdminDepartment, error) {
 	o := orm.NewOrm()
 	// cate := &Category{Id: id}
@@ -845,7 +871,7 @@ func GetAdminDepartbyidtitle(id int64, title string) (*AdminDepartment, error) {
 	return category, err
 }
 
-//添加轮播动画
+// 添加轮播动画
 func AddAdminCarousel(title, url string) (id int64, err error) {
 	o := orm.NewOrm()
 	carousel := &AdminCarousel{

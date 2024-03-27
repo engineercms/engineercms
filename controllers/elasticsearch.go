@@ -6,10 +6,12 @@ import (
 	//"encoding/json"
 	//"fmt"
 	//"log"
-	"github.com/astaxie/beego"
-	"github.com/engineercms/engineercms/models"
+	"github.com/3xxx/engineercms/models"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+	// beego "github.com/beego/beego/v2/adapter"
 	// "github.com/elastic/go-elasticsearch/esapi"
-	//"github.com/astaxie/beego/logs"
+	//"github.com/beego/beego/v2/adapter/logs"
 	"regexp"
 
 	// "bytes"
@@ -42,8 +44,11 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	// "github.com/elastic/go-elasticsearch/v8/esutil"
+	"crypto/tls"
 	"io"
 	"math/rand"
+	"net"
+	"net/http"
 	"path"
 )
 
@@ -60,8 +65,21 @@ import (
 //	LastName  string `json:"last_name"`
 //}
 
-//const baseURL = "https://xkcd.com"
-const baseURL = "http://127.0.0.1:8081/pdf"
+// const baseURL = "https://xkcd.com"
+// http://127.0.0.1:8081/v1/wx/standardpdf?file=/v1/wx/downloadstandard/16
+// 注意点：
+// 发起的请求，如果成功了，一定要记得关闭返回Response的Body,否则会占用一个连接。
+// 全局变量和函数
+var es *elasticsearch.Client
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+const baseURL = "/v1/wx/standardpdf?file=/v1/wx/downloadstandard/"
 
 var (
 	indexName  string
@@ -71,16 +89,25 @@ var (
 )
 
 func init() {
-	flag.StringVar(&indexName, "index", "test-bulk-example", "Index name")
+	var err error
+	config := elasticsearch.Config{}
+	config.Addresses = []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
+	es, err = elasticsearch.NewClient(config)
+	checkError(err)
+
+	flag.StringVar(&indexName, "index", "standard-index", "Index name")
 	//flag.IntVar(&numWorkers, "workers", runtime.NumCPU(), "Number of indexer workers")
 	//flag.IntVar(&flushBytes, "flush", 5e+6, "Flush threshold in bytes")
 	//flag.IntVar(&numItems, "count", 10, "Number of documents to generate")
 	flag.Parse()
 	//setupIndex(indexName)
-	openElasticsearch := beego.AppConfig.String("openElasticsearch")
+	openElasticsearch, err := web.AppConfig.String("openElasticsearch")
+	if err != nil {
+		logs.Error(err)
+	}
 	if openElasticsearch == "true" {
-		beego.Info("建立index")
-		if err := setupIndex(indexName); err != nil { //这里建立索引（相当于表）
+		// beego.Info("建立index")
+		if err = setupIndex(indexName); err != nil { //这里建立索引（相当于表）
 			log.Fatalf("Error creating the client: %s", err)
 		}
 	}
@@ -88,7 +115,6 @@ func init() {
 }
 
 // Document wraps an xkcd.com comic.
-//
 type Document struct {
 	ID        string `json:"id"`
 	ImageURL  string `json:"image_url"`
@@ -103,14 +129,12 @@ type Document struct {
 }
 
 // SearchResults wraps the Elasticsearch search response.
-//
 type SearchResults struct {
 	Total int    `json:"total"`
 	Hits  []*Hit `json:"hits"`
 }
 
 // Hit wraps the document returned in search response.
-//
 type Hit struct {
 	//Document
 	URL        string        `json:"url"`
@@ -154,7 +178,7 @@ type Author struct {
 
 // CMSELASTIC API
 type ElasticController struct {
-	beego.Controller
+	web.Controller
 }
 
 // @Title get elasticsearch web
@@ -168,7 +192,7 @@ func (c *ElasticController) Get() {
 	u := c.Ctx.Input.UserAgent()
 	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	if matched == true {
 		c.TplName = "elastic/index.html"
@@ -200,7 +224,7 @@ func (c *ElasticController) UploadElastic() {
 	u := c.Ctx.Input.UserAgent()
 	matched, err := regexp.MatchString("AppleWebKit.*Mobile.*", u)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	if matched == true {
 		c.TplName = "elastic/upload_elastic.tpl"
@@ -230,11 +254,22 @@ func (c *ElasticController) Upload() {
 		c.ServeJSON()
 		return
 	}
+
+	openElasticsearch, err := web.AppConfig.String("openElasticsearch")
+	if err != nil {
+		logs.Error(err)
+	}
+	if openElasticsearch == "false" {
+		c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "用户未开启elastic全文检索服务！"}
+		c.ServeJSON()
+		return
+	}
+
 	//获取上传的文件
 	_, h, err := c.GetFile("input-ke-2[]")
 	// beego.Info(h.Filename)自动将英文括号改成了_下划线
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	fileSuffix := path.Ext(h.Filename)
 	if fileSuffix != ".DOC" && fileSuffix != ".doc" && fileSuffix != ".DOCX" && fileSuffix != ".docx" && fileSuffix != ".pdf" && fileSuffix != ".PDF" {
@@ -242,13 +277,13 @@ func (c *ElasticController) Upload() {
 		c.ServeJSON()
 		return
 	}
-	prodlabel := c.Input().Get("prodlabel")
-	prodprincipal := c.Input().Get("prodprincipal")
+	prodlabel := c.GetString("prodlabel")
+	prodprincipal := c.GetString("prodprincipal")
 
 	id := c.Ctx.Input.Param(":id")
 	id_int64, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 
 	var filepath, DiskDirectory, Url, attachmentname, article_body, filename1, filename2 string
@@ -256,13 +291,13 @@ func (c *ElasticController) Upload() {
 	//由proj id取得url
 	Url, DiskDirectory, err = GetUrlPath(id_int64)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 
 	//取项目本身
 	category, err := models.GetProj(id_int64)
 	if err != nil {
-		beego.Error(err)
+		logs.Error(err)
 	}
 	var topprojectid int64
 	if category.ParentId != 0 { //如果不是根目录
@@ -271,7 +306,7 @@ func (c *ElasticController) Upload() {
 		patharray := strings.Split(parentidpath1, "-")
 		topprojectid, err = strconv.ParseInt(patharray[0], 10, 64)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 	} else {
 		topprojectid = category.Id
@@ -302,26 +337,26 @@ func (c *ElasticController) Upload() {
 		//根据id添加成果code, title, label, principal, content string, projectid int64
 		prodId, err := models.AddProduct(filename1, filename2, prodlabel, prodprincipal, uid, id_int64, topprojectid)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 		}
 
 		filepath = DiskDirectory + "/" + attachmentname
 		//如果附件名称相同，则覆盖上传，但数据库不追加
 		attachmentid, err = models.AddAttachment(attachmentname, filesize, 0, prodId)
 		if err != nil {
-			beego.Error(err)
+			logs.Error(err)
 			c.Data["json"] = map[string]interface{}{"state": "写入附件数据库错误"}
 			c.ServeJSON()
 		} else {
 			// 如果文件存在，则返回
-			if isExist(filepath) {
+			if PathisExist(filepath) {
 				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "文件已存在！"}
 				c.ServeJSON()
 				return
 			}
 			err = c.SaveToFile("input-ke-2[]", filepath) //.Join("attachment", attachment)) //存文件
 			if err != nil {
-				beego.Error(err)
+				logs.Error(err)
 				c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "文件保存错误！"}
 				c.ServeJSON()
 				return
@@ -332,7 +367,7 @@ func (c *ElasticController) Upload() {
 			//存入文件夹
 			// err = c.SaveToFile("file", filepath) //.Join("attachment", attachment)) //存文件    WaterMark(filepath)    //给文件加水印
 			// if err != nil {
-			// 	beego.Error(err)
+			// 	logs.Error(err)
 			// 	c.Data["json"] = map[string]interface{}{"info": "ERROR", "data": "存入文件夹错误"}
 			// 	c.ServeJSON()
 			// }
@@ -383,7 +418,7 @@ func (c *ElasticController) Upload() {
 		ID:        strconv.FormatInt(attachmentid, 10),
 		ImageURL:  "/static/images/" + strconv.Itoa(rand.Intn(8)) + "s.jpg", //1s.jpg
 		Published: today_str,                                                //fmt.Sprintf("%04d-%02d-%02d", jYear, jMonth, jDay),
-		Title:     filename2,
+		Title:     filename1 + filename2,
 		Body:      article_body,
 	}
 
@@ -436,12 +471,12 @@ func setupIndex(string) error {
 }
 
 // CreateIndex creates a new index with mapping.
-//func (c *ElasticController) CreateIndex(mapping string) error {
+// func (c *ElasticController) CreateIndex(mapping string) error {
 func CreateIndex(mapping string) error {
-	es, err := elasticsearch.NewDefaultClient()
-	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
-	}
+	//es, err := elasticsearch.NewDefaultClient()
+	//if err != nil {
+	//	log.Fatalf("Error creating the client: %s", err)
+	//}
 
 	// // Re-create the index
 	// if res, err = es.Indices.Delete([]string{indexName}, es.Indices.Delete.WithIgnoreUnavailable(true)); err != nil || res.IsError() {
@@ -450,10 +485,14 @@ func CreateIndex(mapping string) error {
 	// res.Body.Close()
 
 	res, err := es.Indices.Exists([]string{indexName})
-	res.Body.Close()
+	if err != nil {
+		logs.Error(err)
+		return err
+	}
 	//s, _ := ioutil.ReadAll(res.Body)
-	//beego.Info(res.Status())
-	//beego.Error(err)
+	// beego.Info(res.Body)
+	// beego.Info(res.Status()) //1.存在：200 OK 2.不存在：404 Not Found 3.未启动：
+	res.Body.Close()
 	if res.Status() == "404 Not Found" {
 		//beego.Info(err)
 		res2, err := es.Indices.Create(indexName, es.Indices.Create.WithBody(strings.NewReader(mapping)))
@@ -461,9 +500,9 @@ func CreateIndex(mapping string) error {
 			return err
 		}
 		if res2.IsError() {
-			return fmt.Errorf("error: %s", res)
+			return fmt.Errorf("error: %s", res2)
 		}
-		return err
+		return nil
 	}
 	return nil
 }
@@ -471,10 +510,12 @@ func CreateIndex(mapping string) error {
 // Create indexes a new document into store.
 // 这里插入数据
 func Createitem(indexName string, item *Document) error {
-	es, err := elasticsearch.NewDefaultClient()
-	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
-	}
+	//es, err := elasticsearch.NewDefaultClient()
+	//if err != nil {
+	//	// logs.Error(err)
+	//	return err
+	//	// log.Fatalf("Error creating the client: %s", err)
+	//}
 	payload, err := json.Marshal(item)
 	if err != nil {
 		return err
@@ -502,12 +543,11 @@ func Createitem(indexName string, item *Document) error {
 }
 
 // Exists returns true when a document with id already exists in the store.
-//
 func (c *ElasticController) Exists(id string) (bool, error) {
-	es, err := elasticsearch.NewDefaultClient()
-	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
-	}
+	//es, err := elasticsearch.NewDefaultClient()
+	//if err != nil {
+	//	log.Fatalf("Error creating the client: %s", err)
+	//}
 	res, err := es.Exists(indexName, id)
 	if err != nil {
 		return false, err
@@ -532,30 +572,32 @@ func (c *ElasticController) Exists(id string) (bool, error) {
 // @router /search [get]
 // 上传文档——tika解析——构造document——存入es
 // Search returns results matching a query, paginated by after.
-//
-func (c *ElasticController) Search() { //(*SearchResults, error)
+// //(*SearchResults, error)
+func (c *ElasticController) Search() {
 	// 3. Search for the indexed documents
 	// Build the request body.
-	query := c.Input().Get("q")
+	query := c.GetString("q")
 	after := c.GetStrings("a")
-	beego.Info(after)
+	//beego.Info(after)
 	//if query == "" {
 	//	query = "目标"
 	//}
 	// *************
-	es, err := elasticsearch.NewDefaultClient()
-	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
-	}
+	//es, err := elasticsearch.NewDefaultClient()
+	//if err != nil {
+	//	log.Fatalf("Error creating the client: %s", err)
+	//}
 	var results SearchResults
 	//Search returns results matching a query, paginated by after.
 	res, err := es.Search(
 		es.Search.WithIndex(indexName),
 		es.Search.WithBody(buildQuery(query, after...)),
 	)
-	//if err != nil {
-	//	return &results, err
-	//}
+	if err != nil {
+		c.Data["json"] = map[string]interface{}{"status": 0, "info": "ERR"}
+		c.ServeJSON()
+		//	return &results, err
+	}
 
 	//***************
 	//var buf bytes.Buffer
@@ -600,7 +642,7 @@ func (c *ElasticController) Search() { //(*SearchResults, error)
 	//**********
 
 	defer res.Body.Close()
-	log.Printf(res.String())
+	//log.Printf(res.String())
 
 	if res.IsError() {
 		var e map[string]interface{}
@@ -656,7 +698,7 @@ func (c *ElasticController) Search() { //(*SearchResults, error)
 
 		if err := json.Unmarshal(hit.Source, &h); err != nil {
 			//return //&results, err
-			beego.Error(err)
+			logs.Error(err)
 			c.Data["json"] = map[string]interface{}{"status": 5, "info": "ERR"}
 			c.ServeJSON()
 		}
@@ -671,7 +713,7 @@ func (c *ElasticController) Search() { //(*SearchResults, error)
 
 		results.Hits = append(results.Hits, &h)
 	}
-	// beego.Info(&results)
+	//beego.Info(&results)
 	//return &results, nil
 	c.Data["json"] = &results //map[string]interface{}{"status": 1, "info": "SUCCESS", "id": aid}
 	c.ServeJSON()
@@ -700,8 +742,12 @@ func buildQuery(query string, after ...string) io.Reader {
 }
 
 const searchAll = `
-	"query" : { "match_all" : {} },
-	"size" : 5,
+	"query" : {
+		"match_all" : {
+
+		}
+	},
+	"size" : 10,
 	"sort" : { "published" : "desc", "_doc" : "asc" }`
 
 const searchMatch = `
@@ -714,19 +760,18 @@ const searchMatch = `
 	},
 	"highlight" : {
 		"fields" : {
-			"title" : { "number_of_fragments" : 0 },
-			"body" : { "number_of_fragments" : 0 },
-			"alt" : { "number_of_fragments" : 0 },
+			"title" : { "number_of_fragments" : 5 },
+			"body" : { "number_of_fragments" : 5, "fragment_size" : 60 },
+			"alt" : { "number_of_fragments" : 5 },
 			"transcript" : { "number_of_fragments" : 5, "fragment_size" : 25 }
 		},
 		"max_analyzed_offset":900000
 	},
-	"size" : 25,
+	"size" : 10,
 	"sort" : [ { "_score" : "desc" }, { "_doc" : "asc" } ]`
 
 // @Title post tika
 // @Description post tika
-// @Success 200 {object} models.PostTika
 // @Failure 400 Invalid page supplied
 // @Failure 404 Tika not found
 // @router /tika [post]
@@ -806,6 +851,246 @@ func (c *ElasticController) Tika() {
 	//}
 }
 
+// 官方用法
+// https://blog.csdn.net/weixin_52025712/article/details/126253327
+func esdefaultconfig() {
+	es, _ := elasticsearch.NewDefaultClient()
+	res, _ := es.Info()
+	defer res.Body.Close()
+	log.Println(res)
+}
+
+func esapicustomconfig() {
+	// 自定义配置
+	cfg := elasticsearch.Config{
+		// 有多个节点时需要配置
+		Addresses: []string{
+			"http://localhost:9200",
+		},
+		// 配置HTTP传输对象
+		Transport: &http.Transport{
+			//MaxIdleConnsPerHost 如果非零，控制每个主机保持的最大空闲(keep-alive)连接。如果为零，则使用默认配置2。
+			MaxIdleConnsPerHost: 10,
+			//ResponseHeaderTimeout 如果非零，则指定在写完请求(包括请求体，如果有)后等待服务器响应头的时间。
+			ResponseHeaderTimeout: time.Second,
+			//DialContext 指定拨号功能，用于创建不加密的TCP连接。如果DialContext为nil(下面已弃用的Dial也为nil)，那么传输拨号使用包网络。
+			DialContext: (&net.Dialer{Timeout: time.Second}).DialContext,
+			// TLSClientConfig指定TLS.client使用的TLS配置。
+			//如果为空，则使用默认配置。
+			//如果非nil，默认情况下可能不启用HTTP/2支持。
+			TLSClientConfig: &tls.Config{
+				MaxVersion: tls.VersionTLS11,
+				//InsecureSkipVerify 控制客户端是否验证服务器的证书链和主机名。
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	es, _ := elasticsearch.NewClient(cfg)
+	res, _ := es.Info()
+	defer res.Body.Close()
+	log.Println(res)
+}
+
+// CRUD
+// 新增文档
+// 使用 index api对文档进行增添或是修改操作。如果id不存在为创建文档，如果文档存在则进行修改。
+func esindex() {
+	es, _ := elasticsearch.NewDefaultClient()
+	// 在索引中创建或更新文档。
+	res, err := es.Index(
+		"test",                                  // Index name
+		strings.NewReader(`{"title" : "Test"}`), // Document body
+		es.Index.WithDocumentID("1"),            // Document ID
+		//es.Index.WithRefresh("true"),               // Refresh
+	)
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+	}
+	defer res.Body.Close()
+
+	log.Println(res)
+}
+
+// 也可以使用esapi进行请求的包装，然后使用Do()方法执行请求。我们做同上面一样的操作，如下
+func esapiindexrequest() {
+	es, _ := elasticsearch.NewDefaultClient()
+	req := esapi.IndexRequest{
+		Index:      "test",                                  // Index name
+		Body:       strings.NewReader(`{"title" : "Test"}`), // Document body
+		DocumentID: "1",                                     // Document ID
+		Refresh:    "true",                                  // Refresh
+	}
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		log.Fatalf("Error getting response: %s", err)
+	}
+	defer res.Body.Close()
+
+	log.Println(res)
+}
+
+// 下面都将之使用esapi方法实现。
+
+// 不覆盖的创建文档
+// 如果不想因为在创建文档填写错了id而对不想进行操作的文档进行了修改，那么可以使用CreateRequest包装请求。
+func esapicreaterequest() {
+	es, _ := elasticsearch.NewDefaultClient()
+	req := esapi.CreateRequest{
+		Index: "learn",
+		// DocumentType: "user",
+		DocumentID: "1",
+		Body: strings.NewReader(`
+{
+   "name": "张三",
+   "age": 25,
+   "about": "一个热爱刑法的男人，但是不精通唱跳Rap"
+}`),
+	}
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		log.Println("出错了，这个你麻麻滴错误是", err)
+	}
+	log.Println(res)
+}
+
+// 查询文档
+// 查询单个文档
+// 使用GetRequest包装请求。
+func esapigetrequest() {
+	es, _ := elasticsearch.NewDefaultClient()
+
+	req := esapi.GetRequest{
+		Index: "learn",
+		// DocumentType: "user",
+		DocumentID: "1",
+	}
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+	}
+	defer res.Body.Close()
+
+	log.Println(res)
+}
+
+// 查询多个文档
+// 使用MgetRequest包装请求。
+func esapiMgetrequest() {
+	es, _ := elasticsearch.NewDefaultClient()
+	request := esapi.MgetRequest{
+		Index: "learn",
+		// DocumentType: "user",
+		Body: strings.NewReader(`{
+  "docs": [
+    {
+      "_id": "1"
+    },
+    {
+      "_id": "2"
+    }
+  ]
+}`),
+	}
+	res, err := request.Do(context.Background(), es)
+	if err != nil {
+		log.Println("出错了，错误是", err)
+	}
+	log.Println(res)
+}
+
+// 修改文档
+// 在上面我们已经进行了创建或者修改的操作，但是使用 index api进行的修改操作需要提供所有的字段，不然会返回 400。
+// 但我们大多数时候只是进行单个字段或多个字段的修改，并不会修改整个文档，这时候我们可以使用UpdateRequest包装请求。
+func esapiupdaterequest() {
+	es, _ := elasticsearch.NewDefaultClient()
+	req := esapi.UpdateRequest{
+		Index: "learn",
+		// DocumentType: "user",
+		DocumentID: "1",
+		Body: strings.NewReader(`
+{
+   "doc": {
+   "name": "张三"
+   }
+}`),
+	}
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		log.Println("出错了，这个你麻麻滴错误是", err)
+	}
+	log.Println(res)
+}
+
+// 删除文档
+// 使用DeleteRequest包装请求。
+func esapideleterequest() {
+	// 创建一个默认配置的客户端
+	es, _ := elasticsearch.NewDefaultClient()
+
+	// 使用index请求
+	req := esapi.DeleteRequest{
+		Index: "test",
+		// DocumentType: "_doc",
+		DocumentID: "1",
+	}
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+	}
+	defer res.Body.Close()
+
+	log.Println(res)
+}
+
+// 批量操作
+// 使用BulkRequest包装请求。注意：格式一定要按照bulk api的格式来写，不然会400，最后别忘了回车
+func esapibulkrequest() {
+	es, _ := elasticsearch.NewDefaultClient()
+
+	// 使用index请求
+	req := esapi.BulkRequest{
+		// 在body中写入bulk请求
+		Body: strings.NewReader(`{ "index" : { "_index" : "test", "_id" : "1" } }
+{ "title" : "Test2" }
+{ "delete" : { "_index" : "test", "_id" : "2" } }
+{ "create" : { "_index" : "test", "_id" : "3" } }
+{ "field1" : "value3" }
+{ "update" : {"_id" : "1", "_index" : "test"} }
+{ "doc" : {"field2" : "value2"} }
+`),
+	}
+	res, err := req.Do(context.Background(), es)
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+	}
+	defer res.Body.Close()
+
+	log.Println(res)
+}
+
+// 搜索
+// 使用SearchRequest对请求进行包装。
+func esapisearch() {
+	es, _ := elasticsearch.NewDefaultClient()
+	req := esapi.SearchRequest{
+		Index: []string{"learn"},
+		// DocumentType: []string{"user"},
+		Body: strings.NewReader(`{
+  "query": {
+    "match": {
+      "about": "唱跳"
+    }
+  }
+}`),
+	}
+	response, err := req.Do(context.Background(), es)
+	if err != nil {
+		log.Println("出错了，这个你麻麻滴错误是", err)
+	}
+	log.Println(response)
+}
+
+// 一下作废，非官方用法
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -843,10 +1128,10 @@ func Index() {
 
 	// Initialize a client with the default settings.
 	// An `ELASTICSEARCH_URL` environment variable will be used when exported.
-	es, err := elasticsearch.NewDefaultClient()
-	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
-	}
+	//es, err := elasticsearch.NewDefaultClient()
+	//if err != nil {
+	//	log.Fatalf("Error creating the client: %s", err)
+	//}
 
 	// 1. Get cluster info
 	res, err := es.Info()
@@ -998,17 +1283,17 @@ func Index() {
 //}
 
 func Search() {
-	addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
-	config := elasticsearch.Config{
-		Addresses: addresses,
-		// Username:  "",
-		// Password:  "",
-		// CloudID:   "",
-		// APIKey:    "",
-	}
-	// new client
-	es, err := elasticsearch.NewClient(config)
-	failOnError(err, "Error creating the client")
+	//addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
+	//config := elasticsearch.Config{
+	//	Addresses: addresses,
+	//	// Username:  "",
+	//	// Password:  "",
+	//	// CloudID:   "",
+	//	// APIKey:    "",
+	//}
+	//// new client
+	//es, err := elasticsearch.NewClient(config)
+	//failOnError(err, "Error creating the client")
 	// info
 	res, err := es.Info()
 	failOnError(err, "Error getting response")
@@ -1048,17 +1333,17 @@ func Search() {
 }
 
 func DeleteByQuery() {
-	addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
-	config := elasticsearch.Config{
-		Addresses: addresses,
-		// Username:  "",
-		// Password:  "",
-		// CloudID:   "",
-		// APIKey:    "",
-	}
-	// new client
-	es, err := elasticsearch.NewClient(config)
-	failOnError(err, "Error creating the client")
+	//addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
+	//config := elasticsearch.Config{
+	//	Addresses: addresses,
+	//	// Username:  "",
+	//	// Password:  "",
+	//	// CloudID:   "",
+	//	// APIKey:    "",
+	//}
+	//// new client
+	//es, err := elasticsearch.NewClient(config)
+	//failOnError(err, "Error creating the client")
 	// DeleteByQuery deletes documents matching the provided query
 	var buf bytes.Buffer
 	query := map[string]interface{}{
@@ -1081,17 +1366,17 @@ func DeleteByQuery() {
 }
 
 func Delete() {
-	addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
-	config := elasticsearch.Config{
-		Addresses: addresses,
-		// Username:  "",
-		// Password:  "",
-		// CloudID:   "",
-		// APIKey:    "",
-	}
-	// new client
-	es, err := elasticsearch.NewClient(config)
-	failOnError(err, "Error creating the client")
+	//addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
+	//config := elasticsearch.Config{
+	//	Addresses: addresses,
+	//	// Username:  "",
+	//	// Password:  "",
+	//	// CloudID:   "",
+	//	// APIKey:    "",
+	//}
+	//// new client
+	//es, err := elasticsearch.NewClient(config)
+	//failOnError(err, "Error creating the client")
 	// Delete removes a document from the index
 	res, err := es.Delete("demo", "POcKSHIBX-ZyL96-ywQO")
 	if err != nil {
@@ -1132,17 +1417,17 @@ func Delete() {
 //}
 
 func Get() {
-	addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
-	config := elasticsearch.Config{
-		Addresses: addresses,
-		// Username:  "",
-		// Password:  "",
-		// CloudID:   "",
-		// APIKey:    "",
-	}
-	// new client
-	es, err := elasticsearch.NewClient(config)
-	failOnError(err, "Error creating the client")
+	//addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
+	//config := elasticsearch.Config{
+	//	Addresses: addresses,
+	//	// Username:  "",
+	//	// Password:  "",
+	//	// CloudID:   "",
+	//	// APIKey:    "",
+	//}
+	//// new client
+	//es, err := elasticsearch.NewClient(config)
+	//failOnError(err, "Error creating the client")
 	res, err := es.Get("demo", "esd")
 	if err != nil {
 		failOnError(err, "Error get response")
@@ -1183,17 +1468,17 @@ func Get() {
 //}
 
 func UpdateByQuery() {
-	addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
-	config := elasticsearch.Config{
-		Addresses: addresses,
-		// Username:  "",
-		// Password:  "",
-		// CloudID:   "",
-		// APIKey:    "",
-	}
-	// new client
-	es, err := elasticsearch.NewClient(config)
-	failOnError(err, "Error creating the client")
+	//addresses := []string{"http://127.0.0.1:9200", "http://127.0.0.1:9201"}
+	//config := elasticsearch.Config{
+	//	Addresses: addresses,
+	//	// Username:  "",
+	//	// Password:  "",
+	//	// CloudID:   "",
+	//	// APIKey:    "",
+	//}
+	//// new client
+	//es, err := elasticsearch.NewClient(config)
+	//failOnError(err, "Error creating the client")
 	// UpdateByQuery performs an update on every document in the index without changing the source,
 	// for example to pick up a mapping change.
 	index := []string{"demo"}
@@ -1248,7 +1533,230 @@ func UpdateByQuery() {
 	fmt.Println(res.String())
 }
 
-func isExist(path string) bool {
+// https://www.cnblogs.com/Me1onRind/p/11534544.html
+// 删除索引
+func deleteIndex() {
+	req := esapi.IndicesDeleteRequest{
+		Index: []string{"test_index"},
+	}
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+// 往索引插入数据
+// 插入单条数据
+func insertSingle() {
+	body := map[string]interface{}{
+		"num": 0,
+		"v":   0,
+		"str": "test",
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	req := esapi.CreateRequest{ // 如果是esapi.IndexRequest则是插入/替换
+		Index: "test_index",
+		//DocumentType: "test_type",
+		DocumentID: "test_1",
+		Body:       bytes.NewReader(jsonBody),
+	}
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+//[201 Created] {"_index":"test_index","_type":"test_type","_id":"test_1","_version":1,"result":"created","_shards":{"total":2,"successful":1,"failed":0},"_seq_no":0,"_primary_term":1}
+
+// 批量插入(很明显，也可以批量做其他操作)
+func insertBatch() {
+	var bodyBuf bytes.Buffer
+	for i := 2; i < 10; i++ {
+		createLine := map[string]interface{}{
+			"create": map[string]interface{}{
+				"_index": "test_index",
+				"_id":    "test_" + strconv.Itoa(i),
+				"_type":  "test_type",
+			},
+		}
+		jsonStr, _ := json.Marshal(createLine)
+		bodyBuf.Write(jsonStr)
+		bodyBuf.WriteByte('\n')
+
+		body := map[string]interface{}{
+			"num": i % 3,
+			"v":   i,
+			"str": "test" + strconv.Itoa(i),
+		}
+		jsonStr, _ = json.Marshal(body)
+		bodyBuf.Write(jsonStr)
+		bodyBuf.WriteByte('\n')
+	}
+
+	req := esapi.BulkRequest{
+		Body: &bodyBuf,
+	}
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+// 查询
+// 通过sql查询
+//
+//	func selectBySql() {
+//		query := map[string]interface{}{
+//			"query": "select count(*) as cnt, max(v) as value, num from test_index where num > 0 group by num",
+//		}
+//		jsonBody, _ := json.Marshal(query)
+//		req := esapi.XPackSQLQueryRequest{
+//			Body: bytes.NewReader(jsonBody),
+//		}
+//		res, err := req.Do(context.Background(), es)
+//		checkError(err)
+//		defer res.Body.Close()
+//		fmt.Println(res.String())
+//	}
+//
+// 通过Search Api查询
+func selectBySearch() {
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"bool": map[string]interface{}{
+				"filter": map[string]interface{}{
+					"range": map[string]interface{}{
+						"num": map[string]interface{}{
+							"gt": 0,
+						},
+					},
+				},
+			},
+		},
+		"size": 0,
+		"aggs": map[string]interface{}{
+			"num": map[string]interface{}{
+				"terms": map[string]interface{}{
+					"field": "num",
+					//"size":  1,
+				},
+				"aggs": map[string]interface{}{
+					"max_v": map[string]interface{}{
+						"max": map[string]interface{}{
+							"field": "v",
+						},
+					},
+				},
+			},
+		},
+	}
+	jsonBody, _ := json.Marshal(query)
+	req := esapi.SearchRequest{
+		Index: []string{"test_index"},
+		//DocumentType: []string{"test_type"},
+		Body: bytes.NewReader(jsonBody),
+	}
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+//但是elasticsearch对聚合查询分页并不是很友好，基本上都是得自己手动分页。
+
+// 局部更新(批量更新略)
+// 根据id更新
+func updateSingle() {
+	body := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"v": 100,
+		},
+	}
+	jsonBody, _ := json.Marshal(body)
+	req := esapi.UpdateRequest{
+		Index: "test_index",
+		//DocumentType: "test_type",
+		DocumentID: "test_1",
+		Body:       bytes.NewReader(jsonBody),
+	}
+
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+//[200 OK] {"_index":"test_index","_type":"test_type","_id":"test_1","_version":2,"result":"updated","_shards":{"total":2,"successful":1,"failed":0},"_seq_no":3,"_primary_term":1}
+
+//除了doc方式之外，还有script方式
+
+// 根据条件更新
+func updateByQuery() {
+	body := map[string]interface{}{
+		"script": map[string]interface{}{
+			"lang": "painless",
+			"source": `
+                ctx._source.v = params.value;
+            `,
+			"params": map[string]interface{}{
+				"value": 101,
+			},
+		},
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
+		},
+	}
+	jsonBody, _ := json.Marshal(body)
+	req := esapi.UpdateByQueryRequest{
+		Index: []string{"test_index"},
+		Body:  bytes.NewReader(jsonBody),
+	}
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+//[200 OK] {"took":109,"timed_out":false,"total":9,"updated":9,"deleted":0,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1.0,"throttled_until_millis":0,"failures":[]}
+
+// 删除
+// 根据id删除
+func deleteSingle() {
+	req := esapi.DeleteRequest{
+		Index: "test_index",
+		//DocumentType: "test_type",
+		DocumentID: "test_1",
+	}
+
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+//[200 OK] {"_index":"test_index","_type":"test_type","_id":"test_1","_version":6,"result":"deleted","_shards":{"total":2,"successful":1,"failed":0},"_seq_no":7,"_primary_term":1}
+
+// 根据条件删除
+func deleteByQuery() {
+	body := map[string]interface{}{
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
+		},
+	}
+	jsonBody, _ := json.Marshal(body)
+	req := esapi.DeleteByQueryRequest{
+		Index: []string{"test_index"},
+		Body:  bytes.NewReader(jsonBody),
+	}
+	res, err := req.Do(context.Background(), es)
+	checkError(err)
+	defer res.Body.Close()
+	fmt.Println(res.String())
+}
+
+// [200 OK] {"took":17,"timed_out":false,"total":9,"deleted":9,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1.0,"throttled_until_millis":0,"failures":[]}
+func PathisExist(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsExist(err) {

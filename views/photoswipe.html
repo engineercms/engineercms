@@ -11,17 +11,32 @@
   <link href="/static/photoswipe/dist/default-skin/default-skin.css?v=4.1.3-1.0.4" rel="stylesheet" />
   <script src="/static/photoswipe/dist/photoswipe.min.js?v=4.1.3-1.0.4"></script>
   <script src="/static/photoswipe/dist/photoswipe-ui-default.min.js?v=4.1.3-1.0.4"></script>
+  
+  <script src="/static/dropzone/dropzone.js"></script>
+  <link rel="stylesheet" href="/static/dropzone/dropzone.css">
+  <link rel="stylesheet" href="/static/dropzone/style.css">
   <style type="text/css">
   img {
     -webkit-filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, .5));
-    /*¿¼ÂÇä¯ÀÀÆ÷¼æÈÝÐÔ£º¼æÈÝ Chrome, Safari, Opera */
+    /* Chrome, Safari, Opera */
     filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, .5));
   }
   </style>
-
 </head>
 
 <body>
+
+<!-- Change /upload-target to your upload address -->
+<!-- <form action="/upload-target" class="dropzone"></form> -->
+<form action="/file-upload" class="dropzone">
+  <div class="fallback">
+    <input name="file" type="file" multiple />
+  </div>
+</form>
+<!-- <form action="" method="post" enctype="multipart/form-data">
+  <input type="file" name="file" />
+</form> -->
+
   <div class="section section--head">
     <div class="row row--heading">
       <h1>PhotoSwipe<a href="https://github.com/dimsemenov/PhotoSwipe/releases"> v4.1.3</a></h1>
@@ -29,33 +44,48 @@
     </div>
     <div class="row">
       <div id="demo-test-gallery" class="demo-gallery">
-        <a href="https://farm4.staticflickr.com/3894/15008518202_c265dfa55f_h.jpg" data-size="1600x1600" data-med="https://farm4.staticflickr.com/3894/15008518202_b016d7d289_b.jpg" data-med-size="1024x1024" data-author="Folkert Gorter" class="demo-gallery__img--main">
-          <img src="https://farm4.staticflickr.com/3894/15008518202_b016d7d289_m.jpg" alt="" />
+        <a href="/static/img/is09aw777.jpg" data-size="1600x1600" data-med="/static/img/is09aw777.jpg" data-med-size="600x600" data-author="Folkert Gorter" class="demo-gallery__img--main">
+          <img src="/static/img/is09aw777.jpg" alt="" />
           <figure>This is dummy caption.</figure>
         </a>
-        <a href="https://farm6.staticflickr.com/5591/15008867125_b61960af01_h.jpg" data-size="1600x1068" data-med="https://farm6.staticflickr.com/5591/15008867125_68a8ed88cc_b.jpg" data-med-size="1024x683" data-author="Samuel Rohl">
-          <img src="https://farm6.staticflickr.com/5591/15008867125_68a8ed88cc_m.jpg" alt="" />
+        <a href="/static/img/is09aw777.jpg" data-size="1600x1068" data-med="/static/img/is09aw777.jpg" data-med-size="1024x683" data-author="Samuel Rohl">
+          <img src="/static/img/is09aw777.jpg" alt="" />
           <figure>This is dummy caption. It has been placed here solely to demonstrate the look and feel of finished, typeset text.</figure>
         </a>
-        <a href="https://farm4.staticflickr.com/3902/14985871946_24f47d4b53_h.jpg" data-size="1600x1067" data-med="https://farm4.staticflickr.com/3902/14985871946_86abb8c56f_b.jpg" data-med-size="1024x683" data-author="Ales Krivec">
-          <img src="https://farm4.staticflickr.com/3902/14985871946_86abb8c56f_m.jpg" alt="" />
+        <a href="/static/img/is09aw777.jpg" data-size="1600x1067" data-med="/static/img/is09aw777.jpg" data-med-size="1024x683" data-author="Ales Krivec">
+          <img src="/static/img/is09aw777.jpg" alt="" />
           <figure>This is dummy caption. It is not meant to be read.</figure>
         </a>
-        <a href="https://farm6.staticflickr.com/5584/14985868676_b51baa4071_h.jpg" data-size="1600x1067" data-med="https://farm6.staticflickr.com/5584/14985868676_4b802b932a_b.jpg" data-med-size="1024x683" data-author="Michael Hull">
-          <img src="https://farm6.staticflickr.com/5584/14985868676_4b802b932a_m.jpg" alt="" />
+        <a href="/static/img/is09aw777.jpg" data-size="1600x1067" data-med="/static/img/is09aw777.jpg" data-med-size="1024x683" data-author="Michael Hull">
+          <img src="/static/img/is09aw777.jpg" alt="" />
           <figure>Dummy caption. It's Greek to you. Unless, of course, you're Greek, in which case, it really makes no sense.</figure>
         </a>
+
         <a href="https://farm4.staticflickr.com/3920/15008465772_d50c8f0531_h.jpg" data-size="1600x1067" data-med="https://farm4.staticflickr.com/3920/15008465772_383e697089_b.jpg" data-med-size="1024x683" data-author="Thomas Lefebvre">
           <img src="https://farm4.staticflickr.com/3920/15008465772_383e697089_m.jpg" alt="" />
           <figure>It's a dummy caption. He who searches for meaning here will be sorely disappointed.</figure>
         </a>
       </div>
       <!-- <figure class="demo-gallery__title">Demo gallery &middot; 5 photos</figure> -->
-
     </div>
   </div>
-
-
+  <!-- <div id="Gallery"> -->
+  <div id="demo-test-gallery" class="demo-gallery">
+    <div class="gallery-row">
+      <a href="/static/img/is09aw777.jpg" data-size="1024x683" class="demo-gallery__img--main"><img src="/static/img/is09aw777.jpg" alt="Image 01" /></a>
+      <a href="/static/img/is09aw77b.jpg" data-size="1024x683"><img src="/static/img/is09aw77b.jpg" alt="Image 02" /></a>
+      <a href="/static/img/is09aw77e.jpg" data-size="1024x683"><img src="/static/img/is09aw77e.jpg" alt="Image 03" /></a>
+      <a href="/static/img/is09aw77b.jpg" data-size="1024x683"><img src="/static/img/is09aw77b.jpg" alt="Image 02" /></a>
+      <a href="/static/img/is09aw77e.jpg" data-size="1024x683"><img src="/static/img/is09aw77e.jpg" alt="Image 03" /></a>
+      <!-- <a href="/static/img/is09aw77b.jpg" data-size="1024x683"><img src="/static/img/is09aw77b.jpg" alt="Image 02" /></a> -->
+      <!-- <a href="/static/img/is09aw77e.jpg" data-size="1024x683"><img src="/static/img/is09aw77e.jpg" alt="Image 03" /></a> -->
+    </div>
+    <!-- <div class="gallery-row">
+      <a href="/static/img/is09aw777.jpg"  class="demo-gallery__img--main"><img src="https://farm4.staticflickr.com/3920/15008465772_383e697089_m.jpg" alt="Image 04" /></a>
+      <a href="/static/img/is09aw777.jpg"><img src="https://farm4.staticflickr.com/3920/15008465772_383e697089_m.jpg" alt="Image 05" /></a>
+      <a href="/static/img/is09aw777.jpg"><img src="https://farm4.staticflickr.com/3920/15008465772_383e697089_m.jpg" alt="Image 06" /></a>
+    </div> -->
+  </div>
   <div id="gallery" class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="pswp__bg"></div>
     <div class="pswp__scroll-wrap">
@@ -82,10 +112,10 @@
         <!-- <div class="pswp__loading-indicator"><div class="pswp__loading-indicator__line"></div></div> -->
         <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
           <div class="pswp__share-tooltip">
-            <!-- <a href="#" class="pswp__share--facebook"></a>
-					<a href="#" class="pswp__share--twitter"></a>
-					<a href="#" class="pswp__share--pinterest"></a>
-					<a href="#" download class="pswp__share--download"></a> -->
+            <!-- <a href="javascript:void(0)" class="pswp__share--facebook"></a>
+          <a href="javascript:void(0)" class="pswp__share--twitter"></a>
+          <a href="javascript:void(0)" class="pswp__share--pinterest"></a>
+          <a href="javascript:void(0)" download class="pswp__share--download"></a> -->
           </div>
         </div>
         <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
@@ -97,7 +127,6 @@
       </div>
     </div>
   </div>
-
   <script type="text/javascript">
   (function() {
 
@@ -392,7 +421,6 @@
 
   })();
   </script>
-
 </body>
 
 </html>

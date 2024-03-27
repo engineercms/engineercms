@@ -54,13 +54,15 @@
 </head>
 
 <body style="height: 100%; margin: 0;">
-  <!-- <button type="button" data-name="insertImage" id="insertImage" class="btn btn-default">
+  <!-- 保留<button type="button" data-name="insertImage" id="insertImage" class="btn btn-default">
       <i class="fa fa-download">插入图片</i>
     </button> -->
-    <button type="button" data-name="downloadas" id="downloadas" class="btn btn-default">
-      <i class="fa fa-download">下载文件</i>
-    </button>
-  <button type="button" class="floating-button2" id="getSignature">获取签名</button>
+  <!-- <button type="button" data-name="downloadas" id="downloadas" class="btn btn-default">
+    <i class="fa fa-download">下载文件</i>
+  </button> -->
+
+  <!-- 保留<button type="button" class="floating-button2" id="getSignature">获取签名</button> -->
+
   <div id="placeholder" style="height: 100%"></div>
   <script type="text/javascript" src="{{.Onlyofficeapi_url}}/web-apps/apps/api/documents/api.js"></script>
   <!-- http://111.230.181.182:8080/web-apps/apps/api/documents/api.js -->
@@ -84,18 +86,21 @@
       //
     }
   };
-  var onDownloadAs = function(event) {
+  // var onDownloadAs = function(event) {
+  //   console.log("ONLYOFFICE Document Editor create file: " + event.data);
+  //   window.top.postMessage(event.data);
+  //   // createAndDownloadFile("test.docx", event.data)
+  //   docEditor.downloadAs("doc");
+  // };
+
+  var onDownloadAs = function (event) {
     console.log("ONLYOFFICE Document Editor create file: " + event.data);
-    window.top.postMessage(event.data);
-    // createAndDownloadFile("test.docx", event.data)
-    docEditor.downloadAs("doc");
+    // docEditor.downloadAs("doc");
   };
 
+
   $("#downloadas").click(function(event) {
-    console.log("ONLYOFFICE Document Editor create file: " + event.data);
-    window.top.postMessage(event.data);
-    createAndDownloadFile("test.docx", event.data)
-    // docEditor.downloadAs();
+    docEditor.downloadAs();
   });
 
   /**
@@ -114,9 +119,17 @@
   }
 
   window.addEventListener('message', function(e) {
-    console.log(e.data)
-    if (e.data == "onDownloadAs"){
-      docEditor.downloadAs();
+    // 将字符串转换为 JavaScript 对象
+    str = JSON.parse(e.data)
+    if (str.event == "onDownloadAs"){
+      var aTag = document.createElement('a');
+      // var blob = new Blob([str.data]);——这个是内容，保留
+      // aTag.download = "1.doc";
+      // aTag.href = URL.createObjectURL(blob);
+      aTag.href = str.data
+      aTag.click();
+      // aTag.remove();
+      // URL.revokeObjectURL(blob);
     }
   }, false)
 
@@ -364,9 +377,9 @@
         }
       ],
       "plugins": {
-        "autostart": [
-          "asc.{07FD8DFA-DFE0-4089-AL24-0730933CC80A}",
-        ],
+        // "autostart": [
+        //   "asc.{07FD8DFA-DFE0-4089-AL24-0730933CC80A}",
+        // ],
         "pluginsData": [
           "{{.Onlyofficeapi_url}}/sdkjs-plugins/photoeditor/config.json"
         ]
@@ -377,8 +390,7 @@
     "type": {{.Type }}, //"desktop",embedded,mobile访问文档的平台类型 网页嵌入
     "width": "100%"
   });
-  </script>
-  <script type="text/javascript">
+
   var ret_data = ""
 
   function myAjax(json) {

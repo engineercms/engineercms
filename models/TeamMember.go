@@ -2,9 +2,11 @@ package models
 
 import (
 	"errors"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	"github.com/engineercms/engineercms/conf"
+	"github.com/3xxx/engineercms/conf"
+	//beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/i18n"
 )
 
 type TeamMember struct {
@@ -17,6 +19,7 @@ type TeamMember struct {
 	Account  string        `orm:"-" json:"account"`
 	RealName string        `orm:"-" json:"real_name"`
 	Avatar   string        `orm:"-" json:"avatar"`
+	Lang     string        `orm:"-"`
 }
 
 // TableName 获取对应数据库表名.
@@ -45,6 +48,11 @@ func NewTeamMember() *TeamMember {
 	return &TeamMember{}
 }
 
+func (m *TeamMember) SetLang(lang string) *TeamMember {
+	m.Lang = lang
+	return m
+}
+
 func (m *TeamMember) First(id int, cols ...string) (*TeamMember, error) {
 	if id <= 0 {
 		return nil, errors.New("参数错误")
@@ -54,7 +62,7 @@ func (m *TeamMember) First(id int, cols ...string) (*TeamMember, error) {
 	err := o.QueryTable(m.TableNameWithPrefix()).Filter("team_member_id", id).One(m, cols...)
 
 	if err != nil && err != orm.ErrNoRows {
-		beego.Error("查询团队成员错误 ->", err)
+		logs.Error("查询团队成员错误 ->", err)
 	}
 
 	return m.Include(), err
@@ -70,7 +78,7 @@ func (m *TeamMember) ChangeRoleId(teamId int, memberId int, roleId conf.BookRole
 	err = o.QueryTable(m.TableNameWithPrefix()).Filter("team_id", teamId).Filter("member_id", memberId).OrderBy("-team_member_id").One(m)
 
 	if err != nil {
-		beego.Error("查询团队用户时失败 ->", err)
+		logs.Error("查询团队用户时失败 ->", err)
 		return m, err
 	}
 	m.RoleId = roleId
@@ -92,7 +100,7 @@ func (m *TeamMember) FindFirst(teamId, memberId int) (*TeamMember, error) {
 	err := o.QueryTable(m.TableNameWithPrefix()).Filter("team_id", teamId).Filter("member_id", memberId).One(m)
 
 	if err != nil {
-		beego.Error("查询团队用户失败 ->", err)
+		logs.Error("查询团队用户失败 ->", err)
 		return nil, err
 	}
 	return m.Include(), nil
@@ -126,7 +134,7 @@ func (m *TeamMember) Save(cols ...string) (err error) {
 		_, err = o.Update(m, cols...)
 	}
 	if err != nil {
-		beego.Error("在保存团队时出错 ->", err)
+		logs.Error("在保存团队时出错 ->", err)
 	}
 	return
 }
@@ -140,7 +148,7 @@ func (m *TeamMember) Delete(id int) (err error) {
 	_, err = orm.NewOrm().QueryTable(m.TableNameWithPrefix()).Filter("team_member_id", id).Delete()
 
 	if err != nil {
-		beego.Error("删除团队用户时出错 ->", err)
+		logs.Error("删除团队用户时出错 ->", err)
 	}
 	return
 }
@@ -159,7 +167,7 @@ func (m *TeamMember) FindToPager(teamId, pageIndex, pageSize int) (list []*TeamM
 
 	if err != nil {
 		if err != orm.ErrNoRows {
-			beego.Error("查询团队成员失败 ->", err)
+			logs.Error("查询团队成员失败 ->", err)
 		}
 		return
 	}
@@ -172,6 +180,7 @@ func (m *TeamMember) FindToPager(teamId, pageIndex, pageSize int) (list []*TeamM
 
 	//将来优化
 	for _, item := range list {
+		item.Lang = m.Lang
 		item.Include()
 	}
 	return
@@ -186,13 +195,13 @@ func (m *TeamMember) Include() *TeamMember {
 		m.Avatar = member.Avatar
 	}
 	if m.RoleId == 0 {
-		m.RoleName = "创始人"
+		m.RoleName = i18n.Tr(m.Lang, "common.creator") //"创始人"
 	} else if m.RoleId == 1 {
-		m.RoleName = "管理员"
+		m.RoleName = i18n.Tr(m.Lang, "common.administrator") //"管理员"
 	} else if m.RoleId == 2 {
-		m.RoleName = "编辑者"
+		m.RoleName = i18n.Tr(m.Lang, "common.editor") //"编辑者"
 	} else if m.RoleId == 3 {
-		m.RoleName = "观察者"
+		m.RoleName = i18n.Tr(m.Lang, "common.observer") //"观察者"
 	}
 	return m
 }
@@ -204,19 +213,19 @@ func (m *TeamMember) FindNotJoinMemberByAccount(teamId int, account string, limi
 	}
 	o := orm.NewOrm()
 
-	sql := `select member.member_id,member.account,team.team_member_id
+	sql := `select member.member_id,member.account,member.real_name,team.team_member_id
 from md_members as member
   left join md_team_member as team on team.team_id = ? and member.member_id = team.member_id
-  where member.account like ? AND team_member_id IS NULL
+  where member.account like ? or member.real_name like ? AND team_member_id IS NULL
   order by member.member_id desc
 limit ?;`
 
 	members := make([]*Member, 0)
 
-	_, err := o.Raw(sql, teamId, "%"+account+"%", limit).QueryRows(&members)
+	_, err := o.Raw(sql, teamId, "%"+account+"%", "%"+account+"%", limit).QueryRows(&members)
 
 	if err != nil {
-		beego.Error("查询团队用户时出错 ->", err)
+		logs.Error("查询团队用户时出错 ->", err)
 		return nil, err
 	}
 
@@ -226,7 +235,7 @@ limit ?;`
 	for _, member := range members {
 		item := KeyValueItem{}
 		item.Id = member.MemberId
-		item.Text = member.Account
+		item.Text = member.Account + "[" + member.RealName + "]"
 		items = append(items, item)
 	}
 	result.Result = items
@@ -249,7 +258,7 @@ and team.member_id = ? order by team.role_id asc limit 1;`
 	err := o.Raw(sql, bookId, memberId).QueryRow(m)
 
 	if err != nil {
-		beego.Error("查询用户项目所在团队失败 ->bookId=", bookId, " memberId=", memberId, err)
+		logs.Error("查询用户项目所在团队失败 ->bookId=", bookId, " memberId=", memberId, err)
 		return nil, err
 	}
 	return m, nil

@@ -8,15 +8,15 @@ import (
 	// "fmt"
 	// "os"
 	// "path"
-	// "github.com/astaxie/beego"
+	// beego "github.com/beego/beego/v2/adapter"
 	"strconv"
 	// "strings"
 	"time"
 	//"github.com/Unknwon/com
 	// "errors"
-	"github.com/astaxie/beego/orm"
-	// "github.com/astaxie/beego/validation"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/beego/beego/v2/client/orm"
+	// "github.com/beego/beego/v2/adapter/validation"
+	// _ "github.com/mattn/go-sqlite3"
 )
 
 //const (
@@ -30,8 +30,8 @@ type Standard struct {
 	Title    string
 	Uid      int64
 	Category string
-	Content  string `orm:"sie(5000)"`
-	Route    string
+	// Content  string `orm:"sie(5000)"`
+	Route string
 	// AttachmentId int64
 	// Attachments     []*Attachment `orm:"reverse(many)"` // fk 的反向关系
 	Created time.Time `orm:"auto_now_add;type(datetime)"`
@@ -43,13 +43,13 @@ type Library struct {
 	Id       int64
 	Number   string //规范的编号`orm:"unique"`
 	Title    string
-	LiNumber string    //完整编号，含年份
-	Category string    //行业分类
-	Year     string    //编号里的年份
-	Execute  string    //执行时间
-	Content  string    `orm:"sie(5000)"`
-	Created  time.Time `orm:"auto_now_add;type(datetime)"`
-	Updated  time.Time `orm:"auto_now;type(datetime)"`
+	LiNumber string //完整编号，含年份
+	Category string //行业分类
+	Year     string //编号里的年份
+	Execute  string //执行时间
+	// Content  string    `orm:"sie(5000)"`
+	Created time.Time `orm:"auto_now_add;type(datetime)"`
+	Updated time.Time `orm:"auto_now;type(datetime)"`
 }
 
 func init() {
@@ -231,7 +231,7 @@ type UserStandard struct {
 	Number   string //`orm:"unique"`
 	Title    string
 	Category string
-	Content  string
+	// Content  string
 	Route    string
 	Created  time.Time
 	Updated  time.Time
@@ -241,16 +241,16 @@ type UserStandard struct {
 
 //查询某个用户借阅记录
 func GetUserStandard(limit, offset int, searchText string) (ustds []UserStandard, err error) {
-	db := GetDB()
+	db := _db //GetDB()
 	if searchText != "" {
 		err = db.Order("standard.updated desc").Table("standard").
-			Select("standard.id,standard.number,standard.title,standard.category,standard.content,standard.route,user.nickname as user_name").
+			Select("standard.id,standard.number,standard.title,standard.category,standard.route,user.nickname as user_name").
 			Where("title LIKE ? OR number LIKE ?", "%"+searchText+"%", "%"+searchText+"%").
 			Joins("left JOIN user on user.id = standard.uid").
 			Limit(limit).Offset(offset).Scan(&ustds).Error
 	} else {
 		err = db.Order("standard.updated desc").Table("standard").
-			Select("standard.id,standard.number,standard.title,standard.category,standard.content,standard.route,user.nickname as user_name").
+			Select("standard.id,standard.number,standard.title,standard.category,standard.route,user.nickname as user_name").
 			Joins("left JOIN user on user.id = standard.uid").
 			Limit(limit).Offset(offset).Scan(&ustds).Error
 	}
@@ -262,7 +262,7 @@ func GetUserStandard(limit, offset int, searchText string) (ustds []UserStandard
 //查询规范记录总数
 func GetUserStandardCount(searchText string) (count int64, err error) {
 	//获取DB
-	db := GetDB()
+	db := _db //GetDB()
 	if searchText != "" {
 		err = db.Table("standard").
 			Where("title LIKE ? OR number LIKE ?", "%"+searchText+"%", "%"+searchText+"%").
@@ -275,14 +275,28 @@ func GetUserStandardCount(searchText string) (count int64, err error) {
 }
 
 //由分类SL和编号搜索有效版本库
-func SearchLiabraryNumber(Category, Number string) (*Library, error) {
-	o := orm.NewOrm()
-	library := new(Library)
-	qs := o.QueryTable("library")
-	err := qs.Filter("category", Category).Filter("number", Number).One(library)
-	if err != nil {
-		return nil, err
-	}
+// func SearchLiabraryNumber(Category, Number string) (*Library, error) {
+// 	o := orm.NewOrm()
+// 	library := new(Library)
+// 	qs := o.QueryTable("library")
+// 	err := qs.Filter("category", Category).Filter("number", Number).One(library)//当有多条返回时竟然出错
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return library, err
+// }
+
+// 获取第一条匹配的记录
+// db.Where("name = ?", "jinzhu").First(&user)
+// SELECT * FROM users WHERE name = 'jinzhu' ORDER BY id LIMIT 1;
+// 获取全部匹配的记录
+// db.Where("name <> ?", "jinzhu").Find(&users)
+// "name LIKE ?", "%jin%"
+func SearchLibraryNumber(Category, Number string) (library *Library, err error) {
+	db := _db //GetDB()
+	err = db.Order("library.updated desc").
+		Where("category LIKE ?", "%"+Category+"%").Where("number = ?", Number).
+		First(&library).Error
 	return library, err
 }
 
@@ -309,7 +323,7 @@ func GetStandard(id int64) (standard Standard, err error) {
 	return standard, err
 }
 
-func UpdateStandard(id,uid int64, number, title, route string) error {
+func UpdateStandard(id, uid int64, number, title, route string) error {
 	o := orm.NewOrm()
 	standard := &Standard{Id: id}
 	if o.Read(standard) == nil {

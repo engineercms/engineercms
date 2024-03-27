@@ -6,13 +6,13 @@ import (
 	// "fmt"
 	// "log"
 	// "time"
-	// "github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	// "github.com/astaxie/beego/validation"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/client/orm"
+	// "github.com/beego/beego/v2/adapter/validation"
 	// . "github.com/beego/admin/src/lib"
 )
 
-//搜索本地项目
+// 搜索本地项目
 func SearchProject(key string) (proj []*Project, err error) {
 	cond := orm.NewCondition()
 	cond1 := cond.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
@@ -27,7 +27,7 @@ func SearchProject(key string) (proj []*Project, err error) {
 	return proj, err
 }
 
-//搜索本地成果
+// 搜索本地成果
 func SearchProduct(key string) (prod []*Product, err error) {
 	cond := orm.NewCondition()
 	cond1 := cond.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
@@ -41,7 +41,7 @@ func SearchProduct(key string) (prod []*Product, err error) {
 	return prod, err
 }
 
-//搜索本地成果,分页
+// 搜索本地成果,分页
 func SearchProductPage(limit, offset int64, key string) (prod []*Product, err error) {
 	cond := orm.NewCondition()
 	cond1 := cond.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
@@ -53,9 +53,43 @@ func SearchProductPage(limit, offset int64, key string) (prod []*Product, err er
 		return prod, err
 	}
 	return prod, err
+	// db := GetDB()
+	// if isadmin {
+	// 	err = db.Order("cart.updated desc").Table("cart").Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
+	// 		Where("cart.status=?", status).
+	// 		Joins("left JOIN user on user.id = cart.user_id").
+	// 		Joins("left join product on product.id = cart.product_id").
+	// 		Joins("left join project AS t1 on t1.id = product.project_id").
+	// 		Joins("left join project AS t2 ON t2.id = product.top_project_id").
+	// 		Limit(limit).Offset(offset).Scan(&usercarts).Error
+	// }
 }
 
-//搜索某个项目里的成果：article的全文，待完善
+// 搜索本地成果,分页
+func SearchProductCount(key string) (count int64, err error) {
+	cond := orm.NewCondition()
+	cond1 := cond.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
+	o := orm.NewOrm()
+	qs := o.QueryTable("Product")
+	qs = qs.SetCond(cond1)
+	count, err = qs.Distinct().Count()
+	if err != nil {
+		return count, err
+	}
+	return count, err
+	// db := GetDB()
+	// if isadmin {
+	// 	err = db.Order("cart.updated desc").Table("cart").Select("cart.id,cart.user_id,cart.product_id,cart.status,cart.updated,user.nickname as user_nickname, product.title as product_title, product.top_project_id as top_project_id,t1.title as project_title,t2.title as top_project_title").
+	// 		Where("cart.status=?", status).
+	// 		Joins("left JOIN user on user.id = cart.user_id").
+	// 		Joins("left join product on product.id = cart.product_id").
+	// 		Joins("left join project AS t1 on t1.id = product.project_id").
+	// 		Joins("left join project AS t2 ON t2.id = product.top_project_id").
+	// 		Limit(limit).Offset(offset).Scan(&usercarts).Error
+	// }
+}
+
+// 搜索某个项目里的成果：article的全文，待完善
 func SearchProjProduct(pid, limit, offset int64, key, searchtext string) (count int64, prod []*Product, err error) {
 	cond := orm.NewCondition()
 	cond1 := cond.Or("ProjectId", pid)
@@ -109,8 +143,9 @@ func SearchProjProduct(pid, limit, offset int64, key, searchtext string) (count 
 	return count, prod, err
 }
 
-//搜索某个项目里的成果，分页，
-//递归出所有子孙项目，这个厉害
+// 搜索某个项目里的成果，分页，
+// 递归出所有子孙项目，这个厉害
+// 这个条件不行，id1或id2或id3 and code 或key 或
 func SearchProjProductPage(pid, limit, offset int64, key string) (prod []*Product, err error) {
 	cond := orm.NewCondition()
 	cond1 := cond.Or("ProjectId", pid)
@@ -123,7 +158,8 @@ func SearchProjProductPage(pid, limit, offset int64, key string) (prod []*Produc
 	}
 	if key != "" {
 		cond2 := cond.Or("Code__contains", key).Or("Title__contains", key).Or("Label__contains", key).Or("Principal__contains", key)
-		cond1 = cond1.AndCond(cond2)
+		// cond1 = cond1.AndCond(cond2)// 这里会出问题
+		cond1 = cond.AndCond(cond1).AndCond(cond2) // 这里是正确的写法
 		// cond2 := cond.AndCond(cond1).OrCond(cond.And("name", "slene"))
 		//循环
 		// cond2 := cond.Or("ProjectId", pid1).Or("ProjectId", pid2)……

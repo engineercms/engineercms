@@ -1,22 +1,23 @@
 <!-- 显示特定项目的搜索页面 -->
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>EngineerCMS</title>
   <script type="text/javascript" src="/static/js/jquery-2.1.3.min.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css"/>
-  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-table.min.css"/>
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-table.min.css" />
   <script type="text/javascript" src="/static/js/bootstrap-table.min.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap-table-zh-CN.min.js"></script>
   <script type="text/javascript" src="/static/js/bootstrap-table-export.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css"/>
+  <link rel="stylesheet" type="text/css" href="/static/font-awesome-4.7.0/css/font-awesome.min.css" />
   <script src="/static/js/tableExport.js"></script>
   <script type="text/javascript" src="/static/js/moment.min.js"></script>
 </head>
-
 <div class="container-fill">{{template "navbar" .}}</div>
+
 <body>
   <div class="bs-example">
     <div id="details">
@@ -29,13 +30,13 @@
           </button>
           <ul class="dropdown-menu" aria-labelledby="">
             <li>
-              <a href="#" onclick="addButton()"><i class="fa fa-plus">&nbsp;&nbsp;单附件模式</i></a>
+              <a href="javascript:void(0)" onclick="addButton()"><i class="fa fa-plus">&nbsp;&nbsp;单附件模式</i></a>
             </li>
             <li>
-              <a href="#" onclick="addButton1()"><i class="fa fa-plus-square-o">&nbsp;&nbsp;多附件模式</i></a>
+              <a href="javascript:void(0)" onclick="addButton1()"><i class="fa fa-plus-square-o">&nbsp;&nbsp;多附件模式</i></a>
             </li>
             <li>
-              <a href="#" onclick="addButton2()"><i class="fa fa-plus-square">&nbsp;&nbsp;文章模式</i></a>
+              <a href="javascript:void(0)" onclick="addButton2()"><i class="fa fa-plus-square">&nbsp;&nbsp;文章模式</i></a>
             </li>
           </ul>
         </div>
@@ -46,10 +47,10 @@
           </button>
           <ul class="dropdown-menu" aria-labelledby="">
             <li>
-              <a href="#" onclick="editorProdButton()"><i class="fa fa-pencil">&nbsp;&nbsp;编辑成果信息</i></a>
+              <a href="javascript:void(0)" onclick="editorProdButton()"><i class="fa fa-pencil">&nbsp;&nbsp;编辑成果信息</i></a>
             </li>
             <li>
-              <a href="#" onclick="editorAttachButton()"><i class="fa fa-edit">&nbsp;&nbsp;编辑成果附件</i></a>
+              <a href="javascript:void(0)" onclick="editorAttachButton()"><i class="fa fa-edit">&nbsp;&nbsp;编辑成果附件</i></a>
             </li>
           </ul>
         </div>
@@ -80,13 +81,14 @@
       url: '/v1/wx/searchprojectproductdata?keyword={{.Key}}&productid={{.Pid}}',
       method: 'get',
       search: 'true',
+      classes: "table table-striped", //这里设置表格样式
       showRefresh: 'true',
       showToggle: 'true',
       showColumns: 'true',
       toolbar:'#toolbar1',
       pagination: 'true',
       sidePagination: "server",
-      queryParamsType:'',
+      queryParamsType: '',
       //请求服务器数据时，你可以通过重写参数的方式添加一些额外的参数，例如 toolbar 中的参数 如果 queryParamsType = 'limit' ,返回参数必须包含
       // limit, offset, search, sort, order 否则, 需要包含: 
       // pageSize, pageNumber, searchText, sortName, sortOrder. 
@@ -94,15 +96,15 @@
       pageSize: 15,
       pageNumber: 1,
       pageList: [15, 50, 100],
-      uniqueId:"id",
-      singleSelect:"true",
-      clickToSelect:"true",
-      showExport:"true",
-      queryParams:function queryParams(params) {   //设置查询参数
+      uniqueId: "id",
+      singleSelect: "true",
+      clickToSelect: "true",
+      showExport: "true",
+      queryParams: function queryParams(params) { //设置查询参数
         var param = {
-            limit: params.pageSize,   //每页多少条数据
-            pageNo: params.pageNumber, // 页码
-            searchText:$(".search .form-control").val()
+          limit: params.pageSize, //每页多少条数据
+          pageNo: params.pageNumber, // 页码
+          searchText: $(".search .form-control").val()
         };
         //搜索框功能
         //当查询条件中包含中文时，get请求默认会使用ISO-8859-1编码请求参数，在服务端需要对其解码
@@ -115,111 +117,110 @@
         // }
         return param;
       },
-      columns: [
-        {
+      columns: [{
           title: '选择',
           radio: 'true',
           width: '10',
-          align:"center",
-          valign:"middle"
+          align: "center",
+          valign: "middle"
         },
         {
           // field: 'Number',
           title: '序号',
-          formatter:function(value,row,index){
-            return index+1
+          formatter: function(value, row, index) {
+            return index + 1
           },
-          align:"center",
-          valign:"middle"
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Code',
           title: '编号',
           // formatter:setCode,
-          halign:"center",
-          align:"left",
-          valign:"middle"
+          halign: "center",
+          align: "left",
+          valign: "middle"
         },
         {
           field: 'Title',
           title: '名称',
           // formatter:setTitle,
-          halign:"center",
-          align:"left",
-          valign:"middle"
+          halign: "center",
+          align: "left",
+          valign: "middle"
         },
         {
           field: 'Label',
           title: '标签',
-          formatter:setLable,
-          align:"center",
-          valign:"middle"
+          formatter: setLable,
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Principal',
           title: '设计',
-          align:"center",
-          valign:"middle"
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Articlecontent',
           title: '文章',
-          formatter:setArticle,
-          events:actionEvents,
-          align:"center",
-          valign:"middle"
+          formatter: setArticle,
+          events: actionEvents,
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Attachmentlink',
           title: '附件',
-          formatter:setAttachment,
-          events:actionEvents,
-          align:"center",
-          valign:"middle"
+          formatter: setAttachment,
+          events: actionEvents,
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Pdflink',
           title: 'PDF',
-          formatter:setPdf,
-          events:actionEvents,
-          align:"center",
-          valign:"middle"
+          formatter: setPdf,
+          events: actionEvents,
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Created',
           title: '建立时间',
-          formatter:localDateFormatter,
-          visible:"false",
-          align:"center",
-          valign:"middle"
+          formatter: localDateFormatter,
+          visible: "false",
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Updated',
           title: '更新时间',
-          formatter:localDateFormatter,
-          visible:"false",
-          align:"center",
-          valign:"middle"
+          formatter: localDateFormatter,
+          visible: "false",
+          align: "center",
+          valign: "middle"
         },
         {
           field: 'Relevancy',
           title: '关联',
-          formatter:RelevFormatter,
+          formatter: RelevFormatter,
           // events:actionRelevancy,
           // visible："false",
-          align:"center",
-          valign:"middle"
+          align: "center",
+          valign: "middle"
         }
       ]
     });
   });
-// 改变点击行颜色
-  $(function(){
-     $("#table0").on("click-row.bs.table",function(e,row,ele){
-         $(".info").removeClass("info");
-         $(ele).addClass("info");
-         rowid=row.Id;//全局变量
-     });
+  // 改变点击行颜色
+  $(function() {
+    $("#table0").on("click-row.bs.table", function(e, row, ele) {
+      $(".info").removeClass("info");
+      $(ele).addClass("info");
+      rowid = row.Id; //全局变量
+    });
   });
 
   // $(document).ready(function(){
@@ -240,9 +241,9 @@
   });
   // });
 
-  function getKey(){  
-    if(event.keyCode==13){  
-     var radio =$("input[type='radio']:checked").val();
+  function getKey() {
+    if (event.keyCode == 13) {
+      var radio = $("input[type='radio']:checked").val();
       $.ajax({
         type: "post", //这里是否一定要用post，是的，因为get会缓存？？
         url: "/v1/wx/searchprojectproductdata",
@@ -254,7 +255,7 @@
           $("#details").show();
           $('#table1').bootstrapTable('append', data);
           $('#table1').bootstrapTable('scrollTo', 'bottom');
-        }       
+        }
       });
     }
   }
@@ -311,9 +312,9 @@
     });
   })
 
-  function index1(value,row,index){
-  // alert( "Data Loaded: " + index );
-    return index+1
+  function index1(value, row, index) {
+    // alert( "Data Loaded: " + index );
+    return index + 1
   }
 
   function localDateFormatter(value) {
@@ -321,25 +322,23 @@
   }
   //关联
   function RelevFormatter(value) {
-    if (value){
-      if (value.length==1){//'<a href="/project/product/article/'
-        var array=value[0].Relevancy.split(",")
-        var relevarray = new Array() 
-        for (i=0;i<array.length;i++)
-        {
-          relevarray[i]=array[i];
+    if (value) {
+      if (value.length == 1) { //'<a href="/project/product/article/'
+        var array = value[0].Relevancy.split(",")
+        var relevarray = new Array()
+        for (i = 0; i < array.length; i++) {
+          relevarray[i] = array[i];
         }
         return relevarray.join(",");
         // articleUrl= '<a href="'+value[0].Link+'/'+value[0].Id+'" title="查看" target="_blank"><i class="fa fa-file-text-o"></i></a>';
         // return articleUrl;
-      }else if(value.length==0){
-                    
-      }else if(value.length>1){
+      } else if (value.length == 0) {
+
+      } else if (value.length > 1) {
         var relevarray = new Array()
-        for (i=0;i<value.length;i++)
-          {
-            relevarray[i]=value[i].Relevancy;
-          }
+        for (i = 0; i < value.length; i++) {
+          relevarray[i] = value[i].Relevancy;
+        }
         return relevarray.join(",");
         // articleUrl= "<a class='article' href='javascript:void(0)' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
         // return articleUrl;
@@ -347,37 +346,36 @@
     }
   }
 
-  function setCode(value,row,index){
-    return "<a href='/project/product/attachment/"+row.Id+"'>" + value + "</a>";
+  function setCode(value, row, index) {
+    return "<a href='/project/product/attachment/" + row.Id + "'>" + value + "</a>";
   }
 
-  function setLable(value,row,index){
+  function setLable(value, row, index) {
     // alert(value);
-    if (value){//注意这里如果value未定义则出错，一定要加这个判断。
-      var array=value.split(",")
-      var labelarray = new Array() 
-      for (i=0;i<array.length;i++)
-      {
-        labelarray[i]="<a href='/project/product/keysearch?keyword="+array[i]+"'>" + array[i] + "</a>";
+    if (value) { //注意这里如果value未定义则出错，一定要加这个判断。
+      var array = value.split(",")
+      var labelarray = new Array()
+      for (i = 0; i < array.length; i++) {
+        labelarray[i] = "<a href='/project/product/keysearch?keyword=" + array[i] + "'>" + array[i] + "</a>";
       }
-        return labelarray.join(",");
-      }
-  } 
-
-  function setTitle(value,row,index){
-    return "<a href='/project/product/"+row.Id+"'>" + value + "</a>";
+      return labelarray.join(",");
+    }
   }
 
-  function setArticle(value,row,index){
+  function setTitle(value, row, index) {
+    return "<a href='/project/product/" + row.Id + "'>" + value + "</a>";
+  }
+
+  function setArticle(value, row, index) {
     // return '<a class="article" href="javascript:void(0)" title="article"><i class="fa fa-file-text-o"></i></a>';
-    if (value){
-      if (value.length==1){//'<a href="/project/product/article/'
-        articleUrl= '<a href="'+value[0].Link+'/'+value[0].Id+'" title="查看" target="_blank"><i class="fa fa-file-text-o"></i></a>';
+    if (value) {
+      if (value.length == 1) { //'<a href="/project/product/article/'
+        articleUrl = '<a href="' + value[0].Link + '/' + value[0].Id + '" title="查看" target="_blank"><i class="fa fa-file-text-o"></i></a>';
         return articleUrl;
-      }else if(value.length==0){
-                    
-      }else if(value.length>1){
-        articleUrl= "<a class='article' href='javascript:void(0)' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
+      } else if (value.length == 0) {
+
+      } else if (value.length > 1) {
+        articleUrl = "<a class='article' href='javascript:void(0)' title='查看文章列表'><i class='fa fa-list-ol'></i></a>";
         return articleUrl;
       }
     }
@@ -388,10 +386,10 @@
       if (value.length == 1) {
         attachUrl = '<a href="/' + value[0].Link + '/' + value[0].Title + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
         return attachUrl;
-      }else if(value.length==0){
-                    
-      }else if(value.length>1){
-        attachUrl= "<a class='attachment' href='javascript:void(0)' title='查看附件列表'><i class='fa fa-list-ol'></i></a>";
+      } else if (value.length == 0) {
+
+      } else if (value.length > 1) {
+        attachUrl = "<a class='attachment' href='javascript:void(0)' title='查看附件列表'><i class='fa fa-list-ol'></i></a>";
         return attachUrl;
       }
     }
@@ -402,82 +400,81 @@
       if (value.length == 1) {
         pdfUrl = '<a href="/pdf?id=' + value[0].Id + '" title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o"></i></a>';
         return pdfUrl;
-      }else if(value.length==0){
-                    
-      }else if(value.length>1){
-        pdfUrl= "<a class='pdf' href='javascript:void(0)' title='查看pdf列表'><i class='fa fa-list-ol'></i></a>";
+      } else if (value.length == 0) {
+
+      } else if (value.length > 1) {
+        pdfUrl = "<a class='pdf' href='javascript:void(0)' title='查看pdf列表'><i class='fa fa-list-ol'></i></a>";
         return pdfUrl;
       }
     }
   }
 
   window.actionEvents = {
-    'click .article': function (e, value, row, index) {
-      var site=/http:\/\/.*?\//.exec(value[1].Link);//非贪婪模式 
-      if (site){
-        $('#articles').bootstrapTable('refresh', {url:'/project/product/syncharticles?site='+site+'&id='+row.Id});
-      }else{
-        $('#articles').bootstrapTable('refresh', {url:'/project/product/articles/'+row.Id});
+    'click .article': function(e, value, row, index) {
+      var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式 
+      if (site) {
+        $('#articles').bootstrapTable('refresh', { url: '/project/product/syncharticles?site=' + site + '&id=' + row.Id });
+      } else {
+        $('#articles').bootstrapTable('refresh', { url: '/project/product/articles/' + row.Id });
       }
       $('#modalarticle').modal({
-        show:true,
-        backdrop:'static'
-      }); 
+        show: true,
+        backdrop: 'static'
+      });
     },
-    'click .attachment': function (e, value, row, index) {
+    'click .attachment': function(e, value, row, index) {
       // for(var i=0;i<value.length;i++)
       // alert(value[i].Link);
       // var ret=/http:(.*)\:/.exec(value[i].Link);//http://127.0.0.1:
-      var site=/http:\/\/.*?\//.exec(value[1].Link);//非贪婪模式 
-      if (site){//跨域
+      var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式 
+      if (site) { //跨域
         // alert("1");
         // $.getJSON(ret+'project/product/attachment/'+row.Id,function(){
-          // $('#attachs').bootstrapTable('load', randomData());
+        // $('#attachs').bootstrapTable('load', randomData());
         // })
-        $('#attachs').bootstrapTable('refresh', {url:'/project/product/synchattachment?site='+site+'&id='+row.Id});
+        $('#attachs').bootstrapTable('refresh', { url: '/project/product/synchattachment?site=' + site + '&id=' + row.Id });
         // $('#attachs').bootstrapTable('refresh', {url:site+'project/product/attachment/'+row.Id});
-      }else{
+      } else {
         // alert("2");
-        $('#attachs').bootstrapTable('refresh', {url:'/project/product/attachment/'+row.Id});
-        }
-        $('#modalattach').modal({
-          show:true,
-          backdrop:'static'
-        });
+        $('#attachs').bootstrapTable('refresh', { url: '/project/product/attachment/' + row.Id });
+      }
+      $('#modalattach').modal({
+        show: true,
+        backdrop: 'static'
+      });
     },
 
-    'click .pdf': function (e, value, row, index) {
-      var site=/http:\/\/.*?\//.exec(value[1].Link);//非贪婪模式 
-      if (site){//跨域
-        $('#pdfs').bootstrapTable('refresh', {url:'/project/product/synchpdf?site='+site+'&id='+row.Id});
-      }else{
-        $('#pdfs').bootstrapTable('refresh', {url:'/project/product/pdf/'+row.Id});
+    'click .pdf': function(e, value, row, index) {
+      var site = /http:\/\/.*?\//.exec(value[1].Link); //非贪婪模式 
+      if (site) { //跨域
+        $('#pdfs').bootstrapTable('refresh', { url: '/project/product/synchpdf?site=' + site + '&id=' + row.Id });
+      } else {
+        $('#pdfs').bootstrapTable('refresh', { url: '/project/product/pdf/' + row.Id });
       }
       $('#modalpdf').modal({
-        show:true,
-        backdrop:'static'
-      }); 
+        show: true,
+        backdrop: 'static'
+      });
     },
   };
 
   //最后面弹出文章列表中用的_根据上面的click，弹出模态框，给模态框中的链接赋值
-  function setArticlecontent(value,row,index){
-    articleUrl= '<a href="'+value+'" title="下载" target="_blank"><i class="fa fa-file-text-o"></i></a>';
-      return articleUrl;
+  function setArticlecontent(value, row, index) {
+    articleUrl = '<a href="' + value + '" title="下载" target="_blank"><i class="fa fa-file-text-o"></i></a>';
+    return articleUrl;
   }
   //最后面弹出附件列表中用的
-  function setAttachlink(value,row,index){
-    attachUrl= '<a href="'+value+'" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
-      return attachUrl;
+  function setAttachlink(value, row, index) {
+    attachUrl = '<a href="' + value + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
+    return attachUrl;
   }
   //最后面弹出pdf列表中用的
-  function setPdflink(value,row,index){
-    pdfUrl= '<a href="'+value+'" title="下载" target="_blank"><i class="fa fa-file-pdf-o"></i></a>';
-      return pdfUrl;
-  }  
-</script>
-
-<!-- 文章列表 -->
+  function setPdflink(value, row, index) {
+    pdfUrl = '<a href="' + value + '" title="下载" target="_blank"><i class="fa fa-file-pdf-o"></i></a>';
+    return pdfUrl;
+  }
+  </script>
+  <!-- 文章列表 -->
   <div class="form-horizontal">
     <div class="modal fade" id="modalarticle">
       <div class="modal-dialog">
@@ -491,27 +488,20 @@
           <div class="modal-body">
             <div class="modal-body-content">
               <!-- <div id="pdfs" style="display:none"> -->
-                <!-- <h3>工程目录分级</h3> -->
-                <table id="articles"
-                      data-toggle="table"
-                      data-page-size="5"
-                      data-page-list="[5, 25, 50, All]"
-                      data-unique-id="id"
-                      data-pagination="true"
-                      data-side-pagination="client"
-                      data-click-to-select="true">
-                    <thead>     
-                    <tr>
-                      <th data-width="10" data-checkbox="true"></th>
-                      <th data-formatter="index1">#</th>
-                      <th data-field="Title">名称</th>
-                      <th data-field="Subtext">副标题</th>
-                      <th data-field="Link" data-formatter="setArticlecontent">查看</th>
-                      <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
-                      <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
-                    </tr>
-                  </thead>
-                </table>
+              <!-- <h3>工程目录分级</h3> -->
+              <table id="articles" data-toggle="table" data-page-size="5" data-page-list="[5, 25, 50, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-click-to-select="true">
+                <thead>
+                  <tr>
+                    <th data-width="10" data-checkbox="true"></th>
+                    <th data-formatter="index1">#</th>
+                    <th data-field="Title">名称</th>
+                    <th data-field="Subtext">副标题</th>
+                    <th data-field="Link" data-formatter="setArticlecontent">查看</th>
+                    <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
+                    <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
+                  </tr>
+                </thead>
+              </table>
               <!-- </div> -->
             </div>
           </div>
@@ -536,27 +526,20 @@
           <div class="modal-body">
             <div class="modal-body-content">
               <!-- <div id="pdfs" style="display:none"> -->
-                <!-- <h3>工程目录分级</h3> -->
-                <table id="attachs"
-                      data-toggle="table"
-                      data-page-size="5"
-                      data-page-list="[5, 25, 50, All]"
-                      data-unique-id="id"
-                      data-pagination="true"
-                      data-side-pagination="client"
-                      data-click-to-select="true">
-                    <thead>     
-                    <tr>
-                      <th data-width="10" data-checkbox="true"></th>
-                      <th data-formatter="index1">#</th>
-                      <th data-field="Title">名称</th>
-                      <th data-field="FileSize">大小</th>
-                      <th data-field="Link" data-formatter="setAttachlink">下载</th>
-                      <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
-                      <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
-                    </tr>
-                  </thead>
-                </table>
+              <!-- <h3>工程目录分级</h3> -->
+              <table id="attachs" data-toggle="table" data-page-size="5" data-page-list="[5, 25, 50, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-click-to-select="true">
+                <thead>
+                  <tr>
+                    <th data-width="10" data-checkbox="true"></th>
+                    <th data-formatter="index1">#</th>
+                    <th data-field="Title">名称</th>
+                    <th data-field="FileSize">大小</th>
+                    <th data-field="Link" data-formatter="setAttachlink">下载</th>
+                    <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
+                    <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
+                  </tr>
+                </thead>
+              </table>
               <!-- </div> -->
             </div>
           </div>
@@ -581,27 +564,20 @@
           <div class="modal-body">
             <div class="modal-body-content">
               <!-- <div id="pdfs" style="display:none"> -->
-                <!-- <h3>工程目录分级</h3> -->
-                <table id="pdfs"
-                      data-toggle="table"
-                      data-page-size="5"
-                      data-page-list="[5, 25, 50, All]"
-                      data-unique-id="id"
-                      data-pagination="true"
-                      data-side-pagination="client"
-                      data-click-to-select="true">
-                    <thead>     
-                    <tr>
-                      <th data-width="10" data-checkbox="true"></th>
-                      <th data-formatter="index1">#</th>
-                      <th data-field="Title">名称</th>
-                      <th data-field="FileSize">大小</th>
-                      <th data-field="Link" data-formatter="setPdflink">下载</th>
-                      <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
-                      <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
-                    </tr>
-                  </thead>
-                </table>
+              <!-- <h3>工程目录分级</h3> -->
+              <table id="pdfs" data-toggle="table" data-page-size="5" data-page-list="[5, 25, 50, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-click-to-select="true">
+                <thead>
+                  <tr>
+                    <th data-width="10" data-checkbox="true"></th>
+                    <th data-formatter="index1">#</th>
+                    <th data-field="Title">名称</th>
+                    <th data-field="FileSize">大小</th>
+                    <th data-field="Link" data-formatter="setPdflink">下载</th>
+                    <th data-field="Created" data-formatter="localDateFormatter">建立时间</th>
+                    <th data-field="Updated" data-formatter="localDateFormatter">修改时间</th>
+                  </tr>
+                </thead>
+              </table>
               <!-- </div> -->
             </div>
           </div>
@@ -612,6 +588,6 @@
       </div>
     </div>
   </div>
-
 </body>
+
 </html>

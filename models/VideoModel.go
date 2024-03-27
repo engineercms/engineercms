@@ -1,8 +1,9 @@
 package models
 
 import (
-	// "github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
+	// beego "github.com/beego/beego/v2/adapter"
+	"github.com/beego/beego/v2/client/orm"
+	"gorm.io/gorm/clause"
 	// _ "github.com/mattn/go-sqlite3"
 	// "strconv"
 	// "strings"
@@ -29,7 +30,7 @@ func init() {
 	orm.RegisterModel(new(Video)) //, new(Article)
 }
 
-//查询返回的视频表
+// 查询返回的视频表
 type UserVideo struct {
 	// gorm.Model
 	Id       int64  `json:"id"`
@@ -45,6 +46,16 @@ type UserVideo struct {
 	TopProjectId int64  `json:"topprojectid"`
 	UserNickname string `json:"usernickname"`
 	ProductTitle string `json:"producttitle"`
+}
+
+// 写入数据库
+func AddVideoData(videodata []Video) error {
+	db := _db //GetDB()
+	// err := db.Create(&photodatas).Error //sqlite不能超过999条
+	err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(videodata, 100).Error
+	// err := db.CreateInBatches(photodatas, 100).Error
+	// err = db.Where("user_id = ? AND temp_title = ?", userid, templetitle).FirstOrCreate(&usertemple).Error
+	return err
 }
 
 func CreateVideo(projectid, userid int64, content, name, url string) (id int64, err error) {
@@ -67,16 +78,17 @@ func CreateVideo(projectid, userid int64, content, name, url string) (id int64, 
 	return id, nil
 }
 
+// 更新视频封面
 func UpdateVideo(vid int64, coverurl string) error {
-	db := GetDB()
+	db := _db //GetDB()
 	err := db.Table("video").Where("id = ?", vid).Update("cover_url", coverurl).Error
 	return err
 }
 
-//查询所有视频
+// 查询所有视频
 func GetUserVideo(pid int64, limit, offset int, searchText string) (uservideos []UserVideo, err error) {
 	//获取DB Where("product.title LIKE ?", "%searchText%").不对
-	db := GetDB()
+	db := _db //GetDB()
 	if searchText != "" {
 		err = db.Order("video.updated desc").Table("video").Select("video.id,video.name,video.url,video.cover_url,video.content,video.user_id,video.project_id,video.updated,user.nickname as user_nickname, project.title as project_title").Where("project_id=?", pid).
 			Joins("left JOIN user on user.id = video.user_id").
@@ -93,10 +105,17 @@ func GetUserVideo(pid int64, limit, offset int, searchText string) (uservideos [
 	// db.Joins("JOIN pays ON pays.user_id = users.id", "jinzhu@example.org").Joins("JOIN credit_cards ON credit_cards.user_id = users.id").Where("user_id = ?", uid).Find(&pays)
 }
 
-//查询某个用户借阅记录总数
+// 查询最新的limit个视频数据，按yearmonth分组
+func GetVideoData(limit, offset int) (results []Video, err error) {
+	db := _db
+	err = db.Limit(limit).Order("created desc").Offset(offset).Table("video").Scan(&results).Error
+	return results, err
+}
+
+// 查询某个用户视频记录总数
 func GetUserVideoCount(pid int64, searchText string) (count int64, err error) {
 	//获取DB
-	db := GetDB()
+	db := _db //GetDB()
 	if searchText != "" {
 		err = db.Table("video").Where("project_id=?", pid).
 			Count(&count).Error
@@ -107,10 +126,10 @@ func GetUserVideoCount(pid int64, searchText string) (count int64, err error) {
 	return count, err
 }
 
-//查询一个video
+// 查询一个video
 func GetVideobyId(id int64) (video Video, err error) {
 	//获取DB
-	db := GetDB()
+	db := _db //GetDB()
 	err = db.Where("id = ?", id).Find(&video).Error
 	return video, err
 }
@@ -118,7 +137,7 @@ func GetVideobyId(id int64) (video Video, err error) {
 // 删除
 func Deletevideo(id int64) error {
 	//获取DB
-	db := GetDB()
+	db := _db //GetDB()
 	err := db.Where("id = ?", id).Delete(Video{}).Error
 	return err
 }

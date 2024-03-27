@@ -1,7 +1,7 @@
 <!-- 项目列表页 后端分页-->
 <!DOCTYPE html>
 {{template "header"}}
-<title>项目列表-EngiCMS</title>
+<title>项目列表|EngiCMS</title>
 <script src="/static/js/bootstrap-treeview.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-table.min.css" />
 <script type="text/javascript" src="/static/js/bootstrap-table.min.js"></script>
@@ -51,13 +51,13 @@
         </button>
         <ul class="dropdown-menu" aria-labelledby="">
           <li>
-            <a href="#" onclick="editorProjButton()"><i class="fa fa-pencil">&nbsp;&nbsp;编辑项目信息</i></a>
+            <a href="javascript:void(0)" onclick="editorProjButton()"><i class="fa fa-pencil">&nbsp;&nbsp;编辑项目信息</i></a>
           </li>
           <li>
-            <a href="#" onclick="editorProjTreeButton()"><i class="fa fa-edit">&nbsp;&nbsp;编辑项目目录</i></a>
+            <a href="javascript:void(0)" onclick="editorProjTreeButton()"><i class="fa fa-edit">&nbsp;&nbsp;编辑项目目录</i></a>
           </li>
           <li>
-            <a href="#" onclick="ProjPermissionButton()"><i class="fa fa-edit">&nbsp;&nbsp;设置项目权限</i></a>
+            <a href="javascript:void(0)" onclick="ProjPermissionButton()"><i class="fa fa-edit">&nbsp;&nbsp;设置项目权限</i></a>
           </li>
         </ul>
       </div>
@@ -68,9 +68,17 @@
         </button>
       </div>
     </div>
+
     <table id="table0"></table>
 
     <script type="text/javascript">
+      
+  $(function() {
+    var projectid = window.localStorage.getItem('projectid')
+    if (projectid != null) {
+      window.open("/project/"+projectid, "_self" )
+    }
+  })
     //项目列表
     $(function() {
       // 初始化【未接受】工作流表格
@@ -78,6 +86,7 @@
         url: '/project/getprojects',
         method: 'get',
         search: 'true',
+        classes: "table table-striped", //这里设置表格样式
         showRefresh: 'true',
         showToggle: 'true',
         showColumns: 'true',
@@ -199,6 +208,7 @@
         url: '/project/getprojects',
         // method: 'get',
         search: 'true',
+        classes: "table table-striped", //这里设置表格样式
         showRefresh: 'true',
         showToggle: 'true',
         showColumns: 'true',
@@ -369,7 +379,7 @@
     window.actionEvents = {
       //大事记
       'click .memorabilia': function(e, value, row, index) {
-        window.open('/project/gettimeline/' + row.Id );
+        window.open('/project/gettimeline/' + row.Id);
       },
       //日志
       'click .log': function(e, value, row, index) {
@@ -471,193 +481,193 @@
     // });
 
     // $(document).ready(function() {
-      $("#addButton").click(function() {
-        if (!{{.IsLogin }}) {
-          alert("权限不够！");
-          return;
-        }
-        $("label#info").remove();
-        $("#saveproj").removeClass("disabled")
-        $('#modalTable').modal({
-          show: true,
-          backdrop: 'static'
-        });
-      })
+    $("#addButton").click(function() {
+      if (!{{.IsLogin }}) {
+        alert("权限不够！");
+        return;
+      }
+      $("label#info").remove();
+      $("#saveproj").removeClass("disabled")
+      $('#modalTable').modal({
+        show: true,
+        backdrop: 'static'
+      });
+    })
 
-      // $("#editorProjButton").click(function() {
-      function editorProjButton() {
-        if (!{{.IsLogin }}) {
-          alert("未登陆！");
-          return;
-        }
-        var selectRow = $('#table0').bootstrapTable('getSelections');
-        if (selectRow.length < 1) {
-          alert("请先勾选项目！");
-          return;
-        }
-        if (selectRow.length > 1) {
-          alert("请不要勾选一个以上！");
-          return;
-        }
-        // alert({{.IsAdmin}})
-        $.ajax({
-          type: "get",
-          url: "/v1/project/projectuserrole",
-          data: { pid: selectRow[0].Id },
-          success: function(data, status) {
-            // alert(data.userrole)
-            if (data.userrole=="isme"||{{.IsAdmin}}){
-              showprojecteditor()
-            }else{
-              alert("非管理员、非本人，无修改权限")
-            }
-          },
-          complete:function(data){
-            //请求完成的处理
-          },
-          error:function(data){
-            //请求出错处理
+    // $("#editorProjButton").click(function() {
+    function editorProjButton() {
+      if (!{{.IsLogin }}) {
+        alert("未登陆！");
+        return;
+      }
+      var selectRow = $('#table0').bootstrapTable('getSelections');
+      if (selectRow.length < 1) {
+        alert("请先勾选项目！");
+        return;
+      }
+      if (selectRow.length > 1) {
+        alert("请不要勾选一个以上！");
+        return;
+      }
+      // alert({{.IsAdmin}})
+      $.ajax({
+        type: "get",
+        url: "/v1/project/projectuserrole",
+        data: { pid: selectRow[0].Id },
+        success: function(data, status) {
+          // alert(data.userrole)
+          if (data.userrole == "isme" || {{.IsAdmin }}) {
+            showprojecteditor()
+          } else {
+            alert("非管理员、非本人，无修改权限")
           }
-        });
+        },
+        complete: function(data) {
+          //请求完成的处理
+        },
+        error: function(data) {
+          //请求出错处理
+        }
+      });
+    }
+
+    function showprojecteditor() {
+      var selectRow = $('#table0').bootstrapTable('getSelections');
+      $("input#cid").remove();
+      var th1 = "<input id='cid' type='hidden' name='cid' value='" + selectRow[0].Id + "'/>";
+      $(".modal-body").append(th1); //这里是否要换名字$("p").remove();
+      $("#projcode1").val(selectRow[0].Code);
+      $("#projname1").val(selectRow[0].Title);
+      $("#projlabel1").val(selectRow[0].Label);
+      $("#projprincipal1").val(selectRow[0].Principal);
+      $('#modalTable1').modal({
+        show: true,
+        backdrop: 'static'
+      });
+    }
+    // 编辑项目目录
+    function editorProjTreeButton() {
+      if (!{{.IsLogin }}) {
+        alert("未登陆！");
+        return;
+      }
+      var selectRow = $('#table0').bootstrapTable('getSelections');
+      if (selectRow.length < 1) {
+        alert("请先勾选项目！");
+        return;
+      }
+      if (selectRow.length > 1) {
+        alert("请不要勾选一个以上！");
+        return;
+      }
+      // alert({{.IsAdmin}})
+      $.ajax({
+        type: "get",
+        url: "/v1/project/projectuserrole",
+        data: { pid: selectRow[0].Id },
+        success: function(data, status) {
+          // alert(data.userrole)
+          if (data.userrole == "isme" || {{.IsAdmin }}) {
+            //跳转到新页面
+            window.location.href = "/v1/project/userprojecteditortree?pid=" + selectRow[0].Id;
+          } else {
+            alert("非管理员、非本人，无修改权限")
+          }
+        },
+        complete: function(data) {
+          //请求完成的处理
+        },
+        error: function(data) {
+          //请求出错处理
+        }
+      });
+    }
+    // 设置项目权限
+    function ProjPermissionButton() {
+      if (!{{.IsLogin }}) {
+        alert("未登陆！");
+        return;
+      }
+      var selectRow = $('#table0').bootstrapTable('getSelections');
+      if (selectRow.length < 1) {
+        alert("请先勾选项目！");
+        return;
+      }
+      if (selectRow.length > 1) {
+        alert("请不要勾选一个以上！");
+        return;
+      }
+      // alert({{.IsAdmin}})
+      $.ajax({
+        type: "get",
+        url: "/v1/project/projectuserrole",
+        data: { pid: selectRow[0].Id },
+        success: function(data, status) {
+          // alert(data.userrole)
+          if (data.userrole == "isme" || {{.IsAdmin }}) {
+            //跳转到新页面
+            window.location.href = "/v1/project/userprojectpermission?pid=" + selectRow[0].Id;
+          } else {
+            alert("非管理员、非本人，无修改权限")
+          }
+        },
+        complete: function(data) {
+          //请求完成的处理
+        },
+        error: function(data) {
+          //请求出错处理
+        }
+      });
+    }
+    // 删除项目
+    $("#deleteButton").click(function() {
+      if ({{.role }} != 1) {
+        alert("权限不够！");
+        return;
       }
 
-      function showprojecteditor(){
-        var selectRow = $('#table0').bootstrapTable('getSelections');
-        $("input#cid").remove();
-        var th1 = "<input id='cid' type='hidden' name='cid' value='" + selectRow[0].Id + "'/>";
-        $(".modal-body").append(th1); //这里是否要换名字$("p").remove();
-        $("#projcode1").val(selectRow[0].Code);
-        $("#projname1").val(selectRow[0].Title);
-        $("#projlabel1").val(selectRow[0].Label);
-        $("#projprincipal1").val(selectRow[0].Principal);
-        $('#modalTable1').modal({
-          show: true,
-          backdrop: 'static'
-        });
+      var selectRow = $('#table0').bootstrapTable('getSelections');
+      if (selectRow.length <= 0) {
+        alert("请先勾选项目！");
+        return false;
       }
-      // 编辑项目目录
-      function editorProjTreeButton() {
-        if (!{{.IsLogin }}) {
-          alert("未登陆！");
-          return;
+      if (confirm("确定删除项目吗？第一次提示！")) {} else {
+        return false;
+      }
+      if (confirm("确定删除项目吗？第二次提示！")) {} else {
+        return false;
+      }
+      if (confirm("确定删除项目吗？一旦删除将无法恢复！")) {
+        var title = $.map(selectRow, function(row) {
+          return row.Title;
+        })
+        var ids = "";
+        for (var i = 0; i < selectRow.length; i++) {
+          if (i == 0) {
+            ids = selectRow[i].Id;
+          } else {
+            ids = ids + "," + selectRow[i].Id;
+          }
         }
-        var selectRow = $('#table0').bootstrapTable('getSelections');
-        if (selectRow.length < 1) {
-          alert("请先勾选项目！");
-          return;
-        }
-        if (selectRow.length > 1) {
-          alert("请不要勾选一个以上！");
-          return;
-        }
-        // alert({{.IsAdmin}})
+        //删除前端表格用的
+        var ids2 = $.map($('#table0').bootstrapTable('getSelections'), function(row) {
+          return row.Id;
+        });
         $.ajax({
-          type: "get",
-          url: "/v1/project/projectuserrole",
-          data: { pid: selectRow[0].Id },
+          type: "post",
+          url: "/project/deleteproject",
+          data: { ids: ids },
           success: function(data, status) {
-            // alert(data.userrole)
-            if (data.userrole=="isme"||{{.IsAdmin}}){
-              //跳转到新页面
-              window.location.href = "/v1/project/userprojecteditortree?pid="+selectRow[0].Id;
-            }else{
-              alert("非管理员、非本人，无修改权限")
-            }
-          },
-          complete:function(data){
-            //请求完成的处理
-          },
-          error:function(data){
-            //请求出错处理
+            alert("删除“" + data.data + "”成功！(status:" + status + ".)");
+            //删除已选数据
+            $('#table0').bootstrapTable('remove', {
+              field: 'Id',
+              values: ids2
+            });
           }
         });
       }
-      // 设置项目权限
-      function ProjPermissionButton() {
-        if (!{{.IsLogin }}) {
-          alert("未登陆！");
-          return;
-        }
-        var selectRow = $('#table0').bootstrapTable('getSelections');
-        if (selectRow.length < 1) {
-          alert("请先勾选项目！");
-          return;
-        }
-        if (selectRow.length > 1) {
-          alert("请不要勾选一个以上！");
-          return;
-        }
-        // alert({{.IsAdmin}})
-        $.ajax({
-          type: "get",
-          url: "/v1/project/projectuserrole",
-          data: { pid: selectRow[0].Id },
-          success: function(data, status) {
-            // alert(data.userrole)
-            if (data.userrole=="isme"||{{.IsAdmin}}){
-              //跳转到新页面
-              window.location.href = "/v1/project/userprojectpermission?pid="+selectRow[0].Id;
-            }else{
-              alert("非管理员、非本人，无修改权限")
-            }
-          },
-          complete:function(data){
-            //请求完成的处理
-          },
-          error:function(data){
-            //请求出错处理
-          }
-        });
-      }
-      // 删除项目
-      $("#deleteButton").click(function() {
-        if ({{.role }} != 1) {
-          alert("权限不够！");
-          return;
-        }
-
-        var selectRow = $('#table0').bootstrapTable('getSelections');
-        if (selectRow.length <= 0) {
-          alert("请先勾选项目！");
-          return false;
-        }
-        if (confirm("确定删除项目吗？第一次提示！")) {} else {
-          return false;
-        }
-        if (confirm("确定删除项目吗？第二次提示！")) {} else {
-          return false;
-        }
-        if (confirm("确定删除项目吗？一旦删除将无法恢复！")) {
-          var title = $.map(selectRow, function(row) {
-            return row.Title;
-          })
-          var ids = "";
-          for (var i = 0; i < selectRow.length; i++) {
-            if (i == 0) {
-              ids = selectRow[i].Id;
-            } else {
-              ids = ids + "," + selectRow[i].Id;
-            }
-          }
-          //删除前端表格用的
-          var ids2 = $.map($('#table0').bootstrapTable('getSelections'), function(row) {
-            return row.Id;
-          });
-          $.ajax({
-            type: "post",
-            url: "/project/deleteproject",
-            data: { ids: ids },
-            success: function(data, status) {
-              alert("删除“" + data + "”成功！(status:" + status + ".)");
-              //删除已选数据
-              $('#table0').bootstrapTable('remove', {
-                field: 'Id',
-                values: ids2
-              });
-            }
-          });
-        }
-      })
+    })
     // })
 
     /*数据json*/
@@ -767,7 +777,7 @@
             url: "/project/addproject",
             data: { code: projcode, name: projname, label: projlabel, principal: projprincipal, ids: ids }, //
             success: function(data, status) {
-              alert("添加“" + data + "”成功！(status:" + status + ".)");
+              alert("添加“" + data.data + "”成功！(status:" + status + ".)");
               //按确定后再刷新
               $('#modalTable').modal('hide');
               $('#table0').bootstrapTable('refresh', { url: '/project/getprojects' });
@@ -798,7 +808,7 @@
           url: "/project/updateproject",
           data: { code: projcode, name: projname, label: projlabel, principal: projprincipal, pid: pid }, //
           success: function(data, status) {
-            alert( data + "(status:" + status + ".)");
+            alert(data.data + "(status:" + status + ".)");
             //按确定后再刷新
             $('#modalTable1').modal('hide');
             $('#table0').bootstrapTable('refresh', { url: '/project/getprojects' });
@@ -1113,37 +1123,33 @@
 
   // 搜索所有项目成果
   $("#search").click(function() {
-    window.location.href="/v1/wx/searchproduct?keyword="+$("#keyword2").val()
+    window.location.href = "/v1/wx/searchproduct?keyword=" + $("#keyword2").val()
   });
-  function searchAllProjectsProduct(){
-    window.location.href="/v1/wx/searchproduct?keyword="+$("#keyword2").val()
+
+  function searchAllProjectsProduct() {
+    window.location.href = "/v1/wx/searchproduct?keyword=" + $("#keyword2").val()
   }
+
   function getKey2() {
     if (event.keyCode == 13) {
-      window.location.href="/v1/wx/searchproduct?keyword="+$("#keyword2").val()
+      window.location.href = "/v1/wx/searchproduct?keyword=" + $("#keyword2").val()
     }
   }
   // 搜索选定项目成果
   $("#search3").click(function() {
-    window.location.href="/v1/wx/searchprojectproduct?productid="+$("#cid").val()+"&keyword="+$("#keyword3").val()
+    window.location.href = "/v1/wx/searchprojectproduct?productid=" + $("#cid").val() + "&keyword=" + $("#keyword3").val()
   });
-  function searchProjectProduct(){
-    window.location.href="/v1/wx/searchprojectproduct?productid="+$("#cid").val()+"&keyword="+$("#keyword3").val()
+
+  function searchProjectProduct() {
+    window.location.href = "/v1/wx/searchprojectproduct?productid=" + $("#cid").val() + "&keyword=" + $("#keyword3").val()
   }
+
   function getKey3() {
     if (event.keyCode == 13) {
-      window.location.href="/v1/wx/searchprojectproduct?productid="+$("#cid").val()+"&keyword="+$("#keyword3").val()
+      window.location.href = "/v1/wx/searchprojectproduct?productid=" + $("#cid").val() + "&keyword=" + $("#keyword3").val()
     }
   }
   </script>
-  <!-- <div>
-  <ul>
-    <li>第一个色块</li>
-    <li>第二个色块</li>
-    <li>第三个色块</li>
-    <li>第四个色块</li>
-  </ul>
-</div> -->
 </body>
 
 </html>

@@ -11,7 +11,9 @@ import (
 	// "log"
 	// "math/rand"
 	// "os"
-	"github.com/astaxie/beego"
+	// beego "github.com/beego/beego/v2/adapter"
+	// "github.com/beego/beego/v2/core/logs"
+	// "github.com/beego/beego/v2/server/web"
 	"path"
 	"regexp"
 	// "strconv"
@@ -20,7 +22,7 @@ import (
 	// "time"
 )
 
-//分离图号图名
+// 分离图号图名
 func Record(filenameWithSuffix string) (Suffix, FileNumber, FileName, ProNumber, ProJiduan, ProLeixing, ProZhuanye string) {
 	FileSuffix := path.Ext(filenameWithSuffix) //只留下后缀名
 	LengthSuffix := len([]rune(FileSuffix))
@@ -234,7 +236,7 @@ func Record(filenameWithSuffix string) (Suffix, FileNumber, FileName, ProNumber,
 	return Suffix, FileNumber, FileName, ProNumber, ProJiduan, ProLeixing, ProZhuanye
 }
 
-//分离规范名称为分类，编号，年代和名称，用于规范上传
+// 分离规范名称为分类，编号，年代和名称，用于规范上传
 func SplitStandardName(filenameWithSuffix string) (Category, Categoryname, FileNumber, Year, FileName, Suffix string) {
 	FileSuffix := path.Ext(filenameWithSuffix) //只留下后缀名
 	LengthSuffix := len([]rune(FileSuffix))
@@ -337,6 +339,18 @@ func SplitStandardName(filenameWithSuffix string) (Category, Categoryname, FileN
 			Category = "NACE"
 		case "RC":
 			Category = "RCC"
+		case "HB":
+			Category = "HB"
+		case "GJB":
+			Category = "GJB"
+		case "JJF":
+			Category = "JJF"
+		case "QJ":
+			Category = "QJ"
+		case "TSG":
+			Category = "TSG"
+		case "YBT":
+			Category = "YBT"
 		default: //图集
 			Category = "Atlas"
 		}
@@ -382,8 +396,8 @@ func SplitStandardName(filenameWithSuffix string) (Category, Categoryname, FileN
 	return Category, Categoryname, FileNumber, Year, FileName, Suffix
 }
 
-//分离上面结果中FileNumber的分类GB和编号50268
-//用于搜索
+// 分离上面结果中FileNumber的分类GB和编号50268
+// 用于搜索
 func SplitStandardFileNumber(filenumber string) (Category, Categoryname, Number string) {
 	r, _ := regexp.Compile(`[a-zA-Z]+\s[0-9A-Za-z\.]+[-][0-9]+`)
 	if r.MatchString(filenumber) { //如果符合正则表达式
@@ -450,6 +464,18 @@ func SplitStandardFileNumber(filenumber string) (Category, Categoryname, Number 
 			Category = "NACE"
 		case "RC":
 			Category = "RCC"
+		case "HB":
+			Category = "HB"
+		case "GJB":
+			Category = "GJB"
+		case "JJF":
+			Category = "JJF"
+		case "QJ":
+			Category = "QJ"
+		case "TSG":
+			Category = "TSG"
+		case "YBT":
+			Category = "YBT"
 		default: //图集
 			Category = "Atlas"
 		}
@@ -461,8 +487,8 @@ func SplitStandardFileNumber(filenumber string) (Category, Categoryname, Number 
 	return Category, Categoryname, Number
 }
 
-//下面这个没什么用了吧，用record代替
-//对于01水电院企业标准.pdf如何办呢，所以最简单是取得第一个汉字的位置即可
+// 下面这个没什么用了吧，用record代替
+// 对于01水电院企业标准.pdf如何办呢，所以最简单是取得第一个汉字的位置即可
 func SubStrings(filenameWithSuffix string) (substr1, substr2 string) {
 	fileSuffix := path.Ext(filenameWithSuffix) //只留下后缀名
 	//	fmt.Println("fileSuffix=", fileSuffix)     //fileSuffix= .go
@@ -484,7 +510,7 @@ func SubStrings(filenameWithSuffix string) (substr1, substr2 string) {
 		if loc != nil {
 			end = loc[0]
 			fulleFilename1 = SubString(filenameOnly, 0, end)
-			beego.Info(fulleFilename1)
+			// beego.Info(fulleFilename1)
 			end = end - 1
 		} else {
 			fulleFilename1 = filenameOnly
@@ -499,9 +525,9 @@ func SubStrings(filenameWithSuffix string) (substr1, substr2 string) {
 	return fulleFilename1, fulleFilename2
 }
 
-//取得usertemple名称，日期和版本
+// 取得usertemple名称，日期和版本
 func MathcadName(filenameWithSuffix string) (Suffix, FileNumber, FileName, Version string) {
-	beego.Info("文件名：", filenameWithSuffix)
+	// beego.Info("文件名：", filenameWithSuffix)
 	FileSuffix := path.Ext(filenameWithSuffix) //只留下后缀名
 	LengthSuffix := len([]rune(FileSuffix))
 	Suffix = SubString(FileSuffix, 1, LengthSuffix-1)
@@ -509,7 +535,7 @@ func MathcadName(filenameWithSuffix string) (Suffix, FileNumber, FileName, Versi
 	var filenameOnly string
 	filenameOnly = strings.TrimSuffix(filenameWithSuffix, FileSuffix) //只留下文件名，无后缀
 
-	beego.Info("文件全名：", filenameOnly) //filenameOnly= mai
+	// beego.Info("文件全名：", filenameOnly) //filenameOnly= mai
 	//这个测试一个字符串是否符合一个表达式。
 	//    match, _ := regexp.MatchString("p([a-z]+)ch", "peach")
 	//    fmt.Println(match)
@@ -523,13 +549,13 @@ func MathcadName(filenameWithSuffix string) (Suffix, FileNumber, FileName, Versi
 		vindex = UnicodeIndex(filenameOnly, "_V")
 	}
 	// beego.Info(vindex)
-	beego.Info("文件名：", filenameOnly)
+	// beego.Info("文件名：", filenameOnly)
 	if vindex == 0 {
 		Version = "0.0.0"
 	} else {
 		Version = SubString(filenameOnly, vindex+2, lengthname-vindex-1)
 		filenameOnly = SubString(filenameOnly, 0, vindex)
-		beego.Info("文件名：", filenameOnly)
+		// beego.Info("文件名：", filenameOnly)
 		lengthname = len([]rune(filenameOnly))
 	}
 
@@ -543,28 +569,28 @@ func MathcadName(filenameWithSuffix string) (Suffix, FileNumber, FileName, Versi
 		loc := re.FindStringIndex(filenameOnly)
 		if loc != nil { //如果有编号——如果没文件名？？？？？
 			FileNumber = SubString(filenameOnly, 0, loc[0])
-			// beego.Info("文件编号：", FileNumber)
+			// logs.Info("文件编号：", FileNumber)
 			FileName = SubString(filenameOnly, loc[0], lengthname-loc[0])
-			// beego.Info("文件名：", FileName)
+			// logs.Info("文件名：", FileName)
 		} else { //如果没有编号
 			FileNumber = filenameOnly
-			// fmt.Println("文件编号：", FileNumber)
+			// logs.Info("文件编号：", FileNumber)
 			FileName = filenameOnly
-			// fmt.Println("文件名：", filenameOnly)
+			// logs.Info("文件名：", filenameOnly)
 		}
 	} else { //如果有空格
 		re, _ := regexp.Compile("[^a-zA-Z0-9-.~]")
 		loc := re.FindStringIndex(filenameOnly)
 		if loc != nil { //如果有编号
 			FileNumber = SubString(filenameOnly, 0, loc[0])
-			// fmt.Println("文件编号：", FileNumber)
+			// logs.Info("文件编号：", FileNumber)
 			FileName = SubString(filenameOnly, loc[0], lengthname-loc[0])
-			// fmt.Println("文件名：", FileName)
+			// logs.Info("文件名：", FileName)
 		} else { //如果没有编号
 			FileNumber = filenameOnly
-			// fmt.Println("文件编号：", FileNumber)
+			// logs.Info("文件编号：", FileNumber)
 			FileName = filenameOnly
-			// fmt.Println("文件名：", filenameOnly)
+			// logs.Info("文件名：", filenameOnly)
 		}
 	}
 
@@ -587,7 +613,7 @@ func UnicodeIndex(str, substr string) int {
 	return result
 }
 
-//如果不够length，返回全部长度范围
+// 如果不够length，返回全部长度范围
 func SubString(str string, begin, length int) (substr string) {
 	// 将字符串的转换成[]rune
 	rs := []rune(str)

@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="/static/wordpress/noticons.css">
   <link rel="stylesheet" href="/static/wordpress/blog.css" type="text/css" media="screen">
   <link rel="stylesheet" href="/static/wordpress/blog-sidebar.css" type="text/css" media="screen">
+
+  <link rel="stylesheet" href="/static/froala/css/froala_style.min.css">
+
   <meta name="description" content="With Recurring Payments, your supporters become your sustainers, and a reliable income stream frees you to push your creative boundaries.">
   <title>{{.product.Title}}</title>
   <!-- <link rel="alternate" type="application/rss+xml" title="The WordPress.com Blog » A New Way to Earn Money on WordPress.com Comments Feed" href="https://en.blog.wordpress.com/2019/11/12/recurring-payments/feed/"> -->
@@ -153,62 +156,71 @@
     filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, .5));
   }
 
-    .next_article{
-      list-style: none;
-    }
-    .prev_article{
-      list-style: none;
-    }
+  .next_article {
+    list-style: none;
+  }
 
-    #post-41687 .article_next_prev span {
-      width: 51px;
-      height: 26px;
-      line-height: 26px;
-      /*display: inline-block;*/
-      color: #fff;
-      padding-left: 27px;
-      margin-right: 7px;
-      background: #999;
-    }
-    #post-41687 .article_next_prev a {
-      text-decoration: none;
-      color: #333;
-    }
-    #post-41687 .article_next_prev .prev_article {
-      margin-bottom: 3px;
-    }
+  .prev_article {
+    list-style: none;
+  }
 
-    #post-41687 .article_next_prev .prev_article span {
-      background-image: url("/static/img/skin-type-icon.png");
-      background-repeat: no-repeat;
-      background-position: 8px -111px;
-      margin-right: 7px;
-    }
-    #post-41687 .article_next_prev .next_article span {
-      background-image: url("/static/img/skin-type-icon.png");
-      background-repeat: no-repeat;
-      background-position: 8px -140px;
-      margin-right: 7px;
-    }
-    #post-41687 .article_next_prev li:hover span {
-      background-color: #3d84b0;
-    }
-    #post-41687 .article_next_prev li:hover a {
-      color: #3d84b0;
-    }
+  #post-41687 .article_next_prev span {
+    width: 51px;
+    height: 26px;
+    line-height: 26px;
+    /*display: inline-block;*/
+    color: #fff;
+    padding-left: 27px;
+    margin-right: 7px;
+    background: #999;
+  }
 
-    #post-41687 .article_next_prev li:hover span {
-      background-color: #c88326;
-    }
-    #post-41687 .article_next_prev li:hover a {
-      color: #c88326;
-    }
-    #post-41687 .article_next_prev #btnDigg {
-      background: #f90;
-    }
-    #post-41687 .article_next_prev #btnBury {
-      background: #ff7900;
-    }
+  #post-41687 .article_next_prev a {
+    text-decoration: none;
+    color: #333;
+  }
+
+  #post-41687 .article_next_prev .prev_article {
+    margin-bottom: 3px;
+  }
+
+  #post-41687 .article_next_prev .prev_article span {
+    background-image: url("/static/img/skin-type-icon.png");
+    background-repeat: no-repeat;
+    background-position: 8px -111px;
+    margin-right: 7px;
+  }
+
+  #post-41687 .article_next_prev .next_article span {
+    background-image: url("/static/img/skin-type-icon.png");
+    background-repeat: no-repeat;
+    background-position: 8px -140px;
+    margin-right: 7px;
+  }
+
+  #post-41687 .article_next_prev li:hover span {
+    background-color: #3d84b0;
+  }
+
+  #post-41687 .article_next_prev li:hover a {
+    color: #3d84b0;
+  }
+
+  #post-41687 .article_next_prev li:hover span {
+    background-color: #c88326;
+  }
+
+  #post-41687 .article_next_prev li:hover a {
+    color: #c88326;
+  }
+
+  #post-41687 .article_next_prev #btnDigg {
+    background: #f90;
+  }
+
+  #post-41687 .article_next_prev #btnBury {
+    background: #ff7900;
+  }
   </style>
   <style id="wp-block-library-inline-css">
   .has-text-align-justify {
@@ -266,9 +278,9 @@
   <div id="wrapper" class="en-wrapper">
     <div id="content" class="widecolumn single">
       <style type="text/css">
-        #post-focus.has-header-img {
-          background-image: url("/static/wordpress/anthony-delanoix-hzgs56ze49s-unsplash.jpg?w=2000");
-        }
+      #post-focus.has-header-img {
+        background-image: url("/static/wordpress/anthony-delanoix-hzgs56ze49s-unsplash.jpg?w=2000");
+      }
       </style>
       <div id="blog-header" class="single has-header-img">
         <div class="inner">
@@ -321,7 +333,7 @@
         <div id="entry-comments">
           <h3 id="comments" class="commentsheader">26 Comments</h3>
           <p class="nocomments"><span>Comments are closed.</span></p>
-    <!--   <div class="commentnav">
+          <!--   <div class="commentnav">
             <div class="alignleft"></div>
             <div class="alignright"></div>
           </div>

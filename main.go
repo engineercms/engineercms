@@ -1,26 +1,20 @@
 package main
 
 import (
-	// "github.com/3xxx/engineercms/commands"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	_ "github.com/astaxie/beego/session/memcache"
-	_ "github.com/astaxie/beego/session/mysql"
-	_ "github.com/astaxie/beego/session/redis"
-	"github.com/astaxie/beego/toolbox"
-	"github.com/engineercms/engineercms/commands/daemon"
-	"github.com/engineercms/engineercms/conf"
-	"github.com/engineercms/engineercms/controllers"
-	_ "github.com/engineercms/engineercms/controllers/version"
-	"github.com/engineercms/engineercms/models"
-	_ "github.com/engineercms/engineercms/routers"
+	"errors"
+	"fmt"
+	"github.com/3xxx/engineercms/commands/daemon"
+	"github.com/3xxx/engineercms/conf"
+	"github.com/3xxx/engineercms/controllers"
+	"github.com/3xxx/engineercms/models"
+	_ "github.com/3xxx/engineercms/routers" //这个最大的坑！！！！！
+	"github.com/beego/beego/v2/adapter/toolbox"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/i18n"
 	"github.com/kardianos/service"
 	_ "github.com/mattn/go-sqlite3"
-	// "github.com/go-xorm/xorm"
-	// "github.com/astaxie/beego/plugins/cors"
-
-	// _ "github.com/mattn/go-sqlite3"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -29,8 +23,11 @@ import (
 	"path"
 	"strings"
 	"time"
-	// _ "github.com/engineercms/engineercms/routers"
 )
+
+// graceful错误——删除router下的另外2个文件，重新运行生成即可。
+// 项目引用了vendor里面的库，里面库go文件在init函数里面有同样的命名，从而在加载引用的时候会被调用，从而在main运行的时候提示已经解析多次。
+// 用goland查找默认是该项目下的文件，可以通过指定vendor目录进行查找。
 
 // 2021-8-30发现建表有问题：
 // 1.beego是首先运行controllers里的init()，然后运行models里的init()，这是不科学的。gorm就先运行models里的init()，建立表格
@@ -40,10 +37,32 @@ import (
 
 func main() {
 	// beego.AddFuncMap("dict", dict)
-	beego.AddFuncMap("loadtimes", loadtimes)
-	beego.AddFuncMap("subsuffix", subsuffix)
-	//默认关闭orm调试模式
-	ormDebug := beego.AppConfig.String("ormDebug")
+	//web.AutoRender = false
+	//beego.TemplateLeft = "<<<"
+	//beego.TemplateRight = ">>>"
+	//web.TemplateLeft = "<<<"
+	//web.TemplateRight = ">>>"
+	//自动建表
+	orm.RunSyncdb("default", false, true)
+	// orm.RunSyncdb("default", true, true)
+	models.InsertUser()
+	// models.InsertGroup()
+	models.InsertRole()
+
+	// err := orm.RunSyncdb("default", false, true) // mindoc
+	// if err == nil {
+	// 	initialization()
+	// } else {
+	// 	panic(err.Error())
+	// }
+
+	web.AddFuncMap("loadtimes", loadtimes)
+	web.AddFuncMap("subsuffix", subsuffix)
+	//默认关闭orm调试模式——仅仅针对beego的orm有效。
+	ormDebug, err := web.AppConfig.String("ormDebug")
+	if err != nil {
+		logs.Error("获取ormDebug ->", err.Error())
+	}
 	if ormDebug == "true" {
 		orm.Debug = true
 	} else {
@@ -53,33 +72,32 @@ func main() {
 	os.Mkdir("attachment", os.ModePerm)
 	//创建轮播图片存放目录
 	os.Mkdir("attachment/carousel", os.ModePerm)
-	//自动建表
-	orm.RunSyncdb("default", false, true)
-	// models.InsertUser()
-	// insertGroup()
-	// models.InsertRole()
+
 	// time1 := "0/" + time + " * * * * *"
 
 	// time1 := "* 30 8 * * 1-5"
-	time1 := beego.AppConfig.String("tasktime")
+	time1, err := web.AppConfig.String("tasktime")
+	if err != nil {
+		logs.Error("获取tasktime ->", err.Error())
+	}
 	if time1 != "" {
 		tk1 := toolbox.NewTask("tk1", time1, func() error { controllers.SendMessage(); return nil }) //func() error { fmt.Println("tk1"); return nil }
 		toolbox.AddTask("tk1", tk1)
 		toolbox.StartTask()
 		defer toolbox.StopTask()
 	}
-	// 上传文件给zsj.itdos
-	// time2 := "0 30 23 * * *"
-	// tk2 := toolbox.NewTask("tk2", time2, func() error { controllers.Postdata(); return nil })
-	// toolbox.AddTask("tk2", tk2)
-	// toolbox.StartTask()
-	// defer toolbox.StopTask()
-	// 备份数据库文件,controllers里必须有postdata()2个方法
-	// time3 := "0 30 23 * * *" //每天晚上23:30执行
-	// tk3 := toolbox.NewTask("tk3", time3, func() error { controllers.Postdata(); return nil })
-	// toolbox.AddTask("tk3", tk3)
-	// toolbox.StartTask()
-	// defer toolbox.StopTask()
+	// 定时备份数据库
+	time2, err := web.AppConfig.String("backupdatatime")
+	if err != nil {
+		logs.Error("获取tasktime ->", err.Error())
+	}
+	// logs.Info(time2)
+	if time2 != "" {
+		tk2 := toolbox.NewTask("tk2", time2, func() error { controllers.Postdata(); return nil }) //func() error { fmt.Println("tk1"); return nil }
+		toolbox.AddTask("tk2", tk2)
+		toolbox.StartTask()
+		defer toolbox.StopTask()
+	}
 	// ********mindoc*********
 	// if len(os.Args) >= 3 && os.Args[1] == "service" {
 	// 	if os.Args[2] == "install" {
@@ -94,24 +112,21 @@ func main() {
 	initialization()
 	// commands.RegisterCache()
 	// commands.RegisterLogger(conf.LogFile)
-
 	// commands.RegisterCommand()
 
 	d := daemon.NewDaemon()
-
 	s, err := service.New(d, d.Config())
-
 	if err != nil {
 		fmt.Println("Create service error => ", err)
 		os.Exit(1)
 	}
-
 	if err := s.Run(); err != nil {
 		log.Fatal("启动程序失败 ->", err)
 	}
-	// ********mindoc*********
 
-	beego.Run()
+	// ********mindoc*********
+	// web.SetStaticPath("/down1", "download1")
+	web.Run()
 	// 开启pprof，监听请求,无效
 	// go func() {
 	// 	log.Println(http.ListenAndServe("127.0.0.1:6060", nil))
@@ -146,41 +161,47 @@ func version(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, fmt.Sprintf("%s", out))
 }
 
-//初始化数据
+//初始化数据，来自commands install.go
 func initialization() {
-
 	err := models.NewOption().Init()
-
 	if err != nil {
 		panic(err.Error())
-		os.Exit(1)
 	}
+	// command.go里已经注册过了
+	lang, _ := web.AppConfig.String("default_lang")
+	// err = i18n.SetMessage(lang, "conf/lang/"+lang+".ini")
+	// if err != nil {
+	// 	panic(fmt.Errorf("initialize locale error: %s", err))
+	// }
 
 	member, err := models.NewMember().FindByFieldFirst("account", "admin")
-	if err == orm.ErrNoRows {
+	if errors.Is(err, orm.ErrNoRows) {
 
+		// create admin user
+		logs.Info("creating admin user")
 		member.Account = "admin"
 		member.Avatar = conf.URLForWithCdnImage("/static/mindoc/images/headimgurl.jpg")
 		member.Password = "123456"
 		member.AuthMethod = "local"
-		member.Role = 0
+		member.Role = conf.MemberSuperRole
 		member.Email = "admin@iminho.me"
 
 		if err := member.Add(); err != nil {
 			panic("Member.Add => " + err.Error())
-			os.Exit(0)
 		}
 
+		// create demo book
+		logs.Info("creating demo book")
 		book := models.NewBook()
 
 		book.MemberId = member.MemberId
-		book.BookName = "MinDoc演示项目"
+		book.BookName = i18n.Tr(lang, "init.default_proj_name") //"MinDoc演示项目"
 		book.Status = 0
 		book.ItemId = 1
-		book.Description = "这是一个MinDoc演示项目，该项目是由系统初始化时自动创建。"
+		book.Description = i18n.Tr(lang, "init.default_proj_desc") //"这是一个MinDoc演示项目，该项目是由系统初始化时自动创建。"
 		book.CommentCount = 0
 		book.PrivatelyOwned = 0
-		book.CommentStatus = "closed"
+		book.CommentStatus = "open" //"closed"
 		book.Identify = "mindoc"
 		book.DocCount = 0
 		book.CommentCount = 0
@@ -189,19 +210,19 @@ func initialization() {
 		book.Editor = "markdown"
 		book.Theme = "default"
 
-		if err := book.Insert(); err != nil {
+		if err := book.Insert(lang); err != nil {
 			panic("初始化项目失败 -> " + err.Error())
-			os.Exit(1)
 		}
+	} else if err != nil {
+		panic(fmt.Errorf("occur errors when initialize: %s", err))
 	}
 
 	if !models.NewItemsets().Exist(1) {
 		item := models.NewItemsets()
-		item.ItemName = "默认项目空间"
+		item.ItemName = i18n.Tr(lang, "init.default_proj_space") //"默认项目空间"
 		item.MemberId = 1
 		if err := item.Save(); err != nil {
 			panic("初始化项目空间失败 -> " + err.Error())
-			os.Exit(1)
 		}
 	}
 }
@@ -236,11 +257,13 @@ func initialization() {
 // f, f_err := os.OpenFile(file_save, os.O_WRONLY|os.O_CREATE, 0666)
 // 		if f_err != nil {
 // 					fmt.Fprintf(w, "file open fail:%s", f_err)
-// 							}		//文件 copy
-// 									_, copy_err := io.Copy(f, file)
-// 											if copy_err != nil {
-// 														fmt.Fprintf(w, "file copy fail:%s", copy_err)
-// 																}		//关闭对应打开的文件		defer f.Close()		defer file.Close()
+// 		}		//文件 copy
+// 		_, copy_err := io.Copy(f, file)
+// 		if copy_err != nil {
+// 				fmt.Fprintf(w, "file copy fail:%s", copy_err)
+// 		}		//关闭对应打开的文件
+// defer f.Close()
+// defer file.Close()
 
 //获得文件名最快的代码实现方式比较
 // func main() {
@@ -288,3 +311,57 @@ func initialization() {
 //     // fmt.Println(string(fd))
 //     return string(fd)
 // }
+
+//将客户端说的一句话记录在【以他的名字命名的文件里】
+// func writeMsgToLog(msg string, client Client) {
+// 	//打开文件
+// 	file, e := os.OpenFile(
+// 		"D:/BJBlockChain1801/demos/W4/day1/01ChatRoomII/logs/"+client.name+".log",
+// 		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+// 		0644)
+// 	SHandleError(e, "os.OpenFile")
+// 	defer file.Close()
+
+// 	//追加这句话
+// 	logMsg := fmt.Sprintln(time.Now().Format("2006-01-02 15:04:05"), msg)
+// 	file.Write([]byte(logMsg))
+// }
+
+//map for  Http Content-Type  Http 文件类型对应的content-Type
+// var HttpContentType = map[string]string{
+//   ".avi": "video/avi",
+//   ".mp3": "   audio/mp3",
+//   ".mp4": "video/mp4",
+//   ".wmv": "   video/x-ms-wmv",
+//   ".asf":  "video/x-ms-asf",
+//   ".rm":   "application/vnd.rn-realmedia",
+//   ".rmvb": "application/vnd.rn-realmedia-vbr",
+//   ".mov":  "video/quicktime",
+//   ".m4v":  "video/mp4",
+//   ".flv":  "video/x-flv",
+//   ".jpg":  "image/jpeg",
+//   ".png":  "image/png",
+// }
+// //根据文件路径读取返回流文件 参数url
+// func PubResFileStreamGetService(c *gin.Context) {
+// filePath := c.Query("url")
+// //获取文件名称带后缀
+// fileNameWithSuffix := path.Base(filePath)
+// //获取文件的后缀
+// fileType := path.Ext(fileNameWithSuffix)
+// //获取文件类型对应的http ContentType 类型
+// fileContentType := HttpContentType[fileType]
+// if common.IsEmpty(fileContentType) {
+//   c.String(http.StatusNotFound, "file http contentType not found")
+//   return
+// }
+// c.Header("Content-Type", fileContentType)
+// c.File(filePath)
+// }
+
+// beego文件流
+// step1:在beego项目中添加:
+// copyrequestbody = true
+// 然后在控制器中添加代码：
+// req:=this.Ctx.Input.RequestBody
+// data:=string(req)

@@ -135,4 +135,5 @@
   <script src="/static/voxes/js/fakeLoader.min.js"></script>
   <script src="/static/voxes/js/main.js"></script>
 </body>
+
 </html>

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 {{template "header"}}
-<title>查阅规范、图集、计算书</title>
+<!-- 收藏用logo图标 -->
+<link rel="bookmark" type="image/x-icon" href="/static/img/elastic.ico" />
+<!-- 网站显示页logo图标 -->
+<link rel="shortcut icon" href="/static/img/elastic.ico">
+<title>查阅规范、图集</title>
 <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-table.min.css" />
 <script type="text/javascript" src="/static/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="/static/js/bootstrap-table.min.js"></script>
@@ -13,28 +17,27 @@
 <script type="text/javascript" src="/static/js/webuploader.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
 </head>
-<div class="container-fill">{{template "navbar" .}}</div>
+<div class="container-fill">{{template "navbar_pass" .}}</div>
 
 <body>
   <div class="text-center">
-    <h1> <i class="glyphicon glyphicon-chevron-right"></i> <i class="glyphicon glyphicon-minus"></i>
+    <h1>
+      <!-- <i class="glyphicon glyphicon-chevron-right"></i> -->
+      <!-- <i class="fa fa-chevron-right fa-lg"></i> -->
+      <!-- <i class="fa fa-window-minimize fa-lg"></i> -->
+      <i class="fa fa-terminal fa-3x"></i>
+        <!-- <i class="fa fa-free-code-camp fa-lg"></i> -->
+        <!-- <i class="fa fa-ravelry fa-lg" aria-hidden="true"></i> -->
+      <!-- <i class="fa fa-linode fa-lg" aria-hidden="true"></i> -->
     </h1>
     <h1>搜索 {{.Length}}个 文件</h1>
-    <p class="large">
-      工程师在设计过程中接触最多的是规范、图集和计算书。
-    </p>
-    <p class="large">
-      规范与计算本应是配套的，但目前二者未结合，造成失误、人力浪费。
-    </p>
-    <p class="large">
-      充分利用这个平台查阅和共享它们<a href="#" id="about"><i class="glyphicon glyphicon-question-sign"></i></a>。
-      <a href="#" id="valid" title="管理有效版本库">《规范目录有效版本》</a>数据来自OA系统。</p>
-    <div class="col-lg-4">
+
+    <div class="col-xs-12 col-sm-12 col-lg-4">
     </div>
-    <div class="col-lg-4">
+    <div class="col-xs-12 col-sm-12 col-lg-4">
       <!-- <form >   form支持回车，但是不支持ajax，如何做到支持ajax？用ajaxform-->
       <div class="input-group">
-        <input type="text" class="form-control" placeholder="请输入关键字或编号进行搜索" name="name" autocomplete="off" size="30" id="name" onkeypress="getKey();">
+        <input type="text" class="form-control" placeholder="输入规范名或编号搜索" name="name" autocomplete="off" size="30" id="name" onkeypress="getKey();">
         <span class="input-group-btn">
           <button class="btn btn-default" type="button" id="search2">
             <i class="glyphicon glyphicon-search"></i>
@@ -43,26 +46,47 @@
         </span>
       </div>
     </div>
-    <div class="col-lg-12">
-      <br>
+    <!-- <div class="col-lg-12">
+      <br> -->
       <!--SWF在初始化的时候指定，在后面将展示-->
-      <div id="uploader" class="wu-example">
+      <!-- <div id="uploader" class="wu-example"> -->
         <!--用来存放文件信息-->
-        <div id="thelist" class="uploader-list"></div>
+        <!-- <div id="thelist" class="uploader-list"></div>
         <div id="picker"><i class="glyphicon glyphicon-plus-sign"></i>选择文件</div>
         <button id="ctlBtn" class="btn btn-default"><i class="glyphicon glyphicon-upload"></i></button>
       </div>
       <br>
-    </div>
-    <div class="col-lg-12">
+    </div> -->
+    <div class="col-xs-12 col-sm-12 col-lg-12">
       <br>
-{{/*      <button id="ctlBtn" class="btn btn-default"><i class="glyphicon glyphicon-upload"></i>全文检索上传</button>*/}}
+      {{/* <button id="ctlBtn" class="btn btn-default"><i class="glyphicon glyphicon-upload"></i>全文检索上传</button>*/}}
       <button onclick="window.open('/v1/wx/uploadstandard')" type="button" data-name="searchButton" id="searchButton" class="btn btn-default" title="全文检索">
+        <i class="fa fa-plus-circle">&nbsp;&nbsp;上传规范</i>
+      </button>
+      <button onclick="window.open('/v1/wx/getelasticstandard')" type="button" data-name="searchButton" id="searchButton" class="btn btn-default" title="全文检索">
         <i class="fa fa-search-plus">&nbsp;&nbsp;全文检索</i>
       </button>
     </div>
+    <div class="col-xs-12 col-sm-12 col-lg-4">
+    </div>
+    <div class="col-xs-12 col-sm-12 col-lg-12">
+      <p align="left">
+         1. 根据规范、图集编号或名称关键字检索；可以全文检索规范，有利于关联
+        </p>
+        <p align="left" class="large">
+          2. 可以上传共享规范和图集；上传规范基本要求<a href="javascript:void(0)" id="about"><i class="glyphicon glyphicon-question-sign"></i></a>。
+          <a href="javascript:void(0)" id="valid" title="管理有效版本库">《规范目录有效版本》</a>数据来自OA系统
+        </p>
+        <p align="left" class="large">
+          3. 如果涉及侵权，请联系我清理；如果遇到文件不清晰或未识别，请联系我处理；技术栈：elasticsearch+ik+tika全文检索,pdf.js分片下载
+        </p>
+        <p align="left" class="large">
+          4. 海量PDF文件自动识别、优化大小处理：<a href="https://zsj.itdos.net/docs/pdf" title="海量pdf处理教程">海量pdf处理教程</a>
+        </p>
+    </div>
+
   </div>
-  <div class="col-lg-12">
+  <div class="col-xs-12 col-sm-12 col-lg-12">
     <!-- 规范查询结果表 -->
     <toolbar id="btn_toolbar" class="toolbar">
       <div class="btn-group">
@@ -77,7 +101,7 @@
       <h3>查询结果</h3>
       <!-- data-url="/admin/category/2" 没有了这个，当然table1表格无法支持刷新了！！！data-show-refresh="true"-->
       <table id="table"></table>
-       <!-- data-toggle="table" data-search="true" data-show-toggle="true" data-show-columns="true" data-toolbar="#btn_toolbar" data-sort-name="Grade" data-page-size="20" data-page-list="[15, 25, 50, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-click-to-select="false" data-striped="true">
+      <!-- data-toggle="table" data-search="true" data-show-toggle="true" data-show-columns="true" data-toolbar="#btn_toolbar" data-sort-name="Grade" data-page-size="20" data-page-list="[15, 25, 50, All]" data-unique-id="id" data-pagination="true" data-side-pagination="client" data-click-to-select="false" data-striped="true">
         <thead>
           <tr>
             <th data-width="10" data-checkbox="true"></th>
@@ -118,19 +142,19 @@
     </div>
   </div>
   <div id="footer">
-    <div class="col-lg-12">
+    <div class="col-xs-12 col-sm-12 col-lg-12">
       <br>
       <hr />
     </div>
-    <div class="col-lg-6">
-      <h4>Copyright © 2016~2021 EngineerCMS</h4>
+    <div class="col-xs-12 col-sm-12 col-lg-6">
+      <h4>Copyright © 2016~2024 EngineerCMS</h4>
       <p>
         网站由 <i class="user icon"></i>
         <a target="_blank" href="https://github.com/3xxx">@3xxx</a>
         建设，并由
-        <a target="_blank" href="http://golang.org">golang</a>
+        <a target="_blank" href="https://golang.org">golang</a>
         和
-        <a target="_blank" href="http://beego.me">beego</a>
+        <a target="_blank" href="https://beego.me">beego</a>
         提供动力。
       </p>
       <p>
@@ -142,7 +166,7 @@
         。
       </p>
     </div>
-    <div class="col-lg-6">
+    <div class="col-xs-12 col-sm-12 col-lg-6">
       <h4>更多项目</h4>
       <div>
         <p>
@@ -171,26 +195,26 @@
           </div>
           <div class="modal-body">
             <div class="modal-body-content">
-              <div class="form-group must">
+              <!-- <div class="form-group must">
                 <label class="col-sm-4 control-label">一、查询：</label>
                 <label class="col-sm-8">1、显示全部规范，输入allstandard；2、显示全部图集，输入allatlas；3、显示全部计算书，输入allcompute</label>
-              </div>
+              </div> -->
               <div class="form-group must">
-                <label class="col-sm-4 control-label">二、电子规范命名：</label>
+                <label class="col-sm-4 control-label">1. 电子规范命名：</label>
                 <label class="col-sm-8">GB 50007-2011建筑地基基础设计规范.pdf</label>
-                <label class="col-sm-8">SL 677-2014水工混凝土施工规范.pdf</label>
+                <label class="col-sm-8">GBT 700-2006碳素结构钢.pdf</label>
               </div>
               <div class="form-group must">
-                <label class="col-sm-4 control-label">三、电子图集命名：</label>
+                <label class="col-sm-4 control-label">2. 电子图集命名：</label>
                 <label class="col-sm-8">07MS101市政给水管道工程-消火栓、附属构筑物、架空钢管、防水套管.pdf</label>
               </div>
-              <div class="form-group must">
+              <!--<div class="form-group must">
                 <label class="col-sm-4 control-label">四、计算书命名：</label>
-                <label class="col-sm-8">波浪爬高.xlsx</label>
-              </div>
+                <label class="col-sm-8">20220808波浪爬高.xlsx</label>
+              </div> -->
               <div class="form-group must">
-                <label class="col-sm-4 control-label">五、优化PDF文件大小：</label>
-                <label class="col-sm-8">文字识别后再另存为“优化厚的pdf”是最优的。</label>
+                <label class="col-sm-4 control-label">3. 识别和优化PDF文件：</label>
+                <label class="col-sm-8">因为是全文检索规范，所以pdf必须是文字识别OCR后再另存为“优化后的pdf”——再用“文档处理——优化扫描的pdf”。<a href="https://zsj.itdos.net/docs/pdf" title="海量pdf处理教程">海量pdf处理教程</a></label>
               </div>
             </div>
           </div>
@@ -353,7 +377,7 @@
 
   function setLink(value, row, index) {
     // return '<a href="' + row.Route + '" title="下载" target="_blank"><i class="fa fa-paperclip"></i></a>';
-    pdfUrl = '<a href="/v1/wx/standardpdf?file=/v1/wx/downloadstandard/'+ row.Id +' "title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o fa-lg text-danger"></i></a>';
+    pdfUrl = '<a href="/v1/wx/standardpdf?file=/v1/wx/downloadstandard/' + row.Id + ' "title="打开pdf" target="_blank"><i class="fa fa-file-pdf-o fa-lg text-danger"></i></a>';
     return pdfUrl;
   }
 
@@ -368,6 +392,7 @@
       url: '/standard/search',
       method: 'get',
       // search: 'true',
+      classes: "table table-striped", //这里设置表格样式
       showRefresh: 'true',
       showToggle: 'true',
       showColumns: 'true',
@@ -467,13 +492,13 @@
     //显示和管理有效版本库
     $("#valid").click(function() {
       $("#details2").show();
-      $('#table1').bootstrapTable('refresh', { url: '/standard/valid'});
+      $('#table1').bootstrapTable('refresh', { url: '/standard/valid' });
     })
 
     $("#search2").click(function() { //这里应该用button的id来区分按钮的哪一个,因为本页有好几个button
       var title = $('#name').val();
       if (title.length >= 2) {
-        $('#table').bootstrapTable('refresh', { url: '/standard/search'});
+        $('#table').bootstrapTable('refresh', { url: '/standard/search' });
         // $.ajax({
         //   type: "get",
         //   url: "/standard/search",
@@ -695,7 +720,7 @@
         data: { cid: cid, number: number1, title: title1, route: route1, uname: uname1 },
         success: function(data, status) {
           alert("修改“" + data + "”成功！(status:" + status + ".)");
-          $('#table').bootstrapTable('refresh');//, { url: '/standard/search' }
+          $('#table').bootstrapTable('refresh'); //, { url: '/standard/search' }
         }
       });
     }
@@ -810,13 +835,13 @@
     var title = $('#name').val();
     if (event.keyCode == 13) {
       if (title.length >= 2) {
-        $('#table').bootstrapTable('refresh', { url: '/standard/search'});
+        $('#table').bootstrapTable('refresh', { url: '/standard/search' });
         // $.ajax({
         //   type: "get",
         //   url: "/standard/search",
         //   data: { searchText: $("#name").val(),pageNo:1 },
         //   success: function(data, status) {
-            $("#details").show();
+        $("#details").show();
         //     $('#table').bootstrapTable('append', data.rows);
         //     $('#table').bootstrapTable('scrollTo', 'bottom');
         //   }
