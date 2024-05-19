@@ -1,20 +1,20 @@
 package cache
 
 import (
-	//"github.com/beego/beego/v2/adapter/cache"
-	"time"
+	"bytes"
 	"context"
 	"encoding/gob"
-	"bytes"
 	"errors"
+	"time"
+
 	"github.com/beego/beego/v2/client/cache"
 	"github.com/beego/beego/v2/core/logs"
 )
 
-
 var bm cache.Cache
 
 var nilctx = context.TODO()
+
 func Get(key string, e interface{}) error {
 
 	val, err := bm.Get(nilctx, key)

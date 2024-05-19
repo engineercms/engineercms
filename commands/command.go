@@ -1,32 +1,37 @@
 package commands
 
 import (
-	"bytes"
 	"encoding/gob"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/3xxx/engineercms/cache"
-	"github.com/3xxx/engineercms/conf"
-	"github.com/3xxx/engineercms/controllers/utils/filetil"
-	"github.com/3xxx/engineercms/models"
-	beegoCache "github.com/beego/beego/v2/client/cache"
-	_ "github.com/beego/beego/v2/client/cache/memcache"
-	"github.com/beego/beego/v2/client/cache/redis"
-	_ "github.com/beego/beego/v2/client/cache/redis"
-	"github.com/beego/beego/v2/client/orm"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
-	"github.com/beego/i18n"
-	"github.com/howeyc/fsnotify"
-	"github.com/lifei6671/gocaptcha"
 	"log"
-	"net/http"
+	// "net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+	_ "time/tzdata"
+
+	"bytes"
+	"encoding/json"
+	"net/http"
+
+	beegoCache "github.com/beego/beego/v2/client/cache"
+	_ "github.com/beego/beego/v2/client/cache/memcache"
+	"github.com/beego/beego/v2/client/cache/redis"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/i18n"
+	"github.com/howeyc/fsnotify"
+	_ "github.com/lib/pq"
+	"github.com/lifei6671/gocaptcha"
+
+	"github.com/3xxx/engineercms/cache"
+	"github.com/3xxx/engineercms/conf"
+	"github.com/3xxx/engineercms/controllers/utils/filetil"
+	"github.com/3xxx/engineercms/models"
 )
 
 // RegisterDataBase 注册数据库
@@ -106,8 +111,9 @@ func RegisterModel() {
 		new(models.TeamMember),
 		new(models.TeamRelationship),
 		new(models.Itemsets),
-    new(models.Comment),
-    new(models.WorkWeixinAccount),
+		new(models.Comment),
+		new(models.WorkWeixinAccount),
+		new(models.DingTalkAccount),
 	)
 	gob.Register(models.Blog{})
 	gob.Register(models.Document{})
@@ -118,6 +124,7 @@ func RegisterModel() {
 // RegisterLogger 注册日志
 func RegisterLogger(log string) {
 
+	logs.Reset()
 	logs.SetLogFuncCall(true)
 	_ = logs.SetLogger("console")
 	logs.EnableFuncCallDepth(true)
@@ -202,7 +209,7 @@ func RegisterCommand() {
 
 }
 
-//注册模板函数
+// 注册模板函数
 func RegisterFunction() {
 	err := web.AddFuncMap("config", models.GetOptionValue)
 
@@ -289,7 +296,7 @@ func RegisterFunction() {
 	}
 }
 
-//解析命令
+// 解析命令
 func ResolveCommand(args []string) {
 	flagSet := flag.NewFlagSet("MinDoc command: ", flag.ExitOnError)
 	flagSet.StringVar(&conf.ConfigurationFile, "config", "", "MinDoc configuration file.")
@@ -338,6 +345,10 @@ func ResolveCommand(args []string) {
 	web.BConfig.WebConfig.StaticDir["/uploads"] = uploads
 	web.BConfig.WebConfig.ViewsPath = conf.WorkingDir("views")
 	// web.BConfig.WebConfig.Session.SessionCookieSameSite = http.SameSiteDefaultMode
+	var upload_file_size = conf.GetUploadFileSize()
+	if upload_file_size > web.BConfig.MaxUploadSize {
+		web.BConfig.MaxUploadSize = upload_file_size
+	}
 
 	fonts := conf.WorkingDir("static", "fonts")
 
@@ -357,7 +368,7 @@ func ResolveCommand(args []string) {
 
 }
 
-//注册缓存管道
+// 注册缓存管道
 func RegisterCache() {
 	isOpenCache := web.AppConfig.DefaultBool("cache", false)
 	if !isOpenCache {
@@ -456,7 +467,7 @@ func RegisterCache() {
 	logs.Info("缓存初始化完成.")
 }
 
-//自动加载配置文件.修改了监听端口号和数据库配置无法自动生效.
+// 自动加载配置文件.修改了监听端口号和数据库配置无法自动生效.
 func RegisterAutoLoadConfig() {
 	if conf.AutoLoadDelay > 0 {
 
@@ -497,7 +508,7 @@ func RegisterAutoLoadConfig() {
 	}
 }
 
-//注册错误处理方法.
+// 注册错误处理方法.
 func RegisterError() {
 	web.ErrorHandler("404", func(writer http.ResponseWriter, request *http.Request) {
 		var buf bytes.Buffer

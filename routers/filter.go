@@ -2,14 +2,14 @@ package routers
 
 import (
 	"encoding/json"
+	"net/url"
+	"regexp"
+
+	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego/v2/server/web/context"
 	"github.com/3xxx/engineercms/conf"
 	"github.com/3xxx/engineercms/models"
 	// beego "github.com/beego/beego/v2/adapter"
-	"github.com/beego/beego/v2/server/web"
-	// "github.com/beego/beego/v2/adapter/context"
-	"github.com/beego/beego/v2/server/web/context"
-	"net/url"
-	"regexp"
 )
 
 func init() {

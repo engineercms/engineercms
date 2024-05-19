@@ -219,6 +219,9 @@ func init() {
 	_db.AutoMigrate(&PassProject{})
 	_db.AutoMigrate(&PhotoData{})
 	_db.AutoMigrate(&FreecadModel{}, &FreecadInputs{})
+	_db.AutoMigrate(&EstimateProject{})
+	_db.AutoMigrate(&EstimateProjPhase{}) // &EstimateProfessional{}, &EstimateSecondary{}, &EstimateTertiary{},
+	_db.AutoMigrate(&EstimateCostArchi{}, EstimateCostElect{}, EstimateCostMetal{}, EstimateCostTemp{})
 }
 
 //获取gorm db对象，其他包需要执行数据库查询的时候，只要通过tools.getDB()获取db对象即可。

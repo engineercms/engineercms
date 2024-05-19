@@ -51,6 +51,7 @@
 # 拷贝engineercms和swagger里的swagger.yml和swagger.json到对应文件夹里
 # $ chmod +x engineercms 
 # $ nohup ./engineercms &
+# $ systemctl stop firewalld.service关闭防火墙
 
 # beego 2.0.0 升级指南
 # 获取最新版本的 bee 工具 go install github.com/beego/bee/v2@latest

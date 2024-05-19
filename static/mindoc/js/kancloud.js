@@ -4,7 +4,6 @@ var events = function () {
         window.sessionStorage && window.sessionStorage.setItem("MinDoc::LastLoadDocument:" + window.book.identify, $param.$id);
         var prevState = window.history.state || {};
         if ('pushState' in history) {
-
             if ($param.$id) {
                 prevState.$id === $param.$id || window.history.pushState($param, $param.$id, $param.$url);
             } else {
@@ -43,6 +42,121 @@ var events = function () {
 
 }();
 
+function format($d) {
+    return $d < 10 ? "0" + $d : "" + $d;
+}
+
+function timeFormat($time) {
+    var span = Date.parse($time)
+    var date = new Date(span)
+    var year = date.getFullYear();
+    var month = format(date.getMonth() + 1);
+    var day = format(date.getDate());
+    var hour = format(date.getHours());
+    var min = format(date.getMinutes());
+    var sec = format(date.getSeconds());
+    return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
+}
+
+// 点击翻页
+function pageClicked($page, $docid) {
+    if (!window.IS_DISPLAY_COMMENT) {
+        return;
+    }
+    $("#articleComment").removeClass('not-show-comment');
+    $.ajax({
+        url : "/comment/lists?page=" + $page + "&docid=" + $docid,
+        type : "GET",
+        success : function ($res) {
+            console.log($res.data);
+            loadComment($res.data.page, $res.data.doc_id);
+        },
+        error : function () {
+            layer.msg("加载失败");
+        }
+    });
+}
+
+// 加载评论
+function loadComment($page, $docid) {
+    $("#commentList").empty();
+    var html = ""
+    var c = $page.List;
+    for (var i = 0; c && i < c.length; i++) {
+        html += "<div class=\"comment-item\" data-id=\"" + c[i].comment_id + "\">";
+            html += "<p class=\"info\"><a class=\"name\">" + c[i].author + "</a><span class=\"date\">" + timeFormat(c[i].comment_date) + "</span></p>";
+            html += "<div class=\"content\">" + c[i].content + "</div>";
+            html += "<p class=\"util\">";
+                if (c[i].show_del == 1) html += "<span class=\"operate toggle\">";
+                else html += "<span class=\"operate\">";
+                    html += "<span class=\"number\">" + c[i].index + "#</span>";
+                    if (c[i].show_del == 1) html += "<i class=\"delete e-delete glyphicon glyphicon-remove\" style=\"color:red\" onclick=\"onDelComment(" + c[i].comment_id + ")\"></i>";
+                html += "</span>";
+            html += "</p>";
+        html += "</div>";
+    }
+    $("#commentList").append(html);
+
+    if ($page.TotalPage > 1) {
+        $("#page").bootstrapPaginator({
+            currentPage: $page.PageNo,
+            totalPages: $page.TotalPage,
+            bootstrapMajorVersion: 3,
+            size: "middle",
+            onPageClicked: function(e, originalEvent, type, page){
+                pageClicked(page, $docid);
+            }
+        });
+    } else {
+        $("#page").find("li").remove();
+    }
+}
+
+// 删除评论
+function onDelComment($id) {
+    console.log($id);
+    $.ajax({
+        url : "/comment/delete",
+        data : {"id": $id},
+        type : "POST",
+        success : function ($res) {
+            if ($res.errcode == 0) {
+                layer.msg("删除成功");
+                $("div[data-id=" + $id + "]").remove();
+            } else {
+                layer.msg($res.message);
+            }
+        },
+        error : function () {
+            layer.msg("删除失败");
+        }
+    });
+}
+
+// 重新渲染页面
+function renderPage($data) {
+    $("#page-content").html($data.body);
+    $("title").text($data.title);
+    $("#article-title").text($data.doc_title);
+    $("#article-info").text($data.doc_info);
+    $("#view_count").text("阅读次数：" + $data.view_count);
+    $("#doc_id").val($data.doc_id);
+    if ($data.page) {
+        loadComment($data.page, $data.doc_id);
+    }
+    else {
+        pageClicked(-1, $data.doc_id);
+    }
+
+    if ($data.is_markdown) {
+        if ($("#view_container").hasClass($data.markdown_theme)) {
+            return
+        }
+        $("#view_container").removeClass("theme__dark theme__green theme__light theme__red theme__default")
+        $("#view_container").addClass($data.markdown_theme)
+    }
+}
+
 /***
  * 加载文档到阅读区
  * @param $url
@@ -53,7 +167,7 @@ function loadDocument($url, $id, $callback) {
     $.ajax({
         url : $url,
         type : "GET",
-        beforeSend : function (xhr) {
+        beforeSend : function () {
             var data = events.data($id);
             if(data) {
                 if (typeof $callback === "function") {
@@ -61,12 +175,10 @@ function loadDocument($url, $id, $callback) {
                 }else if(data.version && data.version != $callback){
                     return true;
                 }
-                $("#page-content").html(data.body);
-                $("title").text(data.title);
-                $("#article-title").text(data.doc_title);
-                $("#article-info").text(data.doc_info);
+                renderPage(data);
 
-                events.trigger('article.open', {$url: $url, $id: $id});
+                loadCopySnippets();
+                events.trigger('article.open', { $url: $url, $id: $id });
 
                 return false;
 
@@ -74,27 +186,17 @@ function loadDocument($url, $id, $callback) {
 
             NProgress.start();
         },
-        success : function (res) {
-            if (res.errcode === 0) {
-                var body = res.data.body;
-                var doc_title = res.data.doc_title;
-                var title = res.data.title;
-                var doc_info = res.data.doc_info;
-
-                $body = body;
-                if (typeof $callback === "function" ) {
-                    $body = $callback(body);
+        success : function ($res) {
+            if ($res.errcode === 0) {
+                var data = $res.data;
+                if (typeof $callback === "function") {
+                    data.body = $callback(data.body);
                 }
-
-                $("#page-content").html($body);
-                $("title").text(title);
-                $("#article-title").text(doc_title);
-                $("#article-info").text(doc_info);
-
-                events.data($id, res.data);
-
-                events.trigger('article.open', { $url : $url, $id : $id });
-            } else if (res.errcode === 6000) {
+                renderPage(data);
+                loadCopySnippets();
+                events.data($id, data);
+                events.trigger('article.open', { $url: $url, $id: $id });
+            } else if ($res.errcode === 6000) {
                 window.location.href = "/";
             } else {
                 layer.msg("加载失败");
@@ -115,7 +217,7 @@ function loadDocument($url, $id, $callback) {
 function initHighlighting() {
     try {
         $('pre,pre.ql-syntax').each(function (i, block) {
-            if ($(this).hasClass('prettyprinted')) {
+            if ($(this).hasClass('prettyprinted') || $(this).hasClass('hljs')) {
                 return;
             }
             hljs.highlightBlock(block);
@@ -125,9 +227,6 @@ function initHighlighting() {
         console.log(e);
     }
 }
-
-
-
 
 $(function () {
     $(".view-backtop").on("click", function () {
@@ -200,7 +299,7 @@ $(function () {
             'animation' : 0
         }
     }).on('select_node.jstree', function (node, selected) {
-        //如果是空目录则直接出发展开下一级功能
+        //如果是空目录则直接触发展开下一级功能
         if (selected.node.a_attr && selected.node.a_attr.disabled) {
             selected.instance.toggle_node(selected.node);
             return false
@@ -284,4 +383,37 @@ $(function () {
             console.log($param);
         }
     };
+
+    // 提交评论
+    $("#commentForm").ajaxForm({
+        beforeSubmit : function () {
+            $("#btnSubmitComment").button("loading");
+        },
+        success : function (res) {
+            if(res.errcode === 0){
+                layer.msg("保存成功");
+            } else {
+                layer.msg(res.message);
+            }
+            $("#btnSubmitComment").button("reset");
+            $("#commentContent").val("");
+            pageClicked(-1, res.data.doc_id); // -1 表示请求最后一页
+        },
+        error : function () {
+            layer.msg("服务错误");
+            $("#btnSubmitComment").button("reset");
+        }
+    });
+    loadCopySnippets();
 });
+
+function loadCopySnippets() {
+    $("pre").addClass("line-numbers language-bash");
+    $("pre").attr('data-prismjs-copy', '复制');
+    $("pre").attr('data-prismjs-copy-error', '按Ctrl+C复制');
+    $("pre").attr('data-prismjs-copy-success', '代码已复制！');
+    var snippets = document.querySelectorAll('pre code');
+    [].forEach.call(snippets, function (snippet) {
+        Prism.highlightElement(snippet);
+    });
+}

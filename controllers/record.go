@@ -341,15 +341,15 @@ func SplitStandardName(filenameWithSuffix string) (Category, Categoryname, FileN
 			Category = "RCC"
 		case "HB":
 			Category = "HB"
-		case "GJB":
+		case "GJ":
 			Category = "GJB"
-		case "JJF":
+		case "JJ":
 			Category = "JJF"
 		case "QJ":
 			Category = "QJ"
-		case "TSG":
+		case "TS":
 			Category = "TSG"
-		case "YBT":
+		case "YB":
 			Category = "YBT"
 		default: //图集
 			Category = "Atlas"

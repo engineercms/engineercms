@@ -1,8 +1,8 @@
 /*
  * Editor.md
  *
- * @file        editormd.js 
- * @version     v1.5.0 
+ * @file        editormd.js
+ * @version     v1.5.0
  * @description Open source online markdown editor.
  * @license     MIT License
  * @author      Pandao
@@ -71,7 +71,7 @@
             "list-ul", "list-ol", "hr", "|",
             "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime", "emoji", "html-entities", "pagebreak", "|",
             "goto-line", "watch", "preview", "fullscreen", "clear", "search", "|",
-            "help", "info"
+            "help", "changetheme", "info"
         ],
         simple : [
             "undo", "redo", "|",
@@ -79,12 +79,12 @@
             "h1", "h2", "h3", "h4", "h5", "h6", "|",
             "list-ul", "list-ol", "hr", "|",
             "watch", "preview", "fullscreen", "|",
-            "help", "info"
+            "help", "changetheme", "info"
         ],
         mini : [
             "undo", "redo", "|",
             "watch", "preview", "|",
-            "help", "info"
+            "help", "changetheme", "info"
         ]
     };
 
@@ -94,8 +94,8 @@
         name                 : "",             // Form element name
         value                : "",             // value for CodeMirror, if mode not gfm/markdown
         theme                : "",             // Editor.md self themes, before v1.5.0 is CodeMirror theme, default empty
-        editorTheme          : "default",      // Editor area, this is CodeMirror theme at v1.5.0
-        previewTheme         : "",             // Preview area theme, default empty
+        editorTheme          : "pastel-on-dark", //"default",      // Editor area, this is CodeMirror theme at v1.5.0
+        previewTheme         : "dark", //"",             // Preview area theme, default empty
         markdown             : "",             // Markdown source code
         appendMarkdown       : "",             // if in init textarea value not empty, append markdown to textarea
         width                : "100%",
@@ -170,6 +170,7 @@
         flowChart            : false,          // flowChart.js only support IE9+
         sequenceDiagram      : false,          // sequenceDiagram.js only support IE9+
         mermaid              : true,
+        mindMap              : true,           // 脑图
         previewCodeHighlight : true,
 
         toolbar              : true,           // show/hide toolbar
@@ -224,6 +225,7 @@
             fullscreen       : "fa-arrows-alt",
             clear            : "fa-eraser",
             help             : "fa-question-circle",
+            changetheme      : "fa-info-circle",
             info             : "fa-info-circle"
         },
         toolbarIconTexts     : {},
@@ -270,6 +272,7 @@
                 clear            : "清空",
                 search           : "搜索",
                 help             : "使用帮助",
+                changetheme      : "切换编辑主题",
                 info             : "关于" + editormd.title
             },
             buttons : {
@@ -321,7 +324,10 @@
                 },
                 help : {
                     title : "使用帮助"
-                }
+                },
+                changetheme : {
+                    title : "切换编辑主题"
+                },
             }
         }
     };
@@ -511,48 +517,45 @@
 
 
                 if (settings.mermaid) {
-                    editormd.loadCSS(loadPath + "mermaid/mermaid", function () {
-                            editormd.loadScript(loadPath + "mermaid/mermaid.min", function () {
-                            window.mermaid.initialize({
-                                theme: 'default',
-                                startOnLoad:true,
-                                cloneCssStyles: true,
-                                flowchart: {
-                                    htmlLabels: false,
-                                    useMaxWidth:false
-                                },
-                            });
-                            mermaid.ganttConfig = {
-                                axisFormatter: [
-                                    // Within a day
-                                    ['%I:%M', function (d) {
-                                        return d.getHours();
-                                    }],
-                                    // Monday a week
-                                    ['%m/%d', function (d) { // redefine date here as '%m/%d'instead of 'w. %U', search mermaid.js
-                                        return d.getDay() == 1;
-                                    }],
-                                    // Day within a week (not monday)
-                                    ['%a %d', function (d) {
-                                        return d.getDay() && d.getDate() != 1;
-                                    }],
-                                    // within a month
-                                    ['%b %d', function (d) {
-                                        return d.getDate() != 1;
-                                    }],
-                                    // Month
-                                    ['%m-%y', function (d) {
-                                        return d.getMonth();
-                                    }],[ "%m-%Y", function () {
-                                        return d.getFullYear();
-                                    }]]
-                            };
-
-                            if (!isLoadedDisplay){
-                                isLoadedDisplay = true;
-                                _this.loadedDisplay();
-                            }
+                    editormd.loadScript(loadPath + "mermaid/mermaid.min", function () {
+                        window.mermaid.initialize({
+                            theme: 'default',
+                            logLevel: 3,
+                            securityLevel: 'loose',
+                            flowchart: { curve: 'basis' },
+                            gantt: { axisFormat: '%m/%d/%Y' },
+                            sequence: { actorMargin: 50 },
                         });
+                        mermaid.ganttConfig = {
+                            axisFormatter: [
+                                // Within a day
+                                ['%I:%M', function (d) {
+                                    return d.getHours();
+                                }],
+                                // Monday a week
+                                ['%m/%d', function (d) { // redefine date here as '%m/%d'instead of 'w. %U', search mermaid.js
+                                    return d.getDay() == 1;
+                                }],
+                                // Day within a week (not monday)
+                                ['%a %d', function (d) {
+                                    return d.getDay() && d.getDate() != 1;
+                                }],
+                                // within a month
+                                ['%b %d', function (d) {
+                                    return d.getDate() != 1;
+                                }],
+                                // Month
+                                ['%m-%y', function (d) {
+                                    return d.getMonth();
+                                }],[ "%m-%Y", function () {
+                                    return d.getFullYear();
+                                }]]
+                        };
+
+                        if (!isLoadedDisplay){
+                            isLoadedDisplay = true;
+                            _this.loadedDisplay();
+                        }
                     });
                 }
                 if (settings.flowChart)
@@ -560,6 +563,20 @@
                     editormd.loadScript(loadPath + "raphael.min", function() {
                         editormd.loadScript(loadPath + "flowchart.min", function() {
                             editormd.loadScript(loadPath + "jquery.flowchart.min", function() {
+                                if (!isLoadedDisplay){
+                                    isLoadedDisplay = true;
+                                    _this.loadedDisplay();
+                                }
+                            });
+                        });
+                    });
+                }
+
+                if (settings.mindMap)
+                {
+                    editormd.loadScript(loadPath + "mindmap/transform.min", function() {
+                        editormd.loadScript(loadPath + "mindmap/d3@5", function() {
+                            editormd.loadScript(loadPath + "mindmap/view.min", function() {
                                 if (!isLoadedDisplay){
                                     isLoadedDisplay = true;
                                     _this.loadedDisplay();
@@ -1560,6 +1577,22 @@
             return this;
         },
 
+
+        /**
+         * 解析思维导图 - 2020-04-12
+         *
+         * @returns {editormd}             返回editormd的实例对象
+         */
+        mindmapRender:function(){
+            this.previewContainer.find(".mindmap").each(function(){
+                var mmap  = $(this);
+                var md_data = window.markmap.transform(mmap.text().trim());
+                window.markmap.markmap("svg#"+this.id,md_data)
+            });
+
+            return this;
+        },
+
         /**
          * 解析和渲染流程图及时序图
          * FlowChart and SequenceDiagram Renderer
@@ -2069,6 +2102,7 @@
                 sequenceDiagram      : settings.sequenceDiagram,
                 previewCodeHighlight : settings.previewCodeHighlight,
                 mermaid              : settings.mermaid,
+                mindMap              : settings.mindMap, // 思维导图
             };
 
             var markedOptions = this.markedOptions = {
@@ -2148,6 +2182,14 @@
                         editormd.$katex = katex;
                         this.katexRender();
                     }
+                }
+
+                // 渲染脑图
+                if(settings.mindMap){
+                    setTimeout(function(){
+                        _this.mindmapRender();
+                    },10)
+
                 }
 
                 if (settings.flowChart || settings.sequenceDiagram || settings.mermaid)
@@ -3348,6 +3390,11 @@
             this.executePlugin("helpDialog", "help-dialog/help-dialog");
         },
 
+        changetheme : function() {
+            this.setEditorTheme((this.settings.editorTheme=="default")?"pastel-on-dark":"default");
+            this.setPreviewTheme((this.settings.previewTheme=="")?"dark":"");
+        },
+
         info : function() {
             this.showInfoDialog();
         }
@@ -3539,7 +3586,7 @@
         ext   : ".png"
     };
 
-    // Twitter Emoji (Twemoji)  graphics files url path    
+    // Twitter Emoji (Twemoji)  graphics files url path
     editormd.twemoji = {
         path : "http://twemoji.maxcdn.com/36x36/",
         ext  : ".png"
@@ -3896,9 +3943,29 @@
             {
                 return "<p class=\"" + editormd.classNames.tex + "\">" + code + "</p>";
             }
+            else if (/^mindmap/i.test(lang)){
+                var len = 9 || 32;
+                var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = $chars.length;
+                var map_id = '';
+                var custom_height;
+                var h = lang.split('>')[1];
+                if (h != undefined) {
+                    custom_height = h;
+                } else {
+                    custom_height = 150;
+                }
+                for (var i = 0; i < len; i++) {
+                    map_id += $chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return "<svg class='mindmap' style='width:100%;min-height=150px;height:"+custom_height+"px;' id='mindmap-"+ map_id +"'>"+code+"</svg>";
+            }
+            if (lang === "drawio") {
+                var svgCode = decodeURIComponent(escape(window.atob(code)))
+                return "<div class=\"svg\" style=\"overflow: auto; padding: 10px;\">" + svgCode + "</div>"
+            } 
             else
             {
-
                 return marked.Renderer.prototype.code.apply(this, arguments);
             }
         };
@@ -3975,7 +4042,6 @@
             html += "<li class=\"directory-item\"><a class=\"directory-item-link directory-item-link-" + level + "\" href=\"#" + id + "\" level=\"" + level + "\">" + text + "</a></li>";
             lastLevel = level;
         }
-        console.log(html);
 
         var tocContainer = container.find(".markdown-toc");
 
@@ -4183,6 +4249,7 @@
             sequenceDiagram      : false,
             previewCodeHighlight : true,
             mermaid              : true,
+            mindMap              : true, //思维导图
         };
 
         editormd.$marked  = marked;
@@ -4213,6 +4280,7 @@
             flowChart            : settings.flowChart,
             sequenceDiagram      : settings.sequenceDiagram,
             mermaid              : settings.mermaid,
+            mindMap              : settings.mindMap, // 思维导图
             previewCodeHighlight : settings.previewCodeHighlight,
         };
 
@@ -4305,6 +4373,18 @@
             {
                 katexHandle();
             }
+        }
+
+        // 前台渲染脑图
+        if(settings.mindMap){
+            var mindmapHandle = function(){
+                div.find(".mindmap").each(function(){
+                    var mmap  = $(this);
+                    var md_data = window.markmap.transform(mmap.text().trim());
+                    window.markmap.markmap("svg#"+this.id,md_data)
+                });
+            }
+            mindmapHandle();
         }
 
         div.getMarkdown = function() {
